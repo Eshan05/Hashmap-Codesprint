@@ -131,7 +131,7 @@ export default function PublicNavbar() {
           </div>
 
           <div className="md:hidden ml-2">
-            <Drawer open={isMobileOpen} onOpenChange={setIsMobileOpen} shouldScaleBackground>
+            <Drawer open={isMobileOpen} onOpenChange={setIsMobileOpen} shouldScaleBackground setBackgroundColorOnScale={false}>
               <DrawerTrigger asChild>
                 <Button aria-label="Open menu">
                   <HiOutlineMenuAlt3 /> Menu

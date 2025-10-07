@@ -34,7 +34,6 @@ export default function SignIn() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // mark client mount to avoid rendering client-only indicators during SSR
     setMounted(true);
 
     // Guard against older browsers and server-side rendering
