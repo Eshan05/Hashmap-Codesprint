@@ -6,6 +6,7 @@ import { ClockIcon, FileQuestionIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { RecentSearch } from '@/types/recent-search';
+import Link from 'next/link';
 const SymptomFormMain = dynamic(() => import('./_components/symptom-form-main'), { ssr: false });
 
 const fetchRecentSearches = async (): Promise<RecentSearch[]> => {
@@ -37,10 +38,10 @@ export default function SymptomSearchPage() {
           <main className='lg:max-w-6xl mx-auto border rounded-lg p-2 lg:p-6 bg-[#ddd2] dark:bg-[#2222] backdrop-blur-lg'>
             <SymptomFormMain />
           </main>
-          <section className="p-6 bg-[#eee2] dark:bg-[#2222] shadow rounded-lg w-full lg:w-1/2 border">
-            <div className="flex items-center gap-2 mb-4">
-              <ClockIcon className="w-6 h-6" />
-              <h1 className="text-3xl font-bold">Recent</h1>
+          <section className="p-2 bg-[#eee2] dark:bg-[#2222] shadow rounded-lg w-full lg:w-1/2 border">
+            <div className="flex items-center justify-center p-2 gap-2 mb-4">
+              <ClockIcon className="w-5 h-5" />
+              <h1 className="text-2xl font-bold">Recent</h1>
             </div>
 
             {isLoading ? (
@@ -60,7 +61,7 @@ export default function SymptomSearchPage() {
             ) : recentSearches.length > 0 ? (
               <div className="space-y-3">
                 {recentSearches.map((search, index) => (
-                  <div key={search.searchId || index} className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                  <Link key={search.searchId || index} href={`/tools/symptom-search/${search.searchId}`} className="block p-3 bg-white dark:bg-neutral-800 rounded-lg border">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1">
@@ -74,7 +75,7 @@ export default function SymptomSearchPage() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
