@@ -38,6 +38,7 @@ import {
   ClockIcon,
   ShieldAlertIcon,
   FlaskConical,
+  FlagIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -78,7 +79,7 @@ type Timestamp = Date | string | number | undefined;
 
 export default async function SymptomSearchResultPage({ params }: PageProps) {
   await dbConnect();
-  const { searchId } = params;
+  const { searchId } = await params;
   const searchResult = await SymptomSearch.findOne({ searchId });
 
   if (!searchResult) {
@@ -525,31 +526,28 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                   <section className="space-y-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-900/80 text-neutral-100 shadow-inner dark:bg-neutral-100/10">
-                          <AlertTriangle className="h-5 w-5" />
-                        </span>
-                        <div className="space-y-1">
-                          <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">When to Seek Help</h2>
-                          <p className="text-sm text-neutral-500 dark:text-neutral-400">Escalation cues, similar symptoms, and immediate self-checks.</p>
+                        <div className="flex h-11 w-11 items-center border justify-center rounded-2xl bg-card aspect-square">
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button size="icon" variant="ghost" type="button">
+                                <AlertTriangle className="h-5 w-5 text-red-400" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-80 border">
+                              <div className="space-y-2 text-sm">
+                                <h4 className="font-semibold">Seeking Help</h4>
+                                <p className=''>Signals that should prompt direct medical intervention, especially if symptoms escalate rapidly or combine with other risk markers.</p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" className="border-neutral-300 text-neutral-600 hover:bg-neutral-200/80 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800/70">
-                          <ClipboardList className="mr-2 h-4 w-4" /> Emergency checklist
-                        </Button>
-                        <HoverCard>
-                          <HoverCardTrigger asChild>
-                            <Button size="icon" variant="ghost" type="button" className="h-9 w-9 border border-neutral-700/60 text-neutral-300 hover:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-300">
-                              <IoInformationOutline className="h-4 w-4" />
-                            </Button>
-                          </HoverCardTrigger>
-                          <HoverCardContent className="w-80 border border-neutral-200 bg-neutral-100/95 text-neutral-800 backdrop-blur-xl dark:border-neutral-700 dark:bg-neutral-900/90 dark:text-neutral-200">
-                            <div className="space-y-2 text-sm">
-                              <h4 className="font-semibold text-neutral-900 dark:text-neutral-100">Seeking Help</h4>
-                              <p>Signals that should prompt direct medical intervention, especially if symptoms escalate rapidly or combine with other risk markers.</p>
-                            </div>
-                          </HoverCardContent>
-                        </HoverCard>
+                        <div className="">
+                          <h2 className="text-2xl font-semibold tracking-tight">When to Seek Help</h2>
+                          <p className="text-sm text-muted-foreground line-clamp-1">Escalation cues, similar symptoms, and immediate self-checks.</p>
+                          <Button variant="outline" size="badge" className="text-xs">
+                            <ClipboardList className="!w-3 !h-3" /> Emergency Checklist
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr_1fr]">
@@ -557,7 +555,6 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                         {seekHelpItems.map((item, index) => {
                           const severityMeta = severityPalette[index % severityPalette.length];
                           const severityPercent = Math.min(94, 72 + index * 9);
-                          const symptomChips = buildSymptomChips(item.explanation);
 
                           return (
                             <li key={index}>
@@ -590,7 +587,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                         </div>
                                       </div>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400 hover:bg-neutral-200/70 hover:text-neutral-700 dark:text-neutral-500 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
                                       <MoreHorizontal className="h-4 w-4" />
                                     </Button>
                                   </div>
@@ -598,22 +595,12 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                     {item.explanation}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
-                                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase">
                                     <Home className="h-4 w-4" /> Immediate steps
                                   </div>
-                                  <p className="text-sm leading-6">
+                                  <p className="text-sm">
                                     Contact your provider or emergency services if the symptom worsens, combines with breathing difficulty, or leads to loss of consciousness.
                                   </p>
-                                  {symptomChips.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                      {symptomChips.map((chip, chipIndex) => (
-                                        <span key={chipIndex} className="flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50/80 px-3 py-1 text-xs font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800/60 dark:text-neutral-300">
-                                          <HeartPulse className="h-3.5 w-3.5" />
-                                          {chip}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
                                 </CardContent>
                                 <CardFooter className="flex flex-wrap items-center justify-between gap-2 pt-0 text-xs text-neutral-500 dark:text-neutral-400">
                                   <span className="flex items-center gap-2">
@@ -627,31 +614,31 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                         })}
                       </ul>
                       <div className="space-y-3">
-                        <Card className="border border-neutral-200/80 bg-white/90 dark:border-neutral-800/80 dark:bg-neutral-900/80">
-                          <CardHeader className="space-y-2">
-                            <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-[0.24em] text-neutral-600 dark:text-neutral-400">
+                        <Card className="border border-neutral-200/80 bg-white/90 dark:border-neutral-800/80 dark:bg-neutral-900/80 gap-2">
+                          <CardHeader className="">
+                            <CardTitle className="flex items-center gap-2 text-sm uppercase">
                               <ClipboardList className="h-4 w-4" /> Quick checklist
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-2 text-sm text-neutral-600 dark:text-neutral-300">
+                          <CardContent className="flex flex-col gap-1 text-sm text-neutral-600 dark:text-neutral-300">
                             {quickChecklist.map((item, index) => (
                               <div key={index} className="flex items-start gap-2">
-                                <span className="mt-1 h-2 w-2 rounded-full bg-neutral-400/70 dark:bg-neutral-600" />
+                                <span className="mt-1.5 h-2 w-2 rounded-full bg-neutral-400/70 dark:bg-neutral-600" />
                                 <span>{item}</span>
                               </div>
                             ))}
                           </CardContent>
                         </Card>
                         <Card className="border border-neutral-200/80 bg-white/90 dark:border-neutral-800/80 dark:bg-neutral-900/80">
-                          <CardHeader className="space-y-2">
-                            <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-[0.24em] text-neutral-600 dark:text-neutral-400">
+                          <CardHeader className="">
+                            <CardTitle className="flex items-center gap-2 text-sm uppercase">
                               <Home className="h-4 w-4" /> Quick relief ideas
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
+                          <CardContent className="space-y-2 text-sm">
                             {reliefIdeas.map(({ title, description, icon: IdeaIcon }, index) => (
-                              <div key={index} className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/80 p-3 dark:border-neutral-700 dark:bg-neutral-800/50">
-                                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-200/80 text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-200">
+                              <div key={index} className="flex items-start gap-3 rounded-2xl border p-2">
+                                <span className="flex h-9 w-9 items-center aspect-square justify-center rounded-xl bg-muted">
                                   <IdeaIcon className="h-4 w-4" />
                                 </span>
                                 <div className="space-y-1">
@@ -669,40 +656,55 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
               </div>
               <section className="flex flex-col gap-3 md:flex-row">
                 <Card className="w-full border border-neutral-200/70 bg-neutral-50/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900/60">
-                  <CardHeader className="space-y-3">
-                    <CardTitle className="text-neutral-900 dark:text-neutral-50">Final Verdict</CardTitle>
-                    <CardDescription className="text-neutral-600 dark:text-neutral-300">{finalVerdict}</CardDescription>
-                  </CardHeader>
-                  <CardFooter className="flex flex-wrap gap-2 pt-0">
-                    <Button className="flex items-center gap-2 bg-neutral-900 text-neutral-50 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
-                      <InfoIcon className="h-4 w-4" /> Report insight
-                    </Button>
-                    <Button variant="ghost" className="text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/80 dark:text-neutral-400 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100">
-                      Save snapshot
-                    </Button>
-                  </CardFooter>
+                  <CardContent className='flex w-full'>
+                    <div className='bg-lime-300/50 p-2 aspect-square w-10 h-10 rounded-md'>
+                      <ShieldAlertIcon className='w-6 h-6' />
+                    </div>
+                    <div className="flex-1">
+                      <CardHeader className="">
+                        <CardTitle className="flex items-center gap-2 text-primary text-lg">
+                          <InfoIcon className="h-4 w-4 text-neutral-400 dark:text-neutral-300" />
+                          Final Verdict
+                        </CardTitle>
+                        <WrapDrawer>
+                          <WDTrigger>
+                            <CardDescription className="text-muted-foreground text-left">
+                              <span className="max-sm:line-clamp-4">
+                                {finalVerdict}
+                              </span>
+                            </CardDescription>
+                          </WDTrigger>
+                          <WDContent title="Final Verdict" description="Your final verdict" showClose>
+                            <p className="text-sm text-neutral-600 dark:text-neutral-300">{finalVerdict}</p>
+                          </WDContent>
+                        </WrapDrawer>
+                      </CardHeader>
+                      <CardFooter className="flex flex-wrap gap-2 pt-2">
+                        <Button size="sm" className="">
+                          <FlagIcon className="h-4 w-4" /> Report Insight
+                        </Button>
+                        <Button variant="outline" size="sm" className="">
+                          Save snapshot
+                        </Button>
+                      </CardFooter>
+                    </div>
+                  </CardContent>
                 </Card>
-                <Card className="w-full border border-neutral-200/70 bg-neutral-50/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900/60">
-                  <CardHeader className="space-y-3">
-                    <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-neutral-500 dark:text-neutral-400">
-                      <InfoIcon className="h-4 w-4" /> Disclaimer
-                    </CardTitle>
-                    <WrapDrawer>
-                      <WDTrigger>
-                        <CardDescription className="text-neutral-600 dark:text-neutral-300">
-                          <span className="line-clamp-2 md:line-clamp-none">
-                            This information is generated by an AI system and should complement—not replace—professional medical expertise. If symptoms escalate or feel alarming, seek urgent care immediately.
-                          </span>
-                          <span className="ml-1 text-xs text-blue-500 md:hidden">(tap for more)</span>
-                        </CardDescription>
-                      </WDTrigger>
-                      <WDContent title="Disclaimer" description="Important information" showClose>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-300">
-                          This information is generated by an AI system and should complement—not replace—professional medical expertise. If symptoms escalate or feel alarming, seek urgent care immediately.
-                        </p>
-                      </WDContent>
-                    </WrapDrawer>
-                  </CardHeader>
+                <Card className="w-full border border-neutral-200/70 bg-neutral-50/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900/60 max-sm:py-4">
+                  <CardContent className='flex w-full max-sm:px-4'>
+                    <div className='bg-red-300/50 p-2 aspect-square w-10 h-10 rounded-md'>
+                      <ShieldAlertIcon className='w-6 h-6' />
+                    </div>
+                    <CardHeader className="flex-1">
+                      <CardTitle className="flex items-center gap-2 text-primary text-lg">
+                        <Sparkles className="h-4 w-4 text-neutral-400 dark:text-neutral-300" />
+                        AI Disclaimer
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        This information is generated by an AI model and should not be used as a substitute for professional medical advice, diagnosis, or treatment. If you wish to gain more information about anything mentioned click on three dots or learn more.
+                      </CardDescription>
+                    </CardHeader>
+                  </CardContent>
                 </Card>
               </section>
             </article>
