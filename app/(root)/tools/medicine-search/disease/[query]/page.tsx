@@ -1,7 +1,7 @@
 import MedicineSearch from '@/models/medicine-search';
 import dbConnect from '@/utils/db-conn';
 import { notFound } from 'next/navigation';
-import { Medicine } from '../../[searchId]/page';
+import type { Medicine } from '../../[searchId]/page';
 import FadeContent from '@/components/fade-content';
 
 interface PageProps {

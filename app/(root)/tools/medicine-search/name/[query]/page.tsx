@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import dbConnect from '@/utils/db-conn';
 import MedicineSearch from '@/models/medicine-search';
-import { Medicine } from '../../[searchId]/page';
+import type { Medicine } from '../../[searchId]/page';
 
 interface Result {
   Medicine: Medicine

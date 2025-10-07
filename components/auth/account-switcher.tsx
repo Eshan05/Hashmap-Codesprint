@@ -16,7 +16,7 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { ChevronDown, PlusCircle } from "lucide-react";
-import { Session } from "@/lib/auth-types";
+import type { Session } from "@/lib/auth-types";
 import { authClient as client, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 

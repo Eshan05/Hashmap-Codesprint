@@ -3,11 +3,12 @@
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { useSession } from '@/lib/auth-client';
-import { LucideIcon, XIcon } from 'lucide-react';
+import { type LucideIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { HiOutlineMenuAlt3 } from 'react-icons/hi';
-import { IconType } from 'react-icons/lib';
+import type { IconType } from 'react-icons/lib';
 import { TbBuildingSkyscraper, TbHome, TbMailShare, TbVideo, TbWorldQuestion } from "react-icons/tb";
 import { Logo } from "../auth/logo";
 import { EButton } from '../ui/enhanced-button';

@@ -1,5 +1,6 @@
 "use client"
 
+import { useSession } from "@/lib/auth-client"
 import {
   AudioWaveform,
   BookOpen,
@@ -14,7 +15,7 @@ import {
   ScanSearch,
   User2Icon
 } from "lucide-react"
-import * as React from "react"
+import type * as React from "react"
 
 import { NavMain } from "@/components/layout/user/nav-main"
 import { NavProjects } from "@/components/layout/user/nav-projects"
@@ -62,7 +63,7 @@ const data = {
         },
         {
           title: "Sleep Tracker",
-          url: "/sleep-tracker",
+          url: "/dashboard/sleep-tracker",
         },
         {
           title: "Health Tools",
@@ -82,29 +83,29 @@ const data = {
     },
     {
       title: "Disease Glossary",
-      url: "/diseases",
+      url: "/tools/diseases",
       icon: ScanSearch,
     },
     {
       title: "Personalized AI",
-      url: "/ai",
+      url: "/dashboard/ai",
       icon: FileUserIcon,
     },
     {
       title: "Smart Watch Dashboard",
-      url: "/watch",
+      url: "/dashboard/watch",
       icon: Newspaper
     }
   ],
   projects: [
     {
       name: "Web Map",
-      url: "/web-map",
+      url: "/dashboard/web-map",
       icon: Frame,
     },
     {
       name: "Statistics",
-      url: "/stats",
+      url: "/dashboard/stats",
       icon: PieChart,
     },
     {
@@ -116,6 +117,8 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = useSession()
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarContent>
@@ -123,7 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser session={session} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import dbConnect from '@/utils/db-conn';
-import MedicineSearch, { IMedicineSearch } from '@/models/medicine-search';
+import MedicineSearch, { type IMedicineSearch } from '@/models/medicine-search';
 import DiseaseResultCard from '../_components/disease-result-card';
 
 interface PageProps {
@@ -80,7 +80,7 @@ export default async function MedicineSearchResultPage({ params }: PageProps) {
             ))}
           </ul>
         );
-      case 'name':
+      case 'name': {
         // Medicine object
         const medicine = resultData as Medicine;
         return (
@@ -103,6 +103,7 @@ export default async function MedicineSearchResultPage({ params }: PageProps) {
             <p>Additional Info: {medicine.additionalInfo}</p>
           </div>
         );
+      }
       case 'sideEffects':
         if (typeof resultData === 'string') {
           return <p>{resultData}</p>;
@@ -135,7 +136,7 @@ export default async function MedicineSearchResultPage({ params }: PageProps) {
         } else {
           return <p>500.</p>;
         }
-      case 'ingredient':
+      case 'ingredient': {
         const ingredient = resultData as Ingredient
         return (
           <div>
@@ -151,6 +152,7 @@ export default async function MedicineSearchResultPage({ params }: PageProps) {
             )}
           </div>
         );
+      }
       case 'similar':
         return (
           <ul>

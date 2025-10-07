@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Upload, X, Image as ImageIcon } from "lucide-react";

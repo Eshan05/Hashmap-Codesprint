@@ -1,4 +1,4 @@
-import { JSX, SVGProps } from "react";
+import { JSX, type SVGProps } from "react";
 import { cn } from "@/lib/utils"; // Assuming cn is imported from a utils file
 
 export const Logo = ({ className, ...props }: SVGProps<SVGSVGElement>) => {

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Medicine } from "../[searchId]/page";
+import type { Medicine } from "../[searchId]/page";
 
 interface DiseaseResultCardProps {
   medicine: Medicine

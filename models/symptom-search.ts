@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, type Document, type Model } from 'mongoose';
 
 // Needa add a boolean that flags whether to store inputs given by user or not
 interface ISymptomSearch extends Document {

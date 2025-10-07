@@ -14,6 +14,7 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@better-fetch/fetch": "^1.1.18",
     "@dnd-kit/core": "^6.3.1",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",

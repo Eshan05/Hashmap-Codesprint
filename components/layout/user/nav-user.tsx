@@ -5,6 +5,7 @@ import {
   Bell,
   ChevronsUpDown,
   CreditCard,
+  Loader2,
   LogOut,
   Sparkles,
 } from "lucide-react"
@@ -29,17 +30,22 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { signOut } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
+import { Session } from "@/lib/auth-types";
+import { useState } from "react"
 
 export function NavUser({
-  user,
+  session,
 }: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
+  session: Session | null
 }) {
   const { isMobile } = useSidebar()
+
+  const router = useRouter()
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  if (!session?.user) return null
+  const user = session?.user
 
   return (
     <SidebarMenu>
@@ -51,11 +57,11 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">U</AvatarFallback>
+                <AvatarImage src={session?.user.image || undefined} alt={user.name} />
+                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
+                <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -70,11 +76,11 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={''} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">U</AvatarFallback>
+                  <AvatarImage src={session?.user.image || undefined} alt={user.name} />
+                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate font-medium">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>
@@ -102,9 +108,32 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuItem
+              onClick={async () => {
+                if (isSigningOut) return
+                setIsSigningOut(true)
+                try {
+                  await signOut({
+                    fetchOptions: { onSuccess() { router.push("/") }, },
+                  })
+                } catch (e) {
+                  console.error("signOut failed", e)
+                } finally {
+                  setIsSigningOut(false)
+                }
+              }}
+            >
+              {isSigningOut ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  <span>Signing out...</span>
+                </>
+              ) : (
+                <>
+                  <LogOut />
+                  <span className="">Log out</span>
+                </>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
