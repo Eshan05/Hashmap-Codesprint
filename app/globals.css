@@ -6,7 +6,7 @@
 @theme {
   --font-inter: 'Inter', sans-serif;
   --font-sans: 'Geist', 'Geist Sans', sans-serif;
-  --font-mono: 'Geist Mono', monospace;
+  --font-mono: 'JetBrains Mono', monospace;
   --breakpoint-xs: 30rem;
   --breakpoint-slg: 991px; 
   --breakpoint-emd: 768px;
