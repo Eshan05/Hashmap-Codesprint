@@ -1,12 +1,12 @@
 import { AppSidebar } from '@/components/layout/user/app-sidebar';
 import { ModeToggle } from "@/components/mode-toggle";
+import { Providers } from '@/components/providers';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { ThemeProvider } from "next-themes";
-
 
 export default function AuthLayout({
   children,
@@ -29,7 +29,7 @@ export default function AuthLayout({
                 <div className="flex items-center gap-2 px-4 justify-between w-full">
                   <aside className="flex items-center gap-2">
                     <SidebarTrigger className="-ml-1" />
-                    <h1 className="text-lg leading-none">
+                    <h1 className="text-lg font-semibold leading-none">
                       CareSphere
                     </h1>
                   </aside>
@@ -38,8 +38,10 @@ export default function AuthLayout({
                   </aside>
                 </div>
               </header>
-              <main className="relative group-has-[[data-collapsible=icon]]/sidebar-wrapper:ml-0 ml-0 p-4">
-                {children}
+              <main className="relative group-has-[[data-collapsible=icon]]/sidebar-wrapper:ml-0 ml-0 px-4">
+                <Providers>
+                  {children}
+                </Providers>
                 {/* <footer className="w-full mx-auto relative"> */}
                 {/* <Footer7 /> */}
                 {/* </footer> */}
