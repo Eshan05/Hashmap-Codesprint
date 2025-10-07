@@ -1,6 +1,7 @@
 import FadeContent from '@/components/fade-content';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { WrapDrawer, WDTrigger, WDContent } from '@/components/ui/wrap-drawer';
 import {
   Card,
   CardContent,
@@ -34,10 +35,20 @@ import {
   Sparkles,
   Stethoscope,
   Thermometer,
+  ClockIcon,
+  ShieldAlertIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { IoInformationOutline } from 'react-icons/io5';
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item"
 
 interface PageProps {
   params: {
@@ -189,31 +200,22 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
     <section className="relative flex min-h-svh flex-col overflow-hidden text-neutral-900 dark:text-neutral-100">
       <div className="relative w-full px-5 py-8 lg:px-11 lg:py-10">
         <header className="relative mb-8">
-          <Card className="overflow-hidden border border-neutral-800/60 bg-neutral-950 text-neutral-100 shadow-2xl dark:border-neutral-800">
-            <CardContent className="p-7 md:p-9">
-              <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-                <div className="max-w-2xl space-y-5">
-                  <div className="flex items-center gap-3 text-[0.7rem] uppercase tracking-[0.28em] text-neutral-300">
+          <Card className="overflow-hidden border border-neutral-800/60 bg-neutral-950 text-neutral-100 shadow-2xl dark:border-neutral-800 py-0">
+            <CardContent className="p-4 sm:p-6 md:p-8 lg:p-10">
+              <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+                <div className="max-w-2xl">
+                  <h1 className="text-3xl mb-1 font-semibold leading-tight sm:text-4xl lg:text-5xl">Symptom Analysis</h1>
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
                     <Sparkles className="h-4 w-4" />
                     <span>Adaptive Insight Console</span>
                   </div>
-                  <div className="space-y-3">
-                    <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-[3.4rem]">Symptom Insight Canvas</h1>
-                    <p className="text-base text-neutral-200/90 sm:text-lg">
-                      Curated guidance layered with dynamic risk cues. Explore probable conditions, recommended therapies, and escalation signals designed with Material Expressive clarity.
-                    </p>
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <ClockIcon className="h-4 w-4" />
+                    <span>Updated {updatedCopy}</span>
                   </div>
-                  <div className="flex flex-wrap gap-2.5">
-                    <Badge className="border border-neutral-100/40 bg-neutral-100/20 text-neutral-50">
-                      Material Expressive 3
-                    </Badge>
-                    <Badge variant="outline" className="border-neutral-100/40 text-neutral-100/90">
-                      <HeartPulse className="mr-1 h-3.5 w-3.5" /> Real-time markers
-                    </Badge>
-                    <Badge variant="outline" className="border-neutral-100/40 text-neutral-100/90">
-                      <Pill className="mr-1 h-3.5 w-3.5" /> Pharmacology ready
-                    </Badge>
-                  </div>
+                  <p className="text-base text-neutral-200/90 sm:text-lg my-4">
+                    Curated guidance layered with dynamic risk cues. Explore probable conditions, recommended therapies, and escalation signals designed with Material Expressive clarity.
+                  </p>
                   <div className="flex flex-wrap gap-2.5">
                     <Button asChild size="sm" className="gap-2 bg-neutral-100 text-neutral-900 hover:bg-neutral-200">
                       <Link href="/symptom-search">
@@ -224,16 +226,15 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                     <Button size="sm" variant="secondary" className="bg-neutral-800 text-neutral-100 hover:bg-neutral-700">
                       <Stethoscope className="h-4 w-4" /> Check similar conditions
                     </Button>
-                    <Button size="sm" variant="outline" className="border-neutral-700 text-neutral-100 hover:bg-neutral-800">
+                    <Button size="sm" variant="outline" className="dark">
                       <Plus className="h-4 w-4" /> Add to profile
                     </Button>
                   </div>
                 </div>
-                <div className="relative w-full max-w-xs self-center">
+                <div className="relative w-full max-w-60 self-center">
                   <div
-                    className={`relative aspect-square overflow-hidden rounded-[34px] border border-neutral-700/70 bg-neutral-900/80 p-6 shadow-xl backdrop-blur-xl transition-colors ${severityBackdrop}`}
+                    className={`relative aspect-square overflow-hidden rounded-3xl border border-neutral-700/70 bg-neutral-900/80 p-4 shadow-xl backdrop-blur-xl transition-colors ${severityBackdrop}`}
                     style={{
-                      // embed the computed color directly into the conic-gradient to avoid using a CSS custom property
                       backgroundImage: (() => {
                         const gaugeColor = severityScore >= 75
                           ? 'rgba(244, 63, 94, 0.45)'
@@ -244,92 +245,101 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                       })(),
                     }}
                   >
-                    <div className="absolute inset-[18%] flex flex-col items-center justify-center gap-3 rounded-[26px] border border-neutral-700/60 bg-neutral-950/85 p-6 text-center">
-                      <Gauge className="h-6 w-6 text-neutral-400" />
-                      <span className="text-[0.68rem] uppercase tracking-[0.28em] text-neutral-500">Severity</span>
+                    <div className="aspect-square flex flex-col items-center justify-center gap-3 rounded-3xl border border-neutral-700/60 bg-neutral-950/85 p-4 text-center">
+                      <header className='flex flex-col gap-1 items-center'>
+                        <div className='flex-center-2'>
+                          <Gauge className="h-3 w-3" />
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground">Severity</span>
+                        </div>
+                        <span className={`text-sm font-medium ${severityTone}`}>{severityLabel}</span>
+                      </header>
                       <div className="flex items-end gap-1">
                         <span className="text-4xl font-semibold">{severityScore}</span>
                         <span className="mb-1 text-sm text-neutral-400">%</span>
                       </div>
-                      <span className={`text-sm font-medium ${severityTone}`}>{severityLabel}</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-3 text-xs uppercase tracking-[0.2em] text-neutral-400">
-                    <div className="rounded-2xl border border-neutral-700/60 bg-neutral-900/70 px-3 py-2 text-neutral-100">
-                      {totalConditions} Conditions
-                    </div>
-                    <div className="rounded-2xl border border-neutral-700/60 bg-neutral-900/70 px-3 py-2 text-neutral-100">
-                      {totalMedicines} Medications
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="icon" variant="ghost" className="text-neutral-500 hover:bg-neutral-200/80 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          <DropdownMenuItem asChild>
+                            <Link href="/symptom-search">Edit original submission</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2">
+                            <Share2 className="h-4 w-4" /> Share report
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2">
+                            <Download className="h-4 w-4" /> Download snapshot
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-            <span>Updated {updatedCopy}</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="ghost" className="text-neutral-500 hover:bg-neutral-200/80 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem asChild>
-                  <Link href="/symptom-search">Edit original submission</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2">
-                  <Share2 className="h-4 w-4" /> Share report
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2">
-                  <Download className="h-4 w-4" /> Download snapshot
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </header>
         <FadeContent blur duration={500} easing="ease-in" initialOpacity={0}>
-          <p className="my-4 text-neutral-600 transition hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-200">
-            <Link href="/symptom-search" className="underline decoration-neutral-400 underline-offset-4 hover:decoration-neutral-600">Return to intake form</Link>
-          </p>
           {searchResult.cumulativePrompt ? (
             <article className="flex flex-col gap-5">
               <section className="flex flex-col gap-3 md:flex-row md:items-stretch">
-                <Card className="w-full border border-neutral-200/70 bg-neutral-50/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900/60">
-                  <CardHeader className="space-y-3">
-                    <CardTitle className="flex items-center gap-2 text-neutral-900 dark:text-neutral-50">
-                      <Sparkles className="h-5 w-5 text-neutral-400 dark:text-neutral-300" />
-                      Overview Snapshot
-                    </CardTitle>
-                    <CardDescription className="text-neutral-600 dark:text-neutral-300">
-                      Highlights the AI synthesized pathways using your submission. Pair this with clinician guidance before making care decisions.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter className="flex flex-wrap gap-2 pt-0 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
-                    <span className="rounded-full border border-neutral-200 px-3 py-1 dark:border-neutral-700">{totalConditions} Conditions</span>
-                    <span className="rounded-full border border-neutral-200 px-3 py-1 dark:border-neutral-700">{totalMedicines} Medications</span>
-                    <span className="rounded-full border border-neutral-200 px-3 py-1 dark:border-neutral-700">{totalAlerts} Alerts</span>
-                  </CardFooter>
+                <Card className="w-full border border-neutral-200/70 bg-neutral-50/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900/60 max-sm:py-4">
+                  <CardContent className='flex w-full max-sm:px-4'>
+                    <div className='bg-red-300/50 p-2 aspect-square w-10 h-10 rounded-md'>
+                      <ShieldAlertIcon className='w-6 h-6' />
+                    </div>
+                    <CardHeader className="flex-1">
+                      <CardTitle className="flex items-center gap-2 text-primary text-lg">
+                        <Sparkles className="h-4 w-4 text-neutral-400 dark:text-neutral-300" />
+                        AI Disclaimer
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        This information is generated by an AI model and should not be used as a substitute for professional medical advice, diagnosis, or treatment. If you wish to gain more information about anything mentioned click on three dots or learn more.
+                      </CardDescription>
+                    </CardHeader>
+                  </CardContent>
                 </Card>
                 <Card className="w-full border border-neutral-200/70 bg-neutral-50/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900/60">
-                  <CardHeader className="space-y-3">
-                    <CardTitle className="flex items-center gap-2 text-neutral-900 dark:text-neutral-50">
-                      <InfoIcon className="h-5 w-5 text-neutral-400 dark:text-neutral-300" />
-                      Input Summary
-                    </CardTitle>
-                    <CardDescription className="leading-6 text-neutral-600 dark:text-neutral-300">{cumulativePrompt}</CardDescription>
-                  </CardHeader>
-                  <CardFooter className="flex flex-wrap gap-2 pt-0">
-                    <Button variant="secondary" size="sm" className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700">
-                      <HeartPulse className="h-4 w-4" /> Learn more
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/80 dark:text-neutral-400 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100">
-                      Quick annotate
-                    </Button>
-                  </CardFooter>
+                  <CardContent className='flex w-full'>
+                    <div className='bg-sky-300/50 p-2 aspect-square w-10 h-10 rounded-md'>
+                      <ShieldAlertIcon className='w-6 h-6' />
+                    </div>
+                    <div className="flex-1">
+                      <CardHeader className="">
+                        <CardTitle className="flex items-center gap-2 text-primary text-lg">
+                          <InfoIcon className="h-4 w-4 text-neutral-400 dark:text-neutral-300" />
+                          Input Summary
+                        </CardTitle>
+                        <WrapDrawer>
+                          <WDTrigger>
+                            <CardDescription className="text-muted-foreground">
+                              <span className="line-clamp-2 md:line-clamp-none">
+                                {cumulativePrompt}
+                              </span>
+                              <span className="ml-1 text-xs text-blue-500 md:hidden">(tap for more)</span>
+                            </CardDescription>
+                          </WDTrigger>
+                          <WDContent title="Input Summary" description="Your submitted symptoms" showClose>
+                            <p className="text-sm text-neutral-600 dark:text-neutral-300">{cumulativePrompt}</p>
+                          </WDContent>
+                        </WrapDrawer>
+                      </CardHeader>
+                      <CardFooter className="flex flex-wrap gap-2 pt-2">
+                        <Button variant="secondary" size="sm" className="">
+                          <HeartPulse className="h-4 w-4" /> Learn more
+                        </Button>
+                        <Button variant="outline" size="sm" className="">
+                          Quick annotate
+                        </Button>
+                      </CardFooter>
+                    </div>
+                  </CardContent>
                 </Card>
               </section>
-              <div className="mx-auto space-y-6 rounded-3xl border border-neutral-200/70 bg-neutral-50/80 p-4 shadow-[0_34px_120px_-40px_rgba(20,20,20,0.45)] backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/60 lg:max-w-6xl lg:p-6">
+              <div className="mx-auto space-y-6 rounded-3xl border border-neutral-200/70 bg-neutral-50/80 p-4 shadow-2xl backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/60 lg:max-w-6xl lg:p-6">
                 {conditions.length > 0 && (
                   <section className="space-y-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -337,7 +347,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                         <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-900/80 text-neutral-100 shadow-inner dark:bg-neutral-100/10 dark:text-neutral-100">
                           <ClipboardList className="h-5 w-5" />
                         </span>
-                        <div className="space-y-1">
+                        <div className="">
                           <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">Potential Conditions</h2>
                           <p className="text-sm text-neutral-400 dark:text-neutral-400">Model-ranked differentials to explore with a clinician.</p>
                         </div>
@@ -680,9 +690,21 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                     <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-neutral-500 dark:text-neutral-400">
                       <InfoIcon className="h-4 w-4" /> Disclaimer
                     </CardTitle>
-                    <CardDescription className="text-neutral-600 dark:text-neutral-300">
-                      This information is generated by an AI system and should complement—not replace—professional medical expertise. If symptoms escalate or feel alarming, seek urgent care immediately.
-                    </CardDescription>
+                    <WrapDrawer>
+                      <WDTrigger>
+                        <CardDescription className="text-neutral-600 dark:text-neutral-300">
+                          <span className="line-clamp-2 md:line-clamp-none">
+                            This information is generated by an AI system and should complement—not replace—professional medical expertise. If symptoms escalate or feel alarming, seek urgent care immediately.
+                          </span>
+                          <span className="ml-1 text-xs text-blue-500 md:hidden">(tap for more)</span>
+                        </CardDescription>
+                      </WDTrigger>
+                      <WDContent title="Disclaimer" description="Important information" showClose>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-300">
+                          This information is generated by an AI system and should complement—not replace—professional medical expertise. If symptoms escalate or feel alarming, seek urgent care immediately.
+                        </p>
+                      </WDContent>
+                    </WrapDrawer>
                   </CardHeader>
                 </Card>
               </section>
@@ -692,6 +714,6 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
           )}
         </FadeContent>
       </div>
-    </section>
+    </section >
   );
 }
