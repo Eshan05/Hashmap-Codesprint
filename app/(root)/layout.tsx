@@ -29,7 +29,7 @@ export default function AuthLayout({
                 <div className="flex items-center gap-2 px-4 justify-between w-full">
                   <aside className="flex items-center gap-2">
                     <SidebarTrigger className="-ml-1" />
-                    <h1 className="text-lg font-semibold leading-none tracking-tight">
+                    <h1 className="text-lg leading-none">
                       CareSphere
                     </h1>
                   </aside>
