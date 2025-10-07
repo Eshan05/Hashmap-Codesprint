@@ -20,7 +20,10 @@ export async function middleware(request: NextRequest) {
 
   if (isTryingToAccessProtectedRoute) {
     if (!session || !session.user) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      const returnTo = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+      const signInUrl = new URL("/sign-in", request.url);
+      signInUrl.searchParams.set("next", returnTo);
+      return NextResponse.redirect(signInUrl);
     }
 
     const userRole = session.user.role;
