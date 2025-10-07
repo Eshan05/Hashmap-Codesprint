@@ -49,7 +49,7 @@ export default function SymptomFormMain() {
     setError('');
 
     try {
-      const response = await fetch('/api/search', {
+      const response = await fetch('/api/symptom-search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
