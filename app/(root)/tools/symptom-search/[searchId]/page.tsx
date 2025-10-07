@@ -155,12 +155,6 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
     Thermometer
   ];
 
-  // const quickChecklist = [
-  //   'Log onset time and symptom intensity',
-  //   'Note any recent triggers or exertion',
-  //   'Record current medications and dosages',
-  // ];
-
   const gaugeStyle = (percent: number, tone: string) => ({
     backgroundImage: `conic-gradient(${tone} 0deg, ${tone} ${percent * 3.6}deg, rgba(220,220,220,0.16) ${percent * 3.6}deg)`,
   });
@@ -169,7 +163,12 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
     <section className="relative flex min-h-svh flex-col overflow-hidden text-neutral-900 dark:text-neutral-100">
       <div className="relative w-full px-2 md:px-4 py-8 lg:px-10 lg:py-10">
         <header className="relative mb-8">
-          <Card className="overflow-hidden border border-neutral-800/60 bg-neutral-950 text-neutral-100 shadow-2xl dark:border-neutral-800 py-0">
+          <Card className="overflow-hidden border border-neutral-800/60 bg-neutral-950 text-neutral-100 shadow-2xl dark:border-neutral-800 py-0"
+            style={{
+              background:
+                'url(https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&amp;q=80)',
+              backgroundSize: 'cover',
+            }}>
             <CardContent className="p-4 sm:p-6 md:p-8 lg:p-10">
               <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-2xl">
@@ -348,11 +347,11 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                           <CardHeader className="">
                             <div className="flex items-start justify-between gap-3">
                               <div className="">
-                                <CardTitle className="text-xl">{condition.name}</CardTitle>
+                                <CardTitle className="text-xl leading-tight">{condition.name}</CardTitle>
                                 <div className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 mt-1">
                                     <Shield className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
-                                    <span>{index === 0 ? 'Primary signal' : index === 1 ? 'Consider closely' : 'Keep monitoring'}</span>
+                                    <span>{condition.lookoutFactor}</span>
                                   </div>
                                 </div>
                                 <CardDescription className="text-muted-foreground mt-2">{condition.description}</CardDescription>
@@ -382,7 +381,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                               <span className="flex items-center gap-2">
                                 <Activity className="h-4 w-4" /> Severity trend
                               </span>
-                              <span className="font-semibold text-neutral-700 dark:text-neutral-200">{index === 0 ? 'Elevated' : index === 1 ? 'Stable' : 'Mild'}</span>
+                              <span className="font-semibold text-neutral-700 dark:text-neutral-200">{condition.severityTrend}</span>
                             </div>
                             <p>{condition.explanation}</p>
                           </CardContent>
@@ -455,7 +454,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                 <span className="flex items-center gap-2">
                                   <Gauge className="h-4 w-4" /> Adherence outlook
                                 </span>
-                                <span className="font-semibold">{index === 0 ? 'High' : 'Moderate'}</span>
+                                <span className="font-semibold">{medicine.adherence}</span>
                               </div>
                               <section className="flex items-start gap-3">
                                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-200/80 dark:bg-neutral-800/70">
@@ -542,15 +541,15 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                             style={gaugeStyle(severityPercent, severityMeta.tone)}
                                           >
                                           </div>
-                                          <span className='text-sm'>{severityPercent}% {severityMeta.label}</span>
+                                          <span className='text-sm'>{item.criticality}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                           <InfoIcon className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
-                                          <span className="text-sm text-muted-foreground">Contact doctor immediately</span>
+                                          <span className="text-sm text-muted-foreground">{item.whenContact}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                           <FlaskConical className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
-                                          <span className="text-sm text-muted-foreground">Easily curable</span>
+                                          <span className="text-sm text-muted-foreground leading-tight">{item.curability}</span>
                                         </div>
                                       </div>
                                     </div>
