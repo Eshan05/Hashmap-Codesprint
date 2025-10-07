@@ -1,4 +1,4 @@
-import MedicineSearch from '@/models/Medicine';
+import MedicineSearch from '@/models/medicine-search';
 import dbConnect from '@/utils/dbConnect';
 import { notFound } from 'next/navigation';
 import { Medicine } from '../../[searchId]/page';

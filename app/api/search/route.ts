@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dbConnect from '@/utils/dbConnect';
-import SymptomSearch from '@/models/SymptomSearch';
+import SymptomSearch from '@/models/symptom-search';
 import { v4 as uuidv4 } from 'uuid';
 import { retryWithExponentialBackoff } from '@/lib/utils';
 

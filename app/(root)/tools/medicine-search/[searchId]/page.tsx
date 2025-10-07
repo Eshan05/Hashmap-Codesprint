@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import dbConnect from '@/utils/dbConnect';
-import MedicineSearch, { IMedicineSearch } from '@/models/Medicine';
+import MedicineSearch, { IMedicineSearch } from '@/models/medicine-search';
 import DiseaseResultCard from '../_components/disease-result-card';
 
 interface PageProps {

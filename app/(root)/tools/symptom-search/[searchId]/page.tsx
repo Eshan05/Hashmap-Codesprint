@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import SymptomSearch from '@/models/SymptomSearch';
+import SymptomSearch from '@/models/symptom-search';
 import dbConnect from '@/utils/dbConnect';
 import { FlagIcon, InfoIcon } from 'lucide-react';
 import { notFound } from 'next/navigation';
