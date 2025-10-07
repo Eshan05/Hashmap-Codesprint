@@ -23,6 +23,7 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        badge: "h-6 px-2 py-0.5 gap-1 has-[>svg]:px-2 rounded-md",
         xs: "h-6.5 rounded-md px-2 gap-1 has-[>svg]:px-1.5",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",

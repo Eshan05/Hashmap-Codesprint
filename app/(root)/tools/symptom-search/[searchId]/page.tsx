@@ -37,6 +37,7 @@ import {
   Thermometer,
   ClockIcon,
   ShieldAlertIcon,
+  FlaskConical,
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -198,7 +199,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
 
   return (
     <section className="relative flex min-h-svh flex-col overflow-hidden text-neutral-900 dark:text-neutral-100">
-      <div className="relative w-full px-5 py-8 lg:px-11 lg:py-10">
+      <div className="relative w-full px-2 md:px-4 py-8 lg:px-10 lg:py-10">
         <header className="relative mb-8">
           <Card className="overflow-hidden border border-neutral-800/60 bg-neutral-950 text-neutral-100 shadow-2xl dark:border-neutral-800 py-0">
             <CardContent className="p-4 sm:p-6 md:p-8 lg:p-10">
@@ -315,11 +316,10 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                         </CardTitle>
                         <WrapDrawer>
                           <WDTrigger>
-                            <CardDescription className="text-muted-foreground">
-                              <span className="line-clamp-2 md:line-clamp-none">
+                            <CardDescription className="text-muted-foreground text-left">
+                              <span className="max-sm:line-clamp-4">
                                 {cumulativePrompt}
                               </span>
-                              <span className="ml-1 text-xs text-blue-500 md:hidden">(tap for more)</span>
                             </CardDescription>
                           </WDTrigger>
                           <WDContent title="Input Summary" description="Your submitted symptoms" showClose>
@@ -344,55 +344,50 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                   <section className="space-y-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-900/80 text-neutral-100 shadow-inner dark:bg-neutral-100/10 dark:text-neutral-100">
-                          <ClipboardList className="h-5 w-5" />
-                        </span>
-                        <div className="">
-                          <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">Potential Conditions</h2>
-                          <p className="text-sm text-neutral-400 dark:text-neutral-400">Model-ranked differentials to explore with a clinician.</p>
+                        <div className="flex h-11 w-11 items-center border justify-center rounded-2xl bg-card aspect-square">
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button size="icon" variant="ghost" type="button">
+                                <ClipboardList className="min-h-5 min-w-5 text-green-400" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-80 border">
+                              <div className="space-y-2 text-sm">
+                                <h4 className="font-semibold">Potential Conditions</h4>
+                                <p className=''>Ranked suggestions that may align with your symptoms. Confirm with a clinician before acting.</p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="border-neutral-400/40 text-neutral-300 dark:border-neutral-700 dark:text-neutral-300">
-                          Likelihood spectrum
-                        </Badge>
-                        <HoverCard>
-                          <HoverCardTrigger asChild>
-                            <Button size="icon" variant="ghost" type="button" className="h-9 w-9 border border-neutral-700/60 text-neutral-300 hover:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-300">
-                              <IoInformationOutline className="h-4 w-4" />
-                            </Button>
-                          </HoverCardTrigger>
-                          <HoverCardContent className="w-80 border border-neutral-200 bg-neutral-100/95 text-neutral-800 backdrop-blur-xl dark:border-neutral-700 dark:bg-neutral-900/90 dark:text-neutral-200">
-                            <div className="space-y-2 text-sm">
-                              <h4 className="font-semibold text-neutral-900 dark:text-neutral-100">Potential Conditions</h4>
-                              <p>Ranked suggestions that may align with your symptoms. Confirm with a clinician before acting.</p>
-                            </div>
-                          </HoverCardContent>
-                        </HoverCard>
+                        <div className="">
+                          <h2 className="text-2xl font-semibold tracking-tight ">Potential Conditions</h2>
+                          <p className="text-sm text-muted-foreground line-clamp-1">Model-ranked differentials to explore with a clinician.</p>
+                          <Badge variant="outline" className="">
+                            Likelihood spectrum
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                       {conditions.map((condition, index) => (
                         <Card
                           key={index}
-                          className="group h-full border border-neutral-200/80 bg-white/90 transition hover:-translate-y-0.5 hover:border-neutral-400 hover:shadow-xl dark:border-neutral-800/80 dark:bg-neutral-900/80 dark:hover:border-neutral-600"
+                          className="group h-full border border-neutral-200/80 bg-white/90 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-neutral-800/80 dark:bg-neutral-900/80 bg-blend-lighten dark:bg-blend-overlay"
                           style={{
                             backgroundImage: conditionGradients[index % conditionGradients.length],
-                            backgroundBlendMode: 'overlay',
                           }}
                         >
-                          <CardHeader className="space-y-3">
+                          <CardHeader className="">
                             <div className="flex items-start justify-between gap-3">
-                              <div className="space-y-2">
-                                <CardTitle className="text-lg text-neutral-900 dark:text-neutral-100">{condition.name}</CardTitle>
-                                <CardDescription className="text-neutral-600 dark:text-neutral-300">{condition.description}</CardDescription>
-                              </div>
-                              <Badge className="rounded-full bg-neutral-900 px-3 py-1 text-xs text-neutral-50 dark:bg-neutral-100 dark:text-neutral-900">#{index + 1}</Badge>
-                            </div>
-                            <div className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                              <div className="flex items-center gap-2">
-                                <Shield className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
-                                <span>{index === 0 ? 'Primary signal' : index === 1 ? 'Consider closely' : 'Keep monitoring'}</span>
+                              <div className="">
+                                <CardTitle className="text-xl">{condition.name}</CardTitle>
+                                <div className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+                                    <span>{index === 0 ? 'Primary signal' : index === 1 ? 'Consider closely' : 'Keep monitoring'}</span>
+                                  </div>
+                                </div>
+                                <CardDescription className="text-muted-foreground mt-2">{condition.description}</CardDescription>
                               </div>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -414,14 +409,14 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                               </DropdownMenu>
                             </div>
                           </CardHeader>
-                          <CardContent className="space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
-                            <p>{condition.explanation}</p>
-                            <div className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-neutral-100/70 px-4 py-3 text-xs uppercase tracking-[0.18em] text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800/60 dark:text-neutral-300">
+                          <CardContent className="gap-2 flex-col flex text-sm text-neutral-600 dark:text-neutral-300">
+                            <div className="flex items-center justify-between rounded-2xl border bg-muted px-4 py-3 text-xs uppercase ">
                               <span className="flex items-center gap-2">
                                 <Activity className="h-4 w-4" /> Severity trend
                               </span>
                               <span className="font-semibold text-neutral-700 dark:text-neutral-200">{index === 0 ? 'Elevated' : index === 1 ? 'Stable' : 'Mild'}</span>
                             </div>
+                            <p>{condition.explanation}</p>
                           </CardContent>
                           <CardFooter className="flex flex-wrap gap-2 pt-0">
                             <Button size="sm" variant="secondary" className="bg-neutral-900 text-neutral-50 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
@@ -441,79 +436,75 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                   <section className="space-y-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-900/80 text-neutral-100 shadow-inner dark:bg-neutral-100/10">
-                          <Pill className="h-5 w-5" />
-                        </span>
-                        <div className="space-y-1">
-                          <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">Potential Medications</h2>
-                          <p className="text-sm text-neutral-500 dark:text-neutral-400">Verify interactions and dosing with your clinician before proceeding.</p>
+                        <div className="flex h-11 w-11 items-center border justify-center rounded-2xl bg-card aspect-square">
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button size="icon" variant="ghost" type="button">
+                                <Pill className="min-h-5 min-w-5 text-blue-400" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-80 border">
+                              <div className="space-y-2 text-sm">
+                                <h4 className="font-semibold">Potential Medications</h4>
+                                <p>Pharmacological options aligned to the presented symptom profile. Verify interactions and dosage with a healthcare professional first.</p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/70 dark:text-neutral-400 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100">
-                          <Download className="mr-2 h-3.5 w-3.5" /> Export to pharmacy
-                        </Button>
-                        <HoverCard>
-                          <HoverCardTrigger asChild>
-                            <Button size="icon" variant="ghost" type="button" className="h-9 w-9 border border-neutral-700/60 text-neutral-300 hover:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-300">
-                              <IoInformationOutline className="h-4 w-4" />
-                            </Button>
-                          </HoverCardTrigger>
-                          <HoverCardContent className="w-80 border border-neutral-200 bg-neutral-100/95 text-neutral-800 backdrop-blur-xl dark:border-neutral-700 dark:bg-neutral-900/90 dark:text-neutral-200">
-                            <div className="space-y-2 text-sm">
-                              <h4 className="font-semibold text-neutral-900 dark:text-neutral-100">Potential Medications</h4>
-                              <p>Pharmacological options aligned to the presented symptom profile. Verify interactions and dosage with a healthcare professional first.</p>
-                            </div>
-                          </HoverCardContent>
-                        </HoverCard>
+                        <div className="">
+                          <h2 className="text-2xl font-semibold tracking-tight">Potential Medications</h2>
+                          <p className="text-sm text-muted-foreground line-clamp-1">Verify interactions and dosing with your clinician before proceeding.</p>
+                          <Button variant="outline" size="badge" className="text-xs">
+                            <Download className="!w-3 !h-3" /> Export to pharmacy
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                       {medicines.map((medicine, index) => (
                         <li key={index}>
                           <Card
-                            className="h-full border border-neutral-200/80 bg-white/90 transition hover:-translate-y-0.5 hover:border-neutral-400 hover:shadow-xl dark:border-neutral-800/80 dark:bg-neutral-900/80 dark:hover:border-neutral-600"
+                            className="h-full border border-neutral-200/80 bg-white/90 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-neutral-800/80 dark:bg-neutral-900/80 bg-blend-lighten dark:bg-blend-overlay"
                             style={{
                               backgroundImage: medicineGradients[index % medicineGradients.length],
-                              backgroundBlendMode: 'overlay',
                             }}
                           >
-                            <CardHeader className="space-y-3">
+                            <CardHeader className="">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="space-y-2">
                                   <CardTitle className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">{medicine.name}</CardTitle>
                                   <CardDescription className="text-neutral-600 dark:text-neutral-300">Commonly used for {medicine.commonUse}</CardDescription>
                                 </div>
-                                <Badge className="rounded-full bg-neutral-900 px-3 py-1 text-neutral-50 dark:bg-neutral-100 dark:text-neutral-900">Rx</Badge>
+                                {/* <Badge className="rounded-full bg-neutral-900 px-3 py-1 text-neutral-50 dark:bg-neutral-100 dark:text-neutral-900">Rx</Badge> */}
                               </div>
-                              <div className="flex flex-wrap gap-2 text-[0.65rem] uppercase tracking-[0.22em] text-neutral-500 dark:text-neutral-400">
-                                <span className="flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1 dark:border-neutral-700"><Stethoscope className="h-3 w-3" /> Consult provider</span>
-                                <span className="flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1 dark:border-neutral-700"><Activity className="h-3 w-3" /> Monitor vitals</span>
+                              <div className="flex flex-wrap gap-2 text-muted-foreground text-xs">
+                                <Button size={'badge'} variant={'outline'} className=""><Stethoscope className="h-3 w-3" /> Consult provider</Button>
+                                <Button size={'badge'} variant={'secondary'} className="text-muted-foreground"><Activity className="h-3 w-3" /> Monitor vitals</Button>
                               </div>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
+                              <div className="flex items-center justify-between rounded-2xl border bg-muted px-4 py-3 text-xs uppercase text-muted-foreground">
+                                <span className="flex items-center gap-2">
+                                  <Gauge className="h-4 w-4" /> Adherence outlook
+                                </span>
+                                <span className="font-semibold">{index === 0 ? 'High' : 'Moderate'}</span>
+                              </div>
                               <section className="flex items-start gap-3">
                                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-200/80 dark:bg-neutral-800/70">
                                   <Pill className="h-5 w-5 text-neutral-600 dark:text-neutral-300" />
                                 </div>
-                                <div className="space-y-2">
-                                  <span className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500 dark:text-neutral-400">Side effects</span>
-                                  <ul className="grid gap-1 text-sm">
+                                <div className="">
+                                  <span className="text-xs font-semibold uppercase">Side effects</span>
+                                  <ul className="grid text-sm mt-1">
                                     {medicine.sideEffects.map((effect, effectIndex) => (
                                       <li key={effectIndex} className="flex items-center gap-2">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-neutral-400/80 dark:bg-neutral-500/70" />
+                                        <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" />
                                         <span>{effect}</span>
                                       </li>
                                     ))}
                                   </ul>
                                 </div>
                               </section>
-                              <div className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-neutral-100/70 px-4 py-3 text-xs uppercase tracking-[0.18em] text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800/60 dark:text-neutral-300">
-                                <span className="flex items-center gap-2">
-                                  <Gauge className="h-4 w-4" /> Adherence outlook
-                                </span>
-                                <span className="font-semibold text-neutral-700 dark:text-neutral-200">{index === 0 ? 'High' : 'Moderate'}</span>
-                              </div>
                             </CardContent>
                             <CardFooter className="flex flex-wrap gap-2 pt-0">
                               <Button size="sm" variant="secondary" className="bg-neutral-900 text-neutral-50 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
@@ -571,34 +562,40 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                           return (
                             <li key={index}>
                               <Card
-                                className="h-full border border-neutral-200/80 bg-white/90 transition hover:-translate-y-0.5 hover:border-neutral-400 hover:shadow-xl dark:border-neutral-800/80 dark:bg-neutral-900/80 dark:hover:border-neutral-600"
+                                className="h-full border border-neutral-200/80 bg-white/90 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-neutral-800/80 dark:bg-neutral-900/80 bg-blend-lighten dark:bg-blend-overlay"
                                 style={{
                                   backgroundImage: helpGradients[index % helpGradients.length],
-                                  backgroundBlendMode: 'overlay',
                                 }}
                               >
-                                <CardHeader className="space-y-3">
+                                <CardHeader className="">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-center gap-3">
-                                      <div
-                                        className="relative h-14 w-14 rounded-full border border-neutral-200 bg-neutral-100/70 p-1 dark:border-neutral-700 dark:bg-neutral-900/40"
-                                        style={gaugeStyle(severityPercent, severityMeta.tone)}
-                                      >
-                                        <div className="absolute inset-[30%] flex flex-col items-center justify-center rounded-full bg-neutral-50/90 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-200">
-                                          <span>{severityPercent}%</span>
-                                          <span>{severityMeta.label}</span>
+                                      <div className='flex flex-col gap-1'>
+                                        <CardTitle className="text-lg leading-tight font-semibold mb-2">{item.title}</CardTitle>
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className="relative h-4 w-4 aspect-square rounded-full bg-muted"
+                                            style={gaugeStyle(severityPercent, severityMeta.tone)}
+                                          >
+                                          </div>
+                                          <span className='text-sm'>{severityPercent}% {severityMeta.label}</span>
                                         </div>
-                                      </div>
-                                      <div>
-                                        <CardTitle className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{item.title}</CardTitle>
-                                        <Badge variant="outline" className="mt-1 border-neutral-300 text-neutral-500 dark:border-neutral-700 dark:text-neutral-300">Priority</Badge>
+                                        <div className="flex items-center gap-2">
+                                          <InfoIcon className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+                                          <span className="text-sm text-muted-foreground">Contact doctor immediately</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <FlaskConical className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+                                          <span className="text-sm text-muted-foreground">Easily curable</span>
+                                        </div>
                                       </div>
                                     </div>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400 hover:bg-neutral-200/70 hover:text-neutral-700 dark:text-neutral-500 dark:hover:bg-neutral-800/70 dark:hover:text-neutral-100">
                                       <MoreHorizontal className="h-4 w-4" />
                                     </Button>
                                   </div>
-                                  <CardDescription className="text-neutral-600 dark:text-neutral-300">{item.explanation}</CardDescription>
+                                  <CardDescription className="text-neutral-600 dark:text-neutral-300">
+                                    {item.explanation}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
                                   <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
