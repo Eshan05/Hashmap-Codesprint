@@ -20,7 +20,7 @@ export default function MedicineSearchPage() {
 
   return (
     <section className="relative overflow-x-hidden flex flex-col font-inter min-h-svh">
-      <div className="w-full px-[1.15rem] py-8 lg:px-8 lg:py-10">
+      <div className="w-full px-[1.15rem] py-8 lg:px-8">
         <header className='relative flex items-center lg:mb-10 space-y-8'>
           <h1 className="shadow-heading text-5xl sm:text-6xl md:text-7xl">Medicine Finder</h1>
         </header>
