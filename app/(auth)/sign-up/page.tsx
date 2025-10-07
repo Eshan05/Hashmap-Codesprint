@@ -1,5 +1,6 @@
 import { Logo } from "@/components/auth/logo";
 import { SignUp } from "@/components/auth/sign-up";
+import { Suspense } from "react";
 
 export default function Page() {
 
@@ -9,7 +10,9 @@ export default function Page() {
         <Logo className="size-10" />
       </div>
       <div className="max-w-md w-full">
-        <SignUp />
+        <Suspense fallback={<div aria-hidden className="h-8" />}>
+          <SignUp />
+        </Suspense>
       </div>
     </div >
   );
