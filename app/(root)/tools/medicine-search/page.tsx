@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ModeToggle } from '@/components/mode-toggle';
 import dynamic from 'next/dynamic';
-import { GradientTop } from '@/components/gradientTop';
+import { GradientTop } from '@/components/gradient-top';
 import {
   Accordion,
   AccordionContent,

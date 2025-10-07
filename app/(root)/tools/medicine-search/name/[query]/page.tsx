@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import dbConnect from '@/utils/dbConnect';
+import dbConnect from '@/utils/db-conn';
 import MedicineSearch from '@/models/medicine-search';
 import { Medicine } from '../../[searchId]/page';
 

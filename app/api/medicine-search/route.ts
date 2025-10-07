@@ -1,6 +1,6 @@
 import { retryWithExponentialBackoff } from '@/lib/utils';
 import MedicineSearch from '@/models/medicine-search';
-import dbConnect from '@/utils/dbConnect';
+import dbConnect from '@/utils/db-conn';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';

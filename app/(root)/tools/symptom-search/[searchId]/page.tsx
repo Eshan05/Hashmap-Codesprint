@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import SymptomSearch from '@/models/symptom-search';
-import dbConnect from '@/utils/dbConnect';
+import dbConnect from '@/utils/db-conn';
 import { FlagIcon, InfoIcon } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { IoInformationOutline } from 'react-icons/io5';
