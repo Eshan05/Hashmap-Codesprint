@@ -24,7 +24,7 @@ import { baseURL, cookieDomain } from "@/utils/constants";
 const from = process.env.BETTER_AUTH_EMAIL || "delivered@resend.dev";
 const to = process.env.TEST_EMAIL || "";
 
-const client = new MongoClient("mongodb+srv://10crollno23gm_db_user:qbIdKcff1hoTI7F2@hashmap.isjlcxl.mongodb.net/");
+const client = new MongoClient(process.env.MONGODB_URI || "");
 const db = client.db();
 
 export const auth = betterAuth({
