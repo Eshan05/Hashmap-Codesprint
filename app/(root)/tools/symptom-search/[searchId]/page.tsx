@@ -51,28 +51,13 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
+import { Condition, Medicine, ReliefIdea, WhenToSeekHelp } from '@/types/symptom-search';
+import React from 'react';
 
 interface PageProps {
   params: {
     searchId: string;
   };
-}
-
-interface Condition {
-  name: string;
-  description: string;
-  explanation: string;
-}
-
-interface Medicine {
-  name: string;
-  commonUse: string;
-  sideEffects: string[];
-}
-
-interface SeekHelp {
-  title: string;
-  explanation: string;
 }
 
 type Timestamp = Date | string | number | undefined;
@@ -100,28 +85,29 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
     console.error("Error parsing medicines on frontend:", e);
   }
 
-  let seekHelpItems: SeekHelp[] = [];
+  let seekHelpItems: WhenToSeekHelp[] = [];
   try {
     seekHelpItems = JSON.parse(searchResult.whenToSeekHelp || "[]");
   } catch (e) {
     console.error("Error parsing whenToSeekHelp on frontend:", e);
   }
 
-  let finalVerdict = searchResult.finalVerdict;
+  let reliefIdeas: ReliefIdea[] = [];
   try {
-    const parsedVerdict = JSON.parse(searchResult.finalVerdict || '{}');
-    finalVerdict = parsedVerdict.finalVerdict || searchResult.finalVerdict;
+    reliefIdeas = JSON.parse(searchResult.reliefIdeas || "[]");
   } catch (e) {
-    console.error("Error parsing finalVerdict:", e);
+    console.error("Error parsing reliefIdeas on frontend:", e);
   }
 
-  let cumulativePrompt = searchResult.cumulativePrompt;
+  let quickChecklist: string[] = [];
   try {
-    const parsedPrompt = JSON.parse(searchResult.cumulativePrompt || '{}');
-    cumulativePrompt = parsedPrompt.problemSummary || searchResult.cumulativePrompt;
+    quickChecklist = JSON.parse(searchResult.quickChecklist || "[]");
   } catch (e) {
-    console.error("Error parsing cumulativePrompt:", e);
+    console.error("Error parsing quickChecklist on frontend:", e);
   }
+
+  let finalVerdict = searchResult.finalVerdict || '';
+  let cumulativePrompt = searchResult.cumulativePrompt || '';
 
   const createdAt: Timestamp = searchResult.createdAt;
   const updatedCopy = createdAt ? new Date(createdAt).toLocaleString() : 'Just now';
@@ -163,36 +149,17 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
     { tone: 'rgba(59, 130, 246, 0.75)', label: 'Monitor' },
   ];
 
-  const reliefIdeas = [
-    {
-      title: 'Hydration & Rest',
-      description: 'Sip water or electrolyte mix and rest briefly to observe symptom shifts before escalating.',
-      icon: Droplet,
-    },
-    {
-      title: 'Guided Breathing',
-      description: 'Use a 4-7-8 breathing cycle for two minutes to calm stress-linked flares.',
-      icon: Activity,
-    },
-    {
-      title: 'Warm Compress',
-      description: 'Apply a warm compress to localized discomfort for short-term relief and note reactions.',
-      icon: Thermometer,
-    },
+  const reliefIcons = [
+    Droplet,
+    Activity,
+    Thermometer
   ];
 
-  const quickChecklist = [
-    'Log onset time and symptom intensity',
-    'Note any recent triggers or exertion',
-    'Record current medications and dosages',
-  ];
-
-  const buildSymptomChips = (text: string) =>
-    text
-      .split(/[,.;]/)
-      .map((chunk) => chunk.trim())
-      .filter((chunk) => chunk.length > 0)
-      .slice(0, 3);
+  // const quickChecklist = [
+  //   'Log onset time and symptom intensity',
+  //   'Note any recent triggers or exertion',
+  //   'Record current medications and dosages',
+  // ];
 
   const gaugeStyle = (percent: number, tone: string) => ({
     backgroundImage: `conic-gradient(${tone} 0deg, ${tone} ${percent * 3.6}deg, rgba(220,220,220,0.16) ${percent * 3.6}deg)`,
@@ -636,10 +603,10 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-2 text-sm">
-                            {reliefIdeas.map(({ title, description, icon: IdeaIcon }, index) => (
+                            {reliefIdeas.map(({ title, description }, index) => (
                               <div key={index} className="flex items-start gap-3 rounded-2xl border p-2">
                                 <span className="flex h-9 w-9 items-center aspect-square justify-center rounded-xl bg-muted">
-                                  <IdeaIcon className="h-4 w-4" />
+                                  {React.createElement(reliefIcons[index % reliefIcons.length], { className: 'h-4 w-4' })}
                                 </span>
                                 <div className="space-y-1">
                                   <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">{title}</p>

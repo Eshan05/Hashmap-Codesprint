@@ -129,6 +129,8 @@ async function generateGeminiResponses(searchId: string, initialPrompt: string) 
           medicines: existingSearch.medicines,
           whenToSeekHelp: existingSearch.whenToSeekHelp,
           finalVerdict: existingSearch.finalVerdict,
+          quickChecklist: existingSearch.quickChecklist,
+          reliefIdeas: existingSearch.reliefIdeas,
           summaryHash,
         }
       );
@@ -144,7 +146,7 @@ async function generateGeminiResponses(searchId: string, initialPrompt: string) 
 
       1.  **potentialConditions**: List potential medical conditions, ordered from most likely to least likely. For each, provide: (Try for 2+)
           - name
-          - lookout factor (Eg. Primary signal, Consider closely, Keep monitoring or similar)
+          - lookoutFactor (Eg. Primary signal, Consider closely, Keep monitoring or similar)
           - description (concise)
           - explanation (why it matches)
           - severityTrend (e.g., Elevated, Stable, Mild)
@@ -240,6 +242,7 @@ async function generateGeminiResponses(searchId: string, initialPrompt: string) 
     );
 
     console.log(`[${searchId}] Step 4: Storing full analysis...`);
+    console.log("Full Analysis Response: ", fullAnalysisResult.response.text());
     const fullAnalysis = JSON.parse(fullAnalysisResult.response.text());
     await SymptomSearch.findOneAndUpdate(
       { searchId },

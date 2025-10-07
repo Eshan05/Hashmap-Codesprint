@@ -1,3 +1,4 @@
+import { Condition, Medicine, ReliefIdea, WhenToSeekHelp } from '@/types/symptom-search';
 import mongoose, { Schema, type Document, type Model } from 'mongoose';
 
 /**
@@ -8,50 +9,21 @@ import mongoose, { Schema, type Document, type Model } from 'mongoose';
  * use valid JSON strings where appropriate to simplify parsing on read.
  */
 
-interface Condition {
-  name: string;
-  description: string;
-  explanation: string;
-  severityTrend?: string;
-}
-
-interface Medicine {
-  name: string;
-  commonUse: string;
-  sideEffects: string[];
-  adherence?: string;
-}
-
-interface WhenToSeekHelp {
-  title: string;
-  explanation: string;
-  criticality?: string;
-  immediateSteps?: string[];
-  curability?: string;
-}
-
-interface ReliefIdea {
-  title: string;
-  description: string;
-  icon?: string;
-}
-
 interface ISymptomSearch extends Document {
   searchId: string; // Unique ID for the search
   user: mongoose.Types.ObjectId; // Reference to the user who made the search
   symptoms: string;
   pastContext?: string | null;
   otherInfo?: string | null;
-  title: string; // Auto-generated title by LLM
-  cumulativePrompt: string; // JSON string or plain string
-  potentialConditions: string; // JSON string (array) stored as string by route.ts
-  medicines: string; // JSON string (array) stored as string by route.ts
-  whenToSeekHelp: string; // JSON string (array) stored as string by route.ts
+  title: string;
+  cumulativePrompt: string;
+  potentialConditions: string;
+  medicines: string;
+  whenToSeekHelp: string;
   // Additional UI-oriented fields that page.tsx expects
-  quickChecklist?: string; // JSON string (array of strings)
-  reliefIdeas?: string; // JSON string (array of {title, description, icon?})
-  // finalVerdict can be plain string or JSON-encoded
-  finalVerdict: string; // string (possibly JSON-encoded)
+  quickChecklist: string;
+  reliefIdeas: string;
+  finalVerdict: string;
   summaryHash?: string;
   duration?: number;
   createdAt?: Date;
