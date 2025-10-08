@@ -135,7 +135,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.CHEST,
     symptoms: allChestSymptoms,
     subCategories: {
-      UPPER_CHEST: { displayName: chestSubCats.UPPERCHEST, symptoms: upperChestSymptoms },
+      UPPERCHEST: { displayName: chestSubCats.UPPERCHEST, symptoms: upperChestSymptoms },
       STERNUM: { displayName: chestSubCats.STERNUM, symptoms: sternumSymptoms },
       BREAST: { displayName: chestSubCats.BREAST, symptoms: breastSymptoms },
     },
@@ -146,7 +146,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     subCategories: {
       SHOULDER: { displayName: armSubCats.SHOULDER, symptoms: shoulderSymptoms },
       ARMPIT: { displayName: armSubCats.ARMPIT, symptoms: armpitSymptoms },
-      UPPER_ARM: { displayName: armSubCats.UPPERARM, symptoms: upperArmSymptoms },
+      UPPERARM: { displayName: armSubCats.UPPERARM, symptoms: upperArmSymptoms },
       ELBOW: { displayName: armSubCats.ELBOW, symptoms: elbowsSymptoms },
       FOREARM: { displayName: armSubCats.FOREARM, symptoms: forearmSymptoms },
       WRIST: { displayName: armSubCats.WRIST, symptoms: wristSymptoms },
@@ -158,29 +158,28 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.ABDOMEN,
     symptoms: allAbdomenSymptoms,
     subCategories: {
-      UPPER_ABDOMEN: { displayName: abdomenSubCats.UPPERABDOMEN, symptoms: upperAbdomenSymptoms },
+      UPPERABDOMEN: { displayName: abdomenSubCats.UPPERABDOMEN, symptoms: upperAbdomenSymptoms },
       EPIGASTRIC: { displayName: abdomenSubCats.EPIGASTRIC, symptoms: epigastricSymptoms },
-      LOWER_ABDOMEN: { displayName: abdomenSubCats.LOWERABDOMEN, symptoms: lowerAbdomenSymptoms },
+      LOWERABDOMEN: { displayName: abdomenSubCats.LOWERABDOMEN, symptoms: lowerAbdomenSymptoms },
     },
   },
   PELVIS: {
     displayName: topLevelSymptoms.PELVIS,
     symptoms: allPelvicSymptoms,
     subCategories: {
-      HIP: { displayName: pelvicSubCats.PELVICHIP, symptoms: pelvicHipSymptoms },
+      PELVICHIP: { displayName: pelvicSubCats.PELVICHIP, symptoms: pelvicHipSymptoms },
       GROIN: { displayName: pelvicSubCats.GROIN, symptoms: groinSymptoms },
       SUPRAPUBIC: { displayName: pelvicSubCats.SUPRAPUBIC, symptoms: suprapubicSymptoms },
-      GENITAL: { displayName: pelvicSubCats.GENITALS, symptoms: genitalSymptoms },
+      GENITALS: { displayName: pelvicSubCats.GENITALS, symptoms: genitalSymptoms },
     },
   },
   BACK: {
     displayName: topLevelSymptoms.BACK,
     symptoms: allBackSymptoms,
     subCategories: {
-      UPPER_BACK: { displayName: backSubCats.UPPERBACK, symptoms: upperBackSymptoms },
-      LOWER_BACK: { displayName: backSubCats.LOWERBACK, symptoms: lowerBackSymptoms },
+      UPPERBACK: { displayName: backSubCats.UPPERBACK, symptoms: upperBackSymptoms },
+      LOWERBACK: { displayName: backSubCats.LOWERBACK, symptoms: lowerBackSymptoms },
       FLANK: { displayName: backSubCats.FLANK, symptoms: flankSymptoms },
-      TAILBONE: { displayName: backSubCats.TAILBONE, symptoms: tailboneSymptoms },
     },
   },
   BUTTOCKS: {
@@ -195,7 +194,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.LEGS,
     symptoms: allLegsSymptoms,
     subCategories: {
-      THIGH: { displayName: legsSubCats.THIGHS, symptoms: thighSymptoms },
+      THIGHS: { displayName: legsSubCats.THIGHS, symptoms: thighSymptoms },
       HAMSTRING: { displayName: legsSubCats.HAMSTRING, symptoms: hamstringSymptoms },
       KNEE: { displayName: legsSubCats.KNEE, symptoms: kneeSymptoms },
       POPLITEAL: { displayName: legsSubCats.POPLITEAL, symptoms: poplitealSymptoms },

@@ -1,31 +1,29 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { AutosizeTextarea } from '@/components/ui/autoresize-textarea';
-import { Button } from '@/components/ui/button';
-import { IoInformationOutline } from "react-icons/io5";
-import { ListOrderedIcon, TextCursorInputIcon } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
-import { useSymptomStore } from '@/lib/store/symptom-select-store'
 import { SymptomDrawer } from '@/app/(root)/tools/symptom-search/_components/symptom-drawer'
+import { AutosizeTextarea } from '@/components/ui/autoresize-textarea'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import { Label } from '@/components/ui/label'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useSymptomStore } from '@/lib/store/symptom-select-store'
+import { ListOrderedIcon, TextCursorInputIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { IoInformationOutline } from "react-icons/io5"
 
 const FormSchema = z.object({
   symptoms: z.string(),
