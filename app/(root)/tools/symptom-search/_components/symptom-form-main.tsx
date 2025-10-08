@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AutosizeTextarea } from '@/components/ui/autoresize-textarea';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
+import { useSymptomStore } from '@/lib/store/symptom-select-store'
+import { SymptomDrawer } from '@/app/(root)/tools/symptom-search/_components/symptom-drawer'
 
 const FormSchema = z.object({
   symptoms: z.string(),
@@ -44,6 +46,15 @@ export default function SymptomFormMain() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  const selectedSymptoms = useSymptomStore((state) => state.selectedSymptoms);
+
+  useEffect(() => {
+    const symptomsArray = Array.from(selectedSymptoms);
+    // This creates a clean, comma-separated string for your NLP model
+    const symptomString = symptomsArray.join(', ');
+    form.setValue('symptoms', symptomString, { shouldValidate: true });
+  }, [selectedSymptoms, form]);
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setLoading(true);
@@ -218,7 +229,7 @@ export default function SymptomFormMain() {
               disabled={loading}>
               {loading ? 'Forming Response...' : 'Analyze'}
             </Button>
-            <Drawer direction='left' shouldScaleBackground setBackgroundColorOnScale={false}>
+            {/* <Drawer direction='left' shouldScaleBackground setBackgroundColorOnScale={false}>
               <DrawerTrigger asChild>
                 <Button type="button" variant={'secondary'}>
                   List of Symptoms
@@ -233,11 +244,12 @@ export default function SymptomFormMain() {
                     </DrawerDescription>
                   </DrawerHeader>
                   <div className="my-4 p-1">
-
+                    
                   </div>
                 </div>
               </DrawerContent>
-            </Drawer>
+            </Drawer> */}
+            <SymptomDrawer />
           </div>
           <div className='flex items-center space-x-2'>
             <Checkbox id="data-share" defaultChecked />

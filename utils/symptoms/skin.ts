@@ -279,7 +279,6 @@ export const skinSymptoms = [
   'skin feels warm',
   'skin hurts',
   'skin infection',
-  'skin infection',
   'skin infiltration',
   'skin lesion margin undulation',
   'skin lesion, fragility',

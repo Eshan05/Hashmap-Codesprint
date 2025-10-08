@@ -6,7 +6,7 @@ export const headSubCats = {
   NOSE: 'Nose Symptoms',
   EARS: 'Ear Symptoms',
   FACE: 'Face Symptoms',
-  THROAT: 'Throat Symptoms',
+  MOUTH: 'Mouth Symptoms',
   JAW: 'Jaw Symptoms',
 }
 

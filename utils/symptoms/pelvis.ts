@@ -1,6 +1,6 @@
 export const pelvicSubCats = {
   ALLPELVIC: 'All Pelvic Symptoms',
-  HIP: 'Hip Symptoms',
+  PELVICHIP: 'Hip Symptoms',
   GROIN: 'Groin Symptoms',
   SUPRAPUBIC: 'Suprapubic Symptoms',
   GENITALS: 'Genital Symptoms',
