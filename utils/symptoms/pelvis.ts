@@ -1,4 +1,4 @@
-export const abdomenSubCats = {
+export const pelvicSubCats = {
   ALLPELVIC: 'All Pelvic Symptoms',
   HIP: 'Hip Symptoms',
   GROIN: 'Groin Symptoms',
@@ -246,3 +246,4 @@ export const allPelvicSymptoms = [
   "weak pee stream",
   "wet dream"
 ]
+
