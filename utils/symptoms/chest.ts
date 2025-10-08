@@ -1,4 +1,4 @@
-export const headSubCats = {
+export const chestSubCats = {
   ALLCHEST: 'All Chest Symptoms',
   UPPERCHEST: 'Upper Chest Symptoms',
   STERNUM: 'Sternum Symptoms',

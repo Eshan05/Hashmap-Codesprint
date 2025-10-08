@@ -13,7 +13,7 @@ export const topLevelSymptoms = {
   LEGS: 'Legs Symptoms',
 }
 
-const generalSymptoms = [
+export const generalSymptoms = [
   'absence seizure',
   'anxiety',
   'arm or leg is weak',

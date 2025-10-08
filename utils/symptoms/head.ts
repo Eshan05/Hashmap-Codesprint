@@ -10,7 +10,7 @@ export const headSubCats = {
   JAW: 'Jaw Symptoms',
 }
 
-const allHeadSymptoms = [
+export const allHeadSymptoms = [
   'anosognosia',
   'can\'t handle noise',
   'can\'t keep my head up',
@@ -81,7 +81,7 @@ const allHeadSymptoms = [
   'weak muscles in face'
 ]
 
-const scalpSymptoms = [
+export const scalpSymptoms = [
   'baby\'s soft spot is bulging',
   'baby\'s soft spot is still open',
   'baby\'s soft spot is sunken',
@@ -153,7 +153,7 @@ const scalpSymptoms = [
   'widespread loss of hair',
 ]
 
-const foreheadSymptoms = [
+export const foreheadSymptoms = [
   'can\'t pay attention',
   'confused thinking and reduced awareness of your environment',
   'enlarged vein on forehead',
@@ -173,7 +173,7 @@ const foreheadSymptoms = [
   'wrinkled forehead'
 ]
 
-const eyesSymptoms = [
+export const eyesSymptoms = [
   'argyll-robertson pupil',
   'astigmatism',
   'black eye',
@@ -436,7 +436,7 @@ const eyesSymptoms = [
   'yellow pea-sized lump(s) on eyelid'
 ]
 
-const noseSymptoms = [
+export const noseSymptoms = [
   'along smile or laugh lines are red',
   'blockage in nose',
   'bloody nose',
@@ -512,7 +512,7 @@ const noseSymptoms = [
   'wide nose'
 ]
 
-const earsSymptoms = [
+export const earsSymptoms = [
   'big ears',
   'blocked ear',
   'bony area behind ear is infected with pus',
@@ -583,7 +583,7 @@ const earsSymptoms = [
   'whole ear swollen ear'
 ]
 
-const faceSymptoms = [
+export const faceSymptoms = [
   'can\'t feel temperature on face',
   'can\'t move my face',
   'can\'t move my face well',
@@ -660,7 +660,7 @@ const faceSymptoms = [
   'winking caused by jaw movement'
 ]
 
-const mouthSymptoms = [
+export const mouthSymptoms = [
   'area of mucus on tongue',
   'area of mucus on tongue',
   'area under tongue is swollen',
@@ -897,7 +897,7 @@ const mouthSymptoms = [
   'yellow skin sore(s) on uvul'
 ]
 
-const jawSymptoms = [
+export const jawSymptoms = [
   'area under chin is hard',
   'beard lice',
   'cheek and jaw swollen',

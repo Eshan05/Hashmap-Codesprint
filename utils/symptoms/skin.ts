@@ -1,4 +1,4 @@
-const skinSymptoms = [
+export const skinSymptoms = [
   'abnormal skin',
   'acne-like rash in one area',
   'air under the skin',
