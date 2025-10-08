@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -36,6 +37,12 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     if (item.type === 'symptom') {
       handleSymptomToggle(item.key);
     } else {
+      // If selecting from partial command (no space), complete the command
+      if (search.startsWith('/') && !search.includes(' ')) {
+        const key = item.categoryKey || item.key;
+        setSearch(`/${key.toLowerCase()} `);
+        return;
+      }
       // When selecting a category or sub-category, we must build the full path.
       const params: Record<string, string | null> = { category: item.categoryKey || null };
       if (item.subCategoryKey) {
@@ -195,7 +202,7 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
   const activePanel = getActivePanel();
 
   const filteredResults = useMemo(() => {
-    if (!search) return { symptoms: [], categories: [] };
+    if (!search) return { symptoms: [], categories: [], scope: '', subScope: '' };
     const query = search.toLowerCase()
 
     if (query === '/') {
@@ -203,36 +210,89 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
       return {
         symptoms: [],
         categories,
+        scope: '',
+        subScope: '',
       };
     }
 
     let scope = '';
+    let subScope = '';
     let sQuery = query;
 
     // Handle scoped search ("/legs pain")
     if (search.startsWith('/')) {
       const parts = search.split(' ');
       const command = parts[0].substring(1).toLowerCase();
-      // Find a category key that matches the command
-      const matchedCategoryKey = Object.keys(structuredSymptoms).find(key => key.toLowerCase() === command);
-      if (matchedCategoryKey) {
-        scope = matchedCategoryKey;
-        sQuery = parts.slice(1).join(' ').toLowerCase();
+      if (parts.length === 1) {
+        // No space, show matching categories
+        const matchingCategories = Object.keys(structuredSymptoms).filter(key =>
+          key.toLowerCase().startsWith(command) || structuredSymptoms[key].displayName.toLowerCase().includes(command)
+        );
+        const matchingSubs: string[] = [];
+        for (const catKey of Object.keys(structuredSymptoms)) {
+          if (structuredSymptoms[catKey].subCategories) {
+            Object.keys(structuredSymptoms[catKey].subCategories!).forEach(subKey => {
+              if (subKey.toLowerCase().startsWith(command) || structuredSymptoms[catKey].subCategories![subKey].displayName.toLowerCase().includes(command)) {
+                matchingSubs.push(subKey);
+              }
+            });
+          }
+        }
+        const categories = allSearchableItems.filter(item =>
+          (item.type === 'category' && matchingCategories.includes(item.key)) ||
+          (item.type === 'subCategory' && matchingSubs.includes(item.key))
+        );
+        return {
+          symptoms: [],
+          categories,
+          scope: '',
+          subScope: '',
+        };
+      } else {
+        // Has space, find exact match for scope
+        let matchedCategoryKey = Object.keys(structuredSymptoms).find(key => key.toLowerCase() === command.toLowerCase());
+        let matchedSubKey = '';
+        if (!matchedCategoryKey) {
+          // Check if it's a subCategory key
+          for (const catKey of Object.keys(structuredSymptoms)) {
+            if (structuredSymptoms[catKey].subCategories) {
+              const subKey = Object.keys(structuredSymptoms[catKey].subCategories!).find(sub => sub.toLowerCase() === command.toLowerCase());
+              if (subKey) {
+                matchedCategoryKey = catKey;
+                matchedSubKey = subKey;
+                break;
+              }
+            }
+          }
+        }
+        if (matchedCategoryKey) {
+          scope = matchedCategoryKey;
+          subScope = matchedSubKey;
+          sQuery = parts.slice(1).join(' ').toLowerCase();
+        }
       }
     }
 
     if (!sQuery) {
       // If only a scope is typed , show all symptoms for that scope
       if (scope) {
-        const symptoms = allSearchableItems.filter(item => item.type === 'symptom' && item.categoryKey === scope);
-        return { symptoms, categories: [] };
+        let symptoms;
+        if (subScope) {
+          symptoms = allSearchableItems.filter(item => item.type === 'symptom' && item.categoryKey === scope && item.subCategoryKey === subScope);
+        } else {
+          symptoms = allSearchableItems.filter(item => item.type === 'symptom' && item.categoryKey === scope);
+        }
+        return { symptoms, categories: [], scope, subScope };
       }
-      return { symptoms: [], categories: [] };
+      return { symptoms: [], categories: [], scope: '', subScope: '' };
     }
 
     const results = allSearchableItems.filter(item => {
       const isMatch = item.displayName.toLowerCase().includes(sQuery);
       if (scope) {
+        if (subScope) {
+          return isMatch && item.categoryKey === scope && item.subCategoryKey === subScope;
+        }
         return isMatch && item.categoryKey === scope;
       }
       return isMatch;
@@ -241,20 +301,30 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     return {
       symptoms: results.filter(item => item.type === 'symptom'),
       categories: results.filter(item => item.type !== 'symptom'),
+      scope,
+      subScope,
     };
   }, [search]);
 
   return (
     <div className="w-full">
-      {/* {activePanel === 'main' && renderMainPanel()}
-      {activePanel === 'category' && renderCategoryPanel()}
-      {activePanel === 'symptoms' && renderSymptomPanel()} */}
       <Command shouldFilter={false} className="relative rounded-lg border bg-background overflow-visible">
-        <CommandInput
-          placeholder="Type a command or search..."
-          value={search}
-          onValueChange={setSearch}
-        />
+        <div className='flex-center-2 relative'>
+          {filteredResults.scope && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              <Badge variant="secondary">
+                {(filteredResults.subScope
+                  ? structuredSymptoms[filteredResults.scope].subCategories![filteredResults.subScope].displayName
+                  : structuredSymptoms[filteredResults.scope].displayName).replace(/ symptoms$/i, '')}
+              </Badge>
+            </div>
+          )}
+          <CommandInput
+            placeholder={filteredResults.scope ? "Search within category..." : "Type a command or search..."}
+            value={search}
+            onValueChange={setSearch}
+          />
+        </div>
         {search && (
           <CommandList className="absolute top-11 w-full rounded-md border bg-background shadow-lg z-10">
             <CommandEmpty>No results found. Searched for {search}.<br /> {filteredResults.categories.length} categories, {filteredResults.symptoms.length} symptoms</CommandEmpty>
