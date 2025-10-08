@@ -11,7 +11,7 @@ import { categoryIcons } from '@/utils/symptoms/icons';
 import { allSearchableItems, SearchableItem } from '@/utils/symptoms/search-data';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface SymptomSelectorProps {
   category: string | null;
@@ -39,13 +39,15 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     } else {
       // If selecting from partial command (no space), complete the command
       if (search.startsWith('/') && !search.includes(' ')) {
-        const key = item.categoryKey || item.key;
+        const key = item.subCategoryKey ?? item.key ?? item.categoryKey;
         setSearch(`/${key.toLowerCase()} `);
         return;
       }
       // When selecting a category or sub-category, we must build the full path.
       const params: Record<string, string | null> = { category: item.categoryKey || null };
-      if (item.subCategoryKey) {
+      if (item.type === 'subCategory') {
+        params.subCategory = item.key;
+      } else if (item.subCategoryKey) {
         params.subCategory = item.subCategoryKey;
       } else if (!structuredSymptoms[item.categoryKey!]?.subCategories) {
         // If it's a category with no subs (like Neck), set subCategory to the same key.
@@ -119,14 +121,14 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
 
     return (
       <div>
-        <Button variant="ghost" onClick={goBack} className="mb-2 w-full justify-start">
+        <Button variant="ghost" onClick={goBack} className="mb-2 w-full hidden justify-start">
           <ArrowLeft className="h-4 w-4 mr-2" /> All Categories
         </Button>
-        <div className="flex items-center gap-3 mb-4 px-2">
+        <Button variant={'ghost'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
           {IconComponent && <IconComponent className="size-5 shrink-0 text-muted-foreground" />}
           <h3 className="font-semibold text-xl leading-6">{displayName}</h3>
-        </div>
-        <div className="space-y-2">
+        </Button>
+        <div className="space-y-1 mt-1">
           {Object.entries(subCategories!).map(([key, data]) => (
             <Button variant={'ghost'} key={key} onClick={() => handleSubCategoryClick(key)} className="w-full text-lg leading-6 flex items-center justify-between p-2 rounded-md hover:bg-accent">
               <span>{data.displayName}</span>
@@ -167,12 +169,16 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     }
 
     if (symptomsToList.length === 0) return <div>No symptoms found.</div>;
+    const IconComponent = category ? categoryIcons[category] : undefined;
     return (
       <div>
         <Button variant="ghost" onClick={goBack} className="mb-2 w-full justify-start">
           <ArrowLeft className="h-4 w-4 mr-2" /> {backButtonText}
         </Button>
-        <h3 className="font-semibold mb-4 px-2">{title}</h3>
+        <Button variant={'ghost'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
+          {IconComponent && <IconComponent className="size-5 shrink-0 text-muted-foreground" />}
+          <h3 className="font-semibold text-xl leading-6">{title}</h3>
+        </Button>
         <div className="space-y-1">
           {symptomsToList.map((symptom) => (
             <div key={symptom} className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent transition-colors">
@@ -306,6 +312,18 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     };
   }, [search]);
 
+  useEffect(() => {
+    if (filteredResults.scope) {
+      const params: Record<string, string | null> = { category: filteredResults.scope };
+      if (filteredResults.subScope) {
+        params.subCategory = filteredResults.subScope;
+      } else if (!structuredSymptoms[filteredResults.scope]?.subCategories) {
+        params.subCategory = filteredResults.scope;
+      }
+      navigate(params);
+    }
+  }, [filteredResults.scope, filteredResults.subScope]);
+
   return (
     <div className="w-full">
       <Command shouldFilter={false} className="relative rounded-lg border bg-background overflow-visible">
@@ -357,7 +375,6 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
         )}
       </Command>
 
-      {/* The panel navigation is now rendered separately and is always present underneath */}
       <div className="mt-4">
         {{
           main: renderMainPanel(),
