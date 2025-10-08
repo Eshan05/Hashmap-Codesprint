@@ -206,5 +206,5 @@ const generalSymptoms = [
   'white spots on nail',
   'worse in the morning',
   'worse with activity',
-  'yellow material under nai'
+  'yellow material under nail'
 ]
