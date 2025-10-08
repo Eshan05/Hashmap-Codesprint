@@ -191,9 +191,11 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                         New assessment
                       </Link>
                     </Button>
+                    {/* // TODO: Implement similar conditions check */}
                     <Button size="sm" variant="secondary" className="bg-neutral-800 text-neutral-100 hover:bg-neutral-700">
                       <Stethoscope className="h-4 w-4" /> Check similar conditions
                     </Button>
+                    {/* // TODO: Add to profile functionality */}
                     <Button size="sm" variant="outline" className="dark">
                       <Plus className="h-4 w-4" /> Add to profile
                     </Button>
@@ -233,12 +235,15 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-52">
                           <DropdownMenuItem asChild>
+                            {/* // TODO: Implement query parameters or some other way to preserve state when redirected and auto-fill inputd */}
                             <Link href="/symptom-search">Edit original submission</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem className="gap-2">
+                            {/* // TODO: Think of how share can be implemented */}
                             <Share2 className="h-4 w-4" /> Share report
                           </DropdownMenuItem>
                           <DropdownMenuItem className="gap-2">
+                            {/* // TODO: Download as PDF in few styles */}
                             <Download className="h-4 w-4" /> Download snapshot
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -364,12 +369,11 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem className="gap-2">
+                                    {/* // TODO: Make a bookmarks table and implement this */}
                                     <Bookmark className="h-4 w-4" /> Bookmark insight
                                   </DropdownMenuItem>
                                   <DropdownMenuItem className="gap-2">
-                                    <Share2 className="h-4 w-4" /> Share with clinician
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="gap-2">
+                                    {/* // TODO: Think of how to do this */}
                                     <Plus className="h-4 w-4" /> Add to care plan
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -386,9 +390,11 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                             <p>{condition.explanation}</p>
                           </CardContent>
                           <CardFooter className="flex flex-wrap gap-2 pt-0">
+                            {/* // TODO: Learn more will go to condition details page (Pre-made for all. Not separately made for each user) */}
                             <Button size="sm" variant="secondary" className="bg-neutral-900 text-neutral-50 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
                               <ArrowRight className="h-4 w-4" /> Learn more
                             </Button>
+                            {/* // TODO: Same route as above just with a query parameter */}
                             <Button size="sm" variant="outline" className="border-neutral-300 text-neutral-600 hover:bg-neutral-200/80 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800/70">
                               <Pill className="h-4 w-4" /> Related treatments
                             </Button>
@@ -422,6 +428,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                           <h2 className="text-2xl font-semibold tracking-tight">Potential Medications</h2>
                           <p className="text-sm text-muted-foreground line-clamp-1">Verify interactions and dosing with your clinician before proceeding.</p>
                           <Button variant="outline" size="badge" className="text-xs">
+                            {/* // TODO: Like care plan but differently categorized */}
                             <Download className="!w-3 !h-3" /> Export to pharmacy
                           </Button>
                         </div>
@@ -445,7 +452,9 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                 {/* <Badge className="rounded-full bg-neutral-900 px-3 py-1 text-neutral-50 dark:bg-neutral-100 dark:text-neutral-900">Rx</Badge> */}
                               </div>
                               <div className="flex flex-wrap gap-2 text-muted-foreground text-xs">
+                                {/* // TODO: Pull up a dialog/drawer maybe */}
                                 <Button size={'badge'} variant={'outline'} className=""><Stethoscope className="h-3 w-3" /> Consult provider</Button>
+                                {/* // TODO: Not possible, have to replace with some other button */}
                                 <Button size={'badge'} variant={'secondary'} className="text-muted-foreground"><Activity className="h-3 w-3" /> Monitor vitals</Button>
                               </div>
                             </CardHeader>
@@ -461,6 +470,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                   <Pill className="h-5 w-5 text-neutral-600 dark:text-neutral-300" />
                                 </div>
                                 <div className="">
+                                  {/* // TODO: Maybe make each a link to condition page? Like /condition/${effect} */}
                                   <span className="text-xs font-semibold uppercase">Side effects</span>
                                   <ul className="grid text-sm mt-1">
                                     {medicine.sideEffects.map((effect, effectIndex) => (
@@ -474,9 +484,11 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                               </section>
                             </CardContent>
                             <CardFooter className="flex flex-wrap gap-2 pt-0">
+                              {/* // TODO: Make each a link to medication page by name */}
                               <Button size="sm" variant="secondary" className="bg-neutral-900 text-neutral-50 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
                                 <Stethoscope className="h-4 w-4" /> Learn more
                               </Button>
+                              {/* // TODO: Care plan, same as dropdown */}
                               <Button size="sm" variant="outline" className="border-neutral-300 text-neutral-600 hover:bg-neutral-200/80 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800/70">
                                 Save to regimen
                               </Button>
@@ -569,6 +581,7 @@ export default async function SymptomSearchResultPage({ params }: PageProps) {
                                   </p>
                                 </CardContent>
                                 <CardFooter className="flex flex-wrap items-center justify-between gap-2 pt-0 text-xs text-neutral-500 dark:text-neutral-400">
+                                  {/* // TODO: Same drawer/dialog thing as medication */}
                                   <span className="flex items-center gap-2">
                                     <Phone className="h-4 w-4" /> Contact provider immediately
                                   </span>
