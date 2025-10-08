@@ -9,7 +9,7 @@ import { useSymptomStore } from '@/lib/store/symptom-select-store';
 import { allSymptoms, structuredSymptoms, topLevelSymptoms } from '@/utils/symptoms';
 import { categoryIcons } from '@/utils/symptoms/icons';
 import { allSearchableItems, SearchableItem } from '@/utils/symptoms/search-data';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight, XIcon } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -24,6 +24,8 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
   const searchParams = useSearchParams();
   const { addSymptom, removeSymptom, isSymptomSelected } = useSymptomStore();
   const [search, setSearch] = useState('');
+  const selectedSymptoms = useSymptomStore((state) => state.selectedSymptoms);
+  const selectedArray = useMemo(() => Array.from(selectedSymptoms), [selectedSymptoms]);
 
   const handleSymptomToggle = (symptom: string) => {
     if (isSymptomSelected(symptom)) {
@@ -124,7 +126,7 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
         <Button variant="ghost" onClick={goBack} className="mb-2 w-full hidden justify-start">
           <ArrowLeft className="h-4 w-4 mr-2" /> All Categories
         </Button>
-        <Button variant={'ghost'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
+        <Button variant={'default'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
           {IconComponent && <IconComponent className="size-5 shrink-0 text-muted-foreground" />}
           <h3 className="font-semibold text-xl leading-6">{displayName}</h3>
         </Button>
@@ -172,10 +174,10 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     const IconComponent = category ? categoryIcons[category] : undefined;
     return (
       <div>
-        <Button variant="ghost" onClick={goBack} className="mb-2 w-full justify-start">
+        <Button variant="ghost" onClick={goBack} className="mb-2 w-full hidden justify-start">
           <ArrowLeft className="h-4 w-4 mr-2" /> {backButtonText}
         </Button>
-        <Button variant={'ghost'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
+        <Button variant={'default'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
           {IconComponent && <IconComponent className="size-5 shrink-0 text-muted-foreground" />}
           <h3 className="font-semibold text-xl leading-6">{title}</h3>
         </Button>
@@ -374,6 +376,29 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
           </CommandList>
         )}
       </Command>
+
+      {/* Selected symptoms quick-list */}
+      {selectedArray.length > 0 && (
+        <div className="mt-4">
+          <div className="border-t my-2" />
+          <div className="space-y-2">
+            {selectedArray.map(symptom => {
+              const item = allSearchableItems.find(i => i.type === 'symptom' && i.key === symptom);
+              return (
+                <div key={symptom} className="flex items-center justify-between p-2 rounded-md hover:bg-accent">
+                  <div className="flex flex-col gap-0">
+                    <span className="font-medium text-sm capitalize">{symptom.replace(/_/g, ' ')}</span>
+                    <span className="text-xs text-muted-foreground">{item?.path || ''}</span>
+                  </div>
+                  <Button variant="ghost" onClick={() => removeSymptom(symptom)} className="ml-4">
+                    <XIcon />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="mt-4">
         {{
