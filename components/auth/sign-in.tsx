@@ -103,7 +103,7 @@ export default function SignIn() {
             <div className="relative w-full">
               <Input
                 id="password"
-                type="password"
+                type={isVisible ? "text" : "password"}
                 placeholder="Your password"
                 autoComplete="current-password webauthn"
                 value={password}

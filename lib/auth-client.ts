@@ -11,6 +11,7 @@ import {
 import { createAuthClient } from "better-auth/react";
 import { toast } from "sonner";
 export const authClient = createAuthClient({
+  // baseURL: process.env.BETTER_AUTH_URL || "http://192.168.1.4:3000",
   baseURL: "http://localhost:3000",
   plugins: [
     twoFactorClient({

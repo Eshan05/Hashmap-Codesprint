@@ -23,6 +23,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 
 const FormSchema = z.object({
   symptoms: z.string(),
@@ -217,9 +218,26 @@ export default function SymptomFormMain() {
               disabled={loading}>
               {loading ? 'Forming Response...' : 'Analyze'}
             </Button>
-            <Button type="button" variant={'secondary'}>
-              List of Symptoms
-            </Button>
+            <Drawer direction='left' shouldScaleBackground setBackgroundColorOnScale={false}>
+              <DrawerTrigger asChild>
+                <Button type="button" variant={'secondary'}>
+                  List of Symptoms
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className='max-w-sm'>
+                <div className="mx-auto w-full max-w-sm py-4">
+                  <DrawerHeader>
+                    <DrawerTitle className='text-lg font-semibold'>Known Symptoms List</DrawerTitle>
+                    <DrawerDescription className='text-sm text-muted-foreground'>
+                      Here is a list of common symptoms you can choose from when using the symptom list input mode.
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  <div className="my-4 p-1">
+
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
           <div className='flex items-center space-x-2'>
             <Checkbox id="data-share" defaultChecked />
