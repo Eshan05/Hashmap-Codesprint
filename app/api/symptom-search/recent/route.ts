@@ -8,7 +8,7 @@ export async function GET() {
 
     const searches = await SymptomSearch.find({})
       .sort({ createdAt: -1 })
-      .limit(5)
+      // .limit(5)
       .lean()
       .select('searchId title symptoms createdAt');
 

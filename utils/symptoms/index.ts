@@ -117,6 +117,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.HEAD,
     symptoms: allHeadSymptoms,
     subCategories: {
+      ALLHEAD: { displayName: 'More Head Symptoms', symptoms: allHeadSymptoms },
       SCALP: { displayName: headSubCats.SCALP, symptoms: scalpSymptoms },
       FOREHEAD: { displayName: headSubCats.FOREHEAD, symptoms: foreheadSymptoms },
       EYES: { displayName: headSubCats.EYES, symptoms: eyesSymptoms },
@@ -135,6 +136,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.CHEST,
     symptoms: allChestSymptoms,
     subCategories: {
+      ALLCHEST: { displayName: 'More Chest Symptoms', symptoms: allChestSymptoms },
       UPPERCHEST: { displayName: chestSubCats.UPPERCHEST, symptoms: upperChestSymptoms },
       STERNUM: { displayName: chestSubCats.STERNUM, symptoms: sternumSymptoms },
       BREAST: { displayName: chestSubCats.BREAST, symptoms: breastSymptoms },
@@ -144,6 +146,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.ARMS,
     symptoms: allArmsSymptoms,
     subCategories: {
+      ALLARMS: { displayName: 'More Arm Symptoms', symptoms: allArmsSymptoms },
       SHOULDER: { displayName: armSubCats.SHOULDER, symptoms: shoulderSymptoms },
       ARMPIT: { displayName: armSubCats.ARMPIT, symptoms: armpitSymptoms },
       UPPERARM: { displayName: armSubCats.UPPERARM, symptoms: upperArmSymptoms },
@@ -158,6 +161,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.ABDOMEN,
     symptoms: allAbdomenSymptoms,
     subCategories: {
+      ALLABDOMEN: { displayName: 'More Abdomen Symptoms', symptoms: allAbdomenSymptoms },
       UPPERABDOMEN: { displayName: abdomenSubCats.UPPERABDOMEN, symptoms: upperAbdomenSymptoms },
       EPIGASTRIC: { displayName: abdomenSubCats.EPIGASTRIC, symptoms: epigastricSymptoms },
       LOWERABDOMEN: { displayName: abdomenSubCats.LOWERABDOMEN, symptoms: lowerAbdomenSymptoms },
@@ -167,6 +171,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.PELVIS,
     symptoms: allPelvicSymptoms,
     subCategories: {
+      ALLPELVIS: { displayName: 'More Pelvic Symptoms', symptoms: allPelvicSymptoms },
       PELVICHIP: { displayName: pelvicSubCats.PELVICHIP, symptoms: pelvicHipSymptoms },
       GROIN: { displayName: pelvicSubCats.GROIN, symptoms: groinSymptoms },
       SUPRAPUBIC: { displayName: pelvicSubCats.SUPRAPUBIC, symptoms: suprapubicSymptoms },
@@ -177,15 +182,18 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.BACK,
     symptoms: allBackSymptoms,
     subCategories: {
+      ALLBACK: { displayName: 'More Back Symptoms', symptoms: allBackSymptoms },
       UPPERBACK: { displayName: backSubCats.UPPERBACK, symptoms: upperBackSymptoms },
       LOWERBACK: { displayName: backSubCats.LOWERBACK, symptoms: lowerBackSymptoms },
       FLANK: { displayName: backSubCats.FLANK, symptoms: flankSymptoms },
+      TAILBONE: { displayName: backSubCats.TAILBONE, symptoms: tailboneSymptoms },
     },
   },
   BUTTOCKS: {
     displayName: topLevelSymptoms.BUTTOCKS,
     symptoms: allButtocksSymptoms,
     subCategories: {
+      ALLBUTTOCKS: { displayName: 'More Buttocks Symptoms', symptoms: allButtocksSymptoms },
       HIP: { displayName: buttocksSubCats.HIP, symptoms: buttocksHipSymptoms },
       RECTUM: { displayName: buttocksSubCats.RECTUM, symptoms: rectumSymptoms },
     },
@@ -194,6 +202,7 @@ export const structuredSymptoms: Record<string, SymptomCategory> = {
     displayName: topLevelSymptoms.LEGS,
     symptoms: allLegsSymptoms,
     subCategories: {
+      ALLLEGS: { displayName: 'More Leg Symptoms', symptoms: allLegsSymptoms },
       THIGHS: { displayName: legsSubCats.THIGHS, symptoms: thighSymptoms },
       HAMSTRING: { displayName: legsSubCats.HAMSTRING, symptoms: hamstringSymptoms },
       KNEE: { displayName: legsSubCats.KNEE, symptoms: kneeSymptoms },

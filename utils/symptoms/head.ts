@@ -503,7 +503,6 @@ export const noseSymptoms = [
   'snotty, runny nose',
   'snout reflex',
   'stuffy nose',
-  'stuffy nose',
   'swollen nose',
   'thin nose',
   'tingling or pricking of nose',
@@ -661,7 +660,6 @@ export const faceSymptoms = [
 ]
 
 export const mouthSymptoms = [
-  'area of mucus on tongue',
   'area of mucus on tongue',
   'area under tongue is swollen',
   'back of mouth is red',

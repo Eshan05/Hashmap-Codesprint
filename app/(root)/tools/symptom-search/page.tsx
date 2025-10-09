@@ -1,21 +1,18 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
-import { ClockIcon, FileQuestionIcon } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { useState } from 'react';
-import { RecentSearch } from '@/types/recent-search';
 import Recent from '@/app/(root)/tools/symptom-search/_components/recent';
 import {
   Credenza,
-  CredenzaTrigger,
+  CredenzaBody,
   CredenzaContent,
   CredenzaHeader,
   CredenzaTitle,
-  CredenzaBody,
-} from '@/components/ui/credenza'
-import Link from 'next/link';
+  CredenzaTrigger,
+} from '@/components/ui/credenza';
+import { RecentSearch } from '@/types/recent-search';
+import { useQuery } from '@tanstack/react-query';
+import { ClockIcon, FileQuestionIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
 const SymptomFormMain = dynamic(() => import('./_components/symptom-form-main'), { ssr: false });
 
 const fetchRecentSearches = async (): Promise<RecentSearch[]> => {
@@ -27,10 +24,6 @@ const fetchRecentSearches = async (): Promise<RecentSearch[]> => {
 };
 
 export default function SymptomSearchPage() {
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
   const { data: recentSearches = [], isLoading, error: queryError } = useQuery<RecentSearch[]>({
     queryKey: ['recent-searches'],
     queryFn: fetchRecentSearches,

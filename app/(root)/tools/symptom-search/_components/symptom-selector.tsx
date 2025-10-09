@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Label } from '@/components/ui/label';
 import { useSymptomStore } from '@/lib/store/symptom-select-store';
+import { searchSymptoms } from '@/lib/symptoms/search';
 import { allSymptoms, structuredSymptoms, topLevelSymptoms } from '@/utils/symptoms';
 import { categoryIcons } from '@/utils/symptoms/icons';
 import { allSearchableItems, SearchableItem } from '@/utils/symptoms/search-data';
@@ -179,7 +180,7 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
         </Button>
         <Button variant={'default'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
           {IconComponent && <IconComponent className="size-5 shrink-0" />}
-          <h3 className="font-medium text-xl tracking-tight leading-6">{title}</h3>
+          <h3 className="font-medium text-xl tracking-tight leading-6">{title.replace(/ symptoms$/i, '')}</h3>
         </Button>
         <div className="space-y-1">
           {symptomsToList.map((symptom) => (
@@ -295,6 +296,9 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
       return { symptoms: [], categories: [], scope: '', subScope: '' };
     }
 
+    const fuzzyResults = searchSymptoms(sQuery);
+    let finalSymptomResults = fuzzyResults;
+
     const results = allSearchableItems.filter(item => {
       const isMatch = item.displayName.toLowerCase().includes(sQuery);
       if (scope) {
@@ -363,7 +367,7 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
             {filteredResults.symptoms.length > 0 && (
               <CommandGroup heading="Symptoms">
                 {filteredResults.symptoms.map(item => (
-                  <CommandItem key={item.key} onSelect={() => handleSelect(item)} className="flex justify-between items-center cursor-pointer">
+                  <CommandItem key={`${item.key}-${item.path}`} onSelect={() => handleSelect(item)} className="flex justify-between items-center cursor-pointer">
                     <div className="flex flex-col">
                       <span className="capitalize">{item.displayName.replace(/_/g, ' ')}</span>
                       <span className="text-xs text-muted-foreground">{item.path}</span>
