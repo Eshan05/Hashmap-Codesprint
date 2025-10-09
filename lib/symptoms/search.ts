@@ -9,7 +9,6 @@ export interface SearchableSymptom {
   prepared: Fuzzysort.Prepared | undefined;
 }
 
-// This function transforms your nested data into a flat, searchable list.
 function createSearchableList(): SearchableSymptom[] {
   const list: SearchableSymptom[] = [];
 
@@ -44,13 +43,12 @@ function createSearchableList(): SearchableSymptom[] {
 // Create the list once and export it so it's not regenerated on every render.
 export const searchableSymptomList = createSearchableList();
 
-// The main search function that will be called from the component.
 export function searchSymptoms(query: string): Fuzzysort.Results {
   if (!query) return Object.assign([], { total: 0 });
 
   return fuzzysort.go(query, searchableSymptomList, {
     key: 'symptom',
     threshold: -1000,
-    limit: 10,
+    limit: 100,
   });
 }

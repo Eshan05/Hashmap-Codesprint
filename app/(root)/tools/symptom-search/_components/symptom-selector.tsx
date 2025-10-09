@@ -160,7 +160,7 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
 
     if (subCategory) {
       if (subCategory === category && !categoryData.subCategories) {
-        // This is a top-level category with no sub-categories (e.g., Neck, Skin)
+        // This is a top-level category with no sub-categories 
         symptomsToList = categoryData.symptoms || [];
       } else if (categoryData.subCategories?.[subCategory]) {
         // This is a sub-category
@@ -210,7 +210,14 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
   };
   const activePanel = getActivePanel();
 
-  const filteredResults = useMemo(() => {
+  type FuzzysortResultLocal = {
+    obj: { symptom: string; path?: string; categoryKey: string; subCategoryKey?: string };
+    highlight?: (before: string, after: string) => string;
+  };
+  type SymptomResult = { result: FuzzysortResultLocal; item: SearchableItem };
+  type FilteredResults = { symptoms: SymptomResult[]; categories: SearchableItem[]; scope: string; subScope: string };
+
+  const filteredResults = useMemo<FilteredResults>(() => {
     if (!search) return { symptoms: [], categories: [], scope: '', subScope: '' };
     const query = search.toLowerCase()
 
@@ -228,7 +235,6 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     let subScope = '';
     let sQuery = query;
 
-    // Handle scoped search ("/legs pain")
     if (search.startsWith('/')) {
       const parts = search.split(' ');
       const command = parts[0].substring(1).toLowerCase();
@@ -262,7 +268,7 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
         let matchedCategoryKey = Object.keys(structuredSymptoms).find(key => key.toLowerCase() === command.toLowerCase());
         let matchedSubKey = '';
         if (!matchedCategoryKey) {
-          // Check if it's a subCategory key
+
           for (const catKey of Object.keys(structuredSymptoms)) {
             if (structuredSymptoms[catKey].subCategories) {
               const subKey = Object.keys(structuredSymptoms[catKey].subCategories!).find(sub => sub.toLowerCase() === command.toLowerCase());
@@ -285,34 +291,62 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
     if (!sQuery) {
       // If only a scope is typed , show all symptoms for that scope
       if (scope) {
-        let symptoms;
-        if (subScope) {
-          symptoms = allSearchableItems.filter(item => item.type === 'symptom' && item.categoryKey === scope && item.subCategoryKey === subScope);
-        } else {
-          symptoms = allSearchableItems.filter(item => item.type === 'symptom' && item.categoryKey === scope);
-        }
+        const symptomsItems = subScope
+          ? allSearchableItems.filter(item => item.type === 'symptom' && item.categoryKey === scope && item.subCategoryKey === subScope)
+          : allSearchableItems.filter(item => item.type === 'symptom' && item.categoryKey === scope);
+
+        const symptoms: SymptomResult[] = symptomsItems.map(it => ({
+          result: { obj: { symptom: it.key, path: it.path, categoryKey: it.categoryKey!, subCategoryKey: it.subCategoryKey } },
+          item: it,
+        }));
+
         return { symptoms, categories: [], scope, subScope };
       }
       return { symptoms: [], categories: [], scope: '', subScope: '' };
     }
 
     const fuzzyResults = searchSymptoms(sQuery);
-    let finalSymptomResults = fuzzyResults;
+    // Local type describing the fuzzysort result shape we expect
+    type FuzzysortResultLocal = {
+      obj: { symptom: string; path?: string; categoryKey: string; subCategoryKey?: string };
+      highlight?: (before: string, after: string) => string;
+    };
 
-    const results = allSearchableItems.filter(item => {
-      const isMatch = item.displayName.toLowerCase().includes(sQuery);
-      if (scope) {
+    let finalSymptomResults: FuzzysortResultLocal[] = fuzzyResults as unknown as FuzzysortResultLocal[];
+    if (scope) {
+      finalSymptomResults = finalSymptomResults.filter(result => {
+        const item = result.obj;
         if (subScope) {
-          return isMatch && item.categoryKey === scope && item.subCategoryKey === subScope;
+          return item.categoryKey === scope && item.subCategoryKey === subScope;
         }
-        return isMatch && item.categoryKey === scope;
-      }
+        return item.categoryKey === scope;
+      });
+    }
+
+    const categories = allSearchableItems.filter(item => {
+      if (item.type === 'symptom') return false;
+      const isMatch = item.displayName.toLowerCase().includes(sQuery);
       return isMatch;
     });
 
+    type SymptomResult = { result: FuzzysortResultLocal; item: SearchableItem };
+    const symptoms: SymptomResult[] = finalSymptomResults.map(result => {
+      const obj = result.obj;
+      const item: SearchableItem = {
+        type: 'symptom',
+        key: obj.symptom,
+        displayName: obj.symptom,
+        path: obj.path,
+        categoryKey: obj.categoryKey,
+        subCategoryKey: obj.subCategoryKey,
+      };
+      return { result, item };
+    });
     return {
-      symptoms: results.filter(item => item.type === 'symptom'),
-      categories: results.filter(item => item.type !== 'symptom'),
+      // symptoms: results.filter(item => item.type === 'symptom'),
+      // categories: results.filter(item => item.type !== 'symptom'),
+      symptoms,
+      categories,
       scope,
       subScope,
     };
@@ -352,7 +386,11 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
         {search && (
           <CommandList className="absolute top-11 w-full rounded-md border bg-background shadow-lg z-10">
             <CommandEmpty>No results found. Searched for {search}.<br /> {filteredResults.categories.length} categories, {filteredResults.symptoms.length} symptoms</CommandEmpty>
-
+            {filteredResults.categories.length > 0 || filteredResults.symptoms.length > 0 ? (
+              <div className="px-2 pt-2 text-xs text-right text-muted-foreground">
+                Shows {filteredResults.categories.length} categories and {filteredResults.symptoms.length} symptoms
+              </div>
+            ) : null}
             {filteredResults.categories.length > 0 && (
               <CommandGroup heading="Go to...">
                 {filteredResults.categories.map(item => (
@@ -366,15 +404,22 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
 
             {filteredResults.symptoms.length > 0 && (
               <CommandGroup heading="Symptoms">
-                {filteredResults.symptoms.map(item => (
-                  <CommandItem key={`${item.key}-${item.path}`} onSelect={() => handleSelect(item)} className="flex justify-between items-center cursor-pointer">
-                    <div className="flex flex-col">
-                      <span className="capitalize">{item.displayName.replace(/_/g, ' ')}</span>
-                      <span className="text-xs text-muted-foreground">{item.path}</span>
-                    </div>
-                    <Checkbox checked={isSymptomSelected(item.key)} className="ml-4" />
-                  </CommandItem>
-                ))}
+                {filteredResults.symptoms.map(({ result, item }) => {
+                  const highlightedHtml = typeof result.highlight === 'function'
+                    ? result.highlight('<b>', '</b>')
+                    : (item.displayName || item.key).replace(/_/g, ' ');
+
+                  return (
+                    <CommandItem key={`${item.key}-${item.path || ''}`} onSelect={() => handleSelect(item)} className="flex justify-between items-center cursor-pointer">
+                      <div className="flex flex-col">
+                        {/* If highlight produced HTML, render it; otherwise plain text shown */}
+                        <span className="capitalize" dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
+                        <span className="text-xs text-muted-foreground">{item.path}</span>
+                      </div>
+                      <Checkbox checked={isSymptomSelected(item.key)} className="ml-4" />
+                    </CommandItem>
+                  )
+                })}
               </CommandGroup>
             )}
           </CommandList>
