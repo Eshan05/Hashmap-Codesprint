@@ -1,29 +1,27 @@
 'use client';
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { AutosizeTextarea } from '@/components/ui/autoresize-textarea';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { IoInformationOutline } from "react-icons/io5";
-import { ListOrderedIcon, TextCursorInputIcon } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectLabel, SelectValue, SelectTrigger } from '@/components/ui/select';
+import { ModeDrawer } from './mode-drawer';
 
 const FormSchema = z.object({
   searchType: z.string(),
@@ -122,7 +120,7 @@ export default function MedSearchForm() {
                   <article className='flex flex-col items-start lg:gap-1'>
                     <span className='text-base -mt-0.5'>Search Type</span>
                     <div className='gap-2 space-evenly items-start lg:flex hidden'>
-                      <p className='text-muted-foreground !text-sm inline-block'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <Button size="none" type='button' variant="link">here</Button></p>
+                      <p className='text-muted-foreground !text-sm inline-block'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <ModeDrawer /></p>
                     </div>
                   </article>
                 </header>
@@ -180,7 +178,7 @@ export default function MedSearchForm() {
                   <article className='flex flex-col items-start lg:gap-1'>
                     <span className='text-base -mt-0.5'>Query</span>
                     <div className='gap-2 space-evenly items-start lg:flex hidden'>
-                      <p className='text-muted-foreground !text-sm inline-block'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <Button size="none" type='button' variant="link">here</Button></p>
+                      <p className='text-muted-foreground !text-sm inline-block'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <ModeDrawer /></p>
                     </div>
                   </article>
                 </header>
@@ -189,7 +187,7 @@ export default function MedSearchForm() {
                 <FormControl>
                   <AutosizeTextarea placeholder={queryPlaceholder} {...field} className={`w-full ${loading ? 'cursor-not-allowed' : ''} $`} />
                 </FormControl>
-                <p className='text-muted-foreground !text-sm inline-block lg:hidden py-2 px-1'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <Button size="none" type='button' variant="link">here</Button></p>
+                <p className='text-muted-foreground !text-sm inline-block lg:hidden py-2 px-1'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <ModeDrawer /></p>
               </div>
               <FormMessage />
             </FormItem>

@@ -1,47 +1,93 @@
 'use client';
 
-import { useState } from 'react';
-import { ModeToggle } from '@/components/mode-toggle';
-import dynamic from 'next/dynamic';
-import { GradientTop } from '@/components/gradient-top';
+import Recent from "@/app/(root)/tools/symptom-search/_components/recent";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
-import { FileQuestionIcon, StarIcon } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/accordion";
+import {
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from '@/components/ui/credenza';
+import { RecentSearch } from "@/types/recent-search";
+import { useQuery } from "@tanstack/react-query";
+import { ClockIcon, FileQuestionIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
 const MedSearchForm = dynamic(() => import('./_components/med-search-form'), { ssr: false });
 
-export default function MedicineSearchPage() {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+const fetchRecentSearches = async (): Promise<RecentSearch[]> => {
+  // TODO: Make new table to map user medicine searches and use it here
+  const response = await fetch('/api/symptom-search/recent');
+  if (!response.ok) {
+    throw new Error('Failed to fetch recent searches');
+  }
+  return response.json();
+};
 
+export default function MedicineSearchPage() {
+  const { data: recentSearches = [], isLoading, error: queryError } = useQuery<RecentSearch[]>({
+    queryKey: ['recent-searches'],
+    queryFn: fetchRecentSearches,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
   return (
-    <section className="relative overflow-x-hidden flex flex-col font-inter min-h-svh">
-      <div className="w-full px-[1.15rem] py-8 lg:px-8">
-        <header className='relative flex items-center lg:mb-10 space-y-8'>
+    <section className="relative overflow-x-hidden flex flex-col min-h-svh">
+      <div className="w-full px-4 py-8 lg:px-8">
+        <header className='relative flex flex-col items-center mb-10 space-y-2'>
           <h1 className="shadow-heading text-5xl sm:text-6xl md:text-7xl">Medicine Finder</h1>
+          <Credenza>
+            <CredenzaTrigger>
+              <div className="flex-center-2 justify-center cursor-pointer">
+                <ClockIcon className="size-4" />
+                <h1 className="text-2xl font-light tracking-tight">View Recent</h1>
+              </div>
+            </CredenzaTrigger>
+
+            <CredenzaContent>
+              <CredenzaHeader>
+                <CredenzaTitle>Recent Searches</CredenzaTitle>
+              </CredenzaHeader>
+              <CredenzaBody>
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-3"></div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Loading recent searches...
+                    </p>
+                  </div>
+                ) : queryError ? (
+                  <div className="text-center py-8">
+                    <FileQuestionIcon className="w-12 h-12 text-red-400 mx-auto mb-3" />
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      Error loading recent searches. Please try again later.
+                    </p>
+                  </div>
+                ) : recentSearches.length > 0 ? (
+                  <div className="space-y-3">
+                    <Recent items={recentSearches} />
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <FileQuestionIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      No recent searches found. Your searches will appear here.
+                    </p>
+                  </div>
+                )}
+              </CredenzaBody>
+            </CredenzaContent>
+          </Credenza>
         </header>
         <section className='flex flex-col lg:flex-row gap-4 lg:items-start lg:justify-between'>
           <main className='lg:max-w-6xl mx-auto border rounded-lg p-2 lg:p-6 bg-[#ddd2] dark:bg-[#2222] backdrop-blur-lg'>
             <MedSearchForm />
           </main>
-          <section className="p-6 bg-[#eee2] dark:bg-[#2222] shadow rounded-lg w-full lg:w-1/2 border">
-            <div className="flex items-center gap-2 mb-4">
-              <FileQuestionIcon className="w-6 h-6" />
-              <h1 className="text-3xl font-bold">FAQs</h1>
-            </div>
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className='font-bold border-b-light-pink'>
-                <AccordionTrigger className='font-semibold text-sm md:text-base'>Disclaimer</AccordionTrigger>
-                <AccordionContent className='text-xs font-medium pb-2 inline-block'>
-                  <p>This information is generated by an AI and is not a substitute for professional medical advice.  Always consult with a qualified healthcare provider for any health concerns.</p>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </section>
         </section>
       </div>
     </section>

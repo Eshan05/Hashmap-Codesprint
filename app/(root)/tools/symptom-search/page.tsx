@@ -31,8 +31,8 @@ export default function SymptomSearchPage() {
   });
 
   return (
-    <section className="relative overflow-x-hidden flex flex-col font-inter min-h-svh">
-      <div className="w-full px-[1.15rem] py-8 lg:px-8">
+    <section className="relative overflow-x-hidden flex flex-col min-h-svh">
+      <div className="w-full px-4 py-8 lg:px-8">
         <header className='relative flex flex-col items-center mb-10 space-y-2'>
           <h1 className="shadow-heading text-4xl sm:text-5xl md:text-6xl my-4">Symptom Analyzer</h1>
           <Credenza>
