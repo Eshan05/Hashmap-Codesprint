@@ -57,6 +57,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Credenza,
+  CredenzaTrigger,
+  CredenzaContent,
+  CredenzaBody,
+  CredenzaHeader,
+  CredenzaDescription,
+  CredenzaTitle,
+} from "@/components/ui/credenza";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import QRCodeStyling from "qr-code-styling";
@@ -66,6 +75,7 @@ import { UAParser } from "ua-parser-js";
 import { TbBrandAndroid, TbBrandApple, TbBrandWindows } from "react-icons/tb";
 import { FaLinux } from "react-icons/fa6";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 function MobileIcon() {
   return (
@@ -239,115 +249,133 @@ export default function UserCard(props: {
           </Alert>
         )}
 
-        <div className="px-2 w-max gap-1 flex flex-col">
-          <p className="text-xs font-medium ">Active Sessions</p>
-          {/* Group sessions by OS category */}
-          {(() => {
-            const groups: Record<string, typeof activeSessions> = {};
-            activeSessions
-              .filter((s) => s.userAgent)
-              .forEach((s) => {
-                const os = new UAParser(s.userAgent || "").getOS().name || "Unknown";
-                let key = "Other";
-                if (/windows/i.test(os)) key = "Windows";
-                else if (/mac os|macos|ios/i.test(os)) key = "Mac/iOS";
-                else if (/android/i.test(os)) key = "Android";
-                else if (/linux/i.test(os)) key = "Linux";
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(s);
-              });
+        <Credenza>
+          <div className="px-2 w-max gap-1 flex flex-col">
+            <p className="text-xs font-medium ">Active Sessions</p>
+            <CredenzaTrigger asChild>
+              <Button variant="ghost" size="sm" className="mt-2">
+                View sessions
+              </Button>
+            </CredenzaTrigger>
+          </div>
+          <CredenzaContent>
+            <CredenzaHeader>
+              <CredenzaTitle>Active Sessions</CredenzaTitle>
+              <CredenzaDescription>Manage your active sessions across all devices.</CredenzaDescription>
+            </CredenzaHeader>
+            <CredenzaBody>
+              <ScrollArea className='overflow-y-auto mb-4 h-60'>
 
-            const entries = Object.entries(groups);
-            if (!entries.length)
-              return <p className="text-sm text-muted-foreground">No active sessions</p>;
+                {/* Group sessions by OS category */}
+                {(() => {
+                  const groups: Record<string, typeof activeSessions> = {};
+                  activeSessions
+                    .filter((s) => s.userAgent)
+                    .forEach((s) => {
+                      const os = new UAParser(s.userAgent || "").getOS().name || "Unknown";
+                      let key = "Other";
+                      if (/windows/i.test(os)) key = "Windows";
+                      else if (/mac os|macos|ios/i.test(os)) key = "Mac/iOS";
+                      else if (/android/i.test(os)) key = "Android";
+                      else if (/linux/i.test(os)) key = "Linux";
+                      if (!groups[key]) groups[key] = [];
+                      groups[key].push(s);
+                    });
 
-            const getIcon = (key: string) => {
-              if (key === "Windows") return <TbBrandWindows size={16} />;
-              if (key === "Mac/iOS") return <TbBrandApple size={16} />;
-              if (key === "Android") return <TbBrandAndroid size={16} />;
-              if (key === "Linux") return <FaLinux size={16} />;
-              return <Laptop size={16} />;
-            };
+                  const entries = Object.entries(groups);
+                  if (!entries.length)
+                    return <p className="text-sm text-muted-foreground">No active sessions</p>;
 
-            return (
-              <Accordion type="multiple" className="w-full mt-2">
-                {entries.map(([key, sessions]) => (
-                  <AccordionItem key={key} value={key} className="border-b-0">
-                    <AccordionTrigger className="flex items-center justify-between gap-3 px-2 py-2 rounded-md hover:bg-muted">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">{getIcon(key)}</span>
-                        <div className="font-medium">{key}</div>
-                        <Badge variant={'secondary'} className="py-0">{`${sessions.length} ${sessions.length === 1 ? 'session' : 'sessions'}`}</Badge>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-2 py-1">
-                      <div className="grid gap-2">
-                        {sessions.map((s) => {
-                          const parser = new UAParser(s.userAgent || "");
-                          const device = parser.getDevice();
-                          const osVersion = parser.getOS().version || "Unknown";
-                          const browser = parser.getBrowser().name || "Unknown";
-                          const browserVer = parser.getBrowser().version || "Unknown";
-                          const osName = parser.getOS().name || "Unknown";
-                          const deviceName = device.model || device.vendor || osName;
-                          // @ts-expect-error Fuck
-                          const location = (s).location || (s).geo || (s).city || (s).ipLocation || null;
-                          // @ts-expect-error Fuck
-                          const ip = (s).ip || (s).ipAddress || (s).clientIp || (s).remoteAddress || null;
-                          const isCurrent = s.id === props.session?.session.id;
-                          return (
-                            <div key={s.id} className="flex items-center justify-between gap-2 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800">
-                              <div className="flex items-start gap-3">
-                                <div className="pt-0.5">
-                                  {device.type === "mobile" ? <MobileIcon /> : <Laptop size={16} />}
-                                </div>
-                                <div>
-                                  <header className="flex-center-2">
-                                    {isCurrent && (
-                                      <Badge variant={'informative'} className="px-2 py-0 rounded-full text-xs">Current</Badge>
-                                    )}
-                                    <div className="text-sm font-medium">{deviceName}</div>
-                                  </header>
-                                  <div className="text-xs text-muted-foreground">{osName} {osVersion} · {browser} {browserVer}</div>
-                                  {location ? (
-                                    <div className="text-xs text-muted-foreground flex items-center gap-1"><MapPin size={12} />{String(location)}</div>
-                                  ) : ip ? (
-                                    <div className="text-xs text-muted-foreground">IP: {ip}</div>
-                                  ) : null}
+                  const getIcon = (key: string) => {
+                    if (key === "Windows") return <TbBrandWindows size={16} />;
+                    if (key === "Mac/iOS") return <TbBrandApple size={16} />;
+                    if (key === "Android") return <TbBrandAndroid size={16} />;
+                    if (key === "Linux") return <FaLinux size={16} />;
+                    return <Laptop size={16} />;
+                  };
 
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="md-icon"
-                                  variant={isCurrent ? "default" : "secondary"}
-                                  onClick={async () => {
-                                    setIsTerminating(s.id);
-                                    const res = await client.revokeSession({ token: s.token });
-                                    if (res.error) {
-                                      toast.error(res.error.message);
-                                    } else {
-                                      toast.success("Session terminated successfully");
-                                      removeActiveSession(s.id);
-                                    }
-                                    if (s.id === props.session?.session.id) router.refresh();
-                                    setIsTerminating(undefined);
-                                  }}
-                                >
-                                  {isTerminating === s.id ? <Loader2 size={15} className="animate-spin" /> : isCurrent ? <LogOut size={15} /> : <Trash size={15} />}
-                                </Button>
-                              </div>
+                  return (
+                    <Accordion type="multiple" className="w-full mt-2">
+                      {entries.map(([key, sessions]) => (
+                        <AccordionItem key={key} value={key} className="border-b-0 w-full">
+                          <AccordionTrigger className="flex items-center justify-between gap-3 px-2 py-2 rounded-md hover:bg-muted w-full">
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground">{getIcon(key)}</span>
+                              <div className="font-medium">{key}</div>
+                              <Badge variant={'secondary'} className="py-0">{`${sessions.length} ${sessions.length === 1 ? 'session' : 'sessions'}`}</Badge>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            );
-          })()}
-        </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-2 py-1">
+                            <div className="grid gap-2">
+                              {sessions.map((s) => {
+                                const parser = new UAParser(s.userAgent || "");
+                                const device = parser.getDevice();
+                                const osVersion = parser.getOS().version || "Unknown";
+                                const browser = parser.getBrowser().name || "Unknown";
+                                const browserVer = parser.getBrowser().version || "Unknown";
+                                const osName = parser.getOS().name || "Unknown";
+                                const deviceName = device.model || device.vendor || osName;
+                                // @ts-expect-error Fuck
+                                const location = (s).location || (s).geo || (s).city || (s).ipLocation || null;
+                                // @ts-expect-error Fuck
+                                const ip = (s).ip || (s).ipAddress || (s).clientIp || (s).remoteAddress || null;
+                                const isCurrent = s.id === props.session?.session.id;
+                                return (
+                                  <div key={s.id} className="flex items-center justify-between gap-2 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800">
+                                    <div className="flex items-start gap-3">
+                                      <div className="pt-0.5">
+                                        {device.type === "mobile" ? <MobileIcon /> : <Laptop size={16} />}
+                                      </div>
+                                      <div>
+                                        <header className="flex-center-2">
+                                          {isCurrent && (
+                                            <Badge variant={'informative'} className="px-2 py-0 rounded-full text-xs">Current</Badge>
+                                          )}
+                                          <div className="text-sm font-medium">{deviceName}</div>
+                                        </header>
+                                        <div className="text-xs text-muted-foreground">{osName} {osVersion} · {browser} {browserVer}</div>
+                                        {location ? (
+                                          <div className="text-xs text-muted-foreground flex items-center gap-1"><MapPin size={12} />{String(location)}</div>
+                                        ) : ip ? (
+                                          <div className="text-xs text-muted-foreground">IP: {ip}</div>
+                                        ) : null}
+
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="md-icon"
+                                        variant={isCurrent ? "default" : "secondary"}
+                                        onClick={async () => {
+                                          setIsTerminating(s.id);
+                                          const res = await client.revokeSession({ token: s.token });
+                                          if (res.error) {
+                                            toast.error(res.error.message);
+                                          } else {
+                                            toast.success("Session terminated successfully");
+                                            removeActiveSession(s.id);
+                                          }
+                                          if (s.id === props.session?.session.id) router.refresh();
+                                          setIsTerminating(undefined);
+                                        }}
+                                      >
+                                        {isTerminating === s.id ? <Loader2 size={15} className="animate-spin" /> : isCurrent ? <LogOut size={15} /> : <Trash size={15} />}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  );
+                })()}
+              </ScrollArea>
+            </CredenzaBody>
+          </CredenzaContent>
+        </Credenza>
         <div className="border-y py-4 flex items-center flex-wrap justify-between gap-2">
           <div className="flex flex-col gap-2">
             <p className="text-sm">Passkeys</p>
