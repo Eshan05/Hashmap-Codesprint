@@ -70,7 +70,7 @@ export default function SymptomFormMain() {
 
       if (response.ok) {
         const data = await response.json();
-        window.open(`/symptom-search/${data.searchId}`, '_blank');
+        window.open(`/tools/symptom-search/${data.searchId}`, '_blank');
         // router.push(`/symptom-search/${data.searchId}`);
       } else {
         const errorData = await response.json();

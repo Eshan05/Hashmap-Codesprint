@@ -100,13 +100,13 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
   // --- Panel Rendering ---
 
   const renderMainPanel = () => (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {Object.entries(topLevelSymptoms).map(([key, displayName]) => {
         const IconComponent = categoryIcons[key];
         return (
-          <Button key={key} variant={'ghost'} onClick={() => handleCategoryClick(key)} className="w-full flex items-center justify-between p-2 rounded-md hover:bg-accent">
-            <div className="flex items-center gap-3 font-semibold text-xl leading-6">
-              {IconComponent && <IconComponent className="size-5 shrink-0 text-muted-foreground" />}
+          <Button key={key} variant={'ghost'} onClick={() => handleCategoryClick(key)} className="w-full flex items-center justify-between p-2 rounded-md hover:bg-accent text-muted-foreground">
+            <div className="flex items-center gap-3 font-medium tracking-tight text-xl leading-6">
+              {IconComponent && <IconComponent className="size-5 shrink-0" />}
               <span>{displayName.replace(/ symptoms$/i, '')}</span>
             </div>
             <ChevronRight className="h-4 w-4" />
@@ -127,12 +127,12 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
           <ArrowLeft className="h-4 w-4 mr-2" /> All Categories
         </Button>
         <Button variant={'default'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
-          {IconComponent && <IconComponent className="size-5 shrink-0 text-muted-foreground" />}
-          <h3 className="font-semibold text-xl leading-6">{displayName}</h3>
+          {IconComponent && <IconComponent className="size-5 shrink-0" />}
+          <h3 className="font-medium tracking-tight text-xl leading-6">{displayName}</h3>
         </Button>
         <div className="space-y-1 mt-1">
           {Object.entries(subCategories!).map(([key, data]) => (
-            <Button variant={'ghost'} key={key} onClick={() => handleSubCategoryClick(key)} className="w-full text-lg leading-6 flex items-center justify-between p-2 rounded-md hover:bg-accent">
+            <Button variant={'ghost'} key={key} onClick={() => handleSubCategoryClick(key)} className="w-full text-lg leading-6 flex items-center justify-between p-2 rounded-md hover:bg-accent text-muted-foreground">
               <span>{data.displayName}</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -178,8 +178,8 @@ export function SymptomSelector({ category, subCategory }: SymptomSelectorProps)
           <ArrowLeft className="h-4 w-4 mr-2" /> {backButtonText}
         </Button>
         <Button variant={'default'} className="flex items-center w-full gap-3 mb-4 px-2" onClick={goBack}>
-          {IconComponent && <IconComponent className="size-5 shrink-0 text-muted-foreground" />}
-          <h3 className="font-semibold text-xl leading-6">{title}</h3>
+          {IconComponent && <IconComponent className="size-5 shrink-0" />}
+          <h3 className="font-medium text-xl tracking-tight leading-6">{title}</h3>
         </Button>
         <div className="space-y-1">
           {symptomsToList.map((symptom) => (

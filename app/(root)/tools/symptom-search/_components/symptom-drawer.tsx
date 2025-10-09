@@ -65,8 +65,8 @@ export function SymptomDrawer() {
       </DrawerTrigger>
       <DrawerContent className="max-w-sm h-full flex flex-col">
         <DrawerHeader>
-          <DrawerTitle className='text-lg font-semibold'>Select Symptoms</DrawerTitle>
-          <DrawerDescription className='text-sm text-muted-foreground'>
+          <DrawerTitle className='text-xl font-semibold'>Symptoms List</DrawerTitle>
+          <DrawerDescription className='text-sm sr-only text-muted-foreground'>
             Browse categories or search for specific symptoms.
           </DrawerDescription>
         </DrawerHeader>
