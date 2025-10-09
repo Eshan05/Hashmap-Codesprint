@@ -5,57 +5,89 @@ import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle, Drawer
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { IoChevronDown } from 'react-icons/io5';
+import { ChevronDown, Thermometer, Pill, AlertTriangle, FlaskConical, Repeat } from 'lucide-react';
 import React from 'react';
 
 const items = [
   {
-    id: '1',
-    title: 'Aliases and Tags',
-    icon: 'command',
-    description: 'Learn about aliases and tags',
+    id: 'disease',
+    title: 'Disease / Condition',
+    icon: Thermometer,
+    description: 'Search by disease or condition to find recommended medicines, common treatments, and typical dosages.',
     collapsibles: [
       {
-        title: 'Aliases',
-        content: 'Alternative short URLs that redirect to the same destination. Useful for branding or multiple access points.',
-        icon: 'link',
+        title: 'Example prompts',
+        content: `"What medicines are commonly prescribed for type 2 diabetes?"\n"First-line treatments for acute otitis media"\n"Drugs used to manage hypertension in adults"`,
       },
       {
-        title: 'Tags',
-        content: 'Labels to categorize and organize your links for easier management and analytics.',
-        icon: 'tag',
+        title: 'Follow-ups to try',
+        content: `"What are typical dosages and frequency?"\n"Any major contraindications?"`,
       },
     ],
   },
   {
-    id: '2',
-    title: 'Password Protection',
-    icon: 'lock',
-    description: 'Secure your link with a password. They will first be redirected to the password page, they must enter the correct password to access the destination URL.',
-    collapsibles: [],
-  },
-  {
-    id: '3',
-    title: 'UTM Parameters',
-    icon: 'target',
-    description: 'UTM parameters are tags added to URLs to track the effectiveness of marketing campaigns. They help identify traffic sources in analytics tools like Google Analytics.',
+    id: 'name',
+    title: 'Medicine by Name',
+    icon: Pill,
+    description: 'Look up a specific medicine to see indications, common side effects, interactions, and brand/generic names.',
     collapsibles: [
       {
-        title: 'Source',
-        content: 'Identifies the advertiser, site, publication, ... (EX: Google, newsletter)',
-        icon: 'globe',
+        title: 'Example prompts',
+        content: `"Information on amoxicillin"\n"What is paracetamol used for?"\n"Compare atorvastatin vs simvastatin"`,
       },
       {
-        title: 'Medium',
-        content: 'Identifies the marketing medium (EX: SEO, CPC, Banner, Email)',
-        icon: 'satellite-radar',
+        title: 'Follow-ups to try',
+        content: `"What are common adverse reactions?"\n"Does it require dose adjustment in renal impairment?"`,
       },
     ],
-    link: {
-      url: 'https://support.google.com/analytics/answer/1033863',
-      text: 'Learn more about UTM parameters',
-    },
-    note: undefined,
+  },
+  {
+    id: 'sideEffects',
+    title: 'Side Effects / Adverse Reactions',
+    icon: AlertTriangle,
+    description: 'Search by side effect to find medicines that commonly cause it and possible alternatives.',
+    collapsibles: [
+      {
+        title: 'Example prompts',
+        content: `"Which drugs commonly cause dizziness?"\n"Medications associated with dry cough"\n"Drugs linked to photosensitivity reactions"`,
+      },
+      {
+        title: 'Follow-ups to try',
+        content: `"What are safer alternatives?"\n"How should this side effect be managed?"`,
+      },
+    ],
+  },
+  {
+    id: 'ingredient',
+    title: 'Ingredient / Active Substance',
+    icon: FlaskConical,
+    description: 'Find medicines that contain a specific active ingredient and view brand equivalents.',
+    collapsibles: [
+      {
+        title: 'Example prompts',
+        content: `"List drugs containing metformin"\n"Which OTC products contain ibuprofen?"`,
+      },
+      {
+        title: 'Follow-ups to try',
+        content: `"Generic vs brand-name examples"\n"Typical dosing ranges"`,
+      },
+    ],
+  },
+  {
+    id: 'similar',
+    title: 'Find Similar Medicines',
+    icon: Repeat,
+    description: 'Get alternatives or therapeutically equivalent medicines to a given drug.',
+    collapsibles: [
+      {
+        title: 'Example prompts',
+        content: `"Alternatives to lisinopril"\n"Drugs similar to cetirizine for allergies"`,
+      },
+      {
+        title: 'Follow-ups to try',
+        content: `"How do their side-effect profiles compare?"\n"Cost or availability differences"`,
+      },
+    ],
   },
 ];
 
@@ -99,50 +131,42 @@ export function ModeDrawer() {
       </DrawerTrigger>
       <DrawerContent className="max-w-sm h-full flex flex-col">
         <DrawerHeader>
-          <DrawerTitle className=''>Configuring Special Links</DrawerTitle>
-          <DrawerDescription className=''>
-            Learn about the various options available for creating special links.
-          </DrawerDescription>
+          <DrawerTitle className=''>Search Modes</DrawerTitle>
+          <DrawerDescription className=''>Choose a mode to see example prompts and tips for better queries.</DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4">
           <Accordion type="multiple" className="w-full">
-            {items.map((item) => (
-              <AccordionItem key={item.id} value={item.id} className="has-focus-visible:border-ring has-focus-visible:ring-ring/50 outline-none has-focus-visible:ring-[3px]">
-                <AccordionTrigger className="justify-start gap-3 text-xl leading-6 font-semibold outline-none hover:no-underline [&>svg]:hidden">
-                  <span className="flex items-center gap-3">
-                    {/* simple icon placeholder */}
-                    <span className="opacity-60">{item.title.slice(0, 1)}</span>
-                    <span>{item.title}</span>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="p-0">
-                  {item.description && <div className="px-4 pb-2 text-sm text-muted-foreground">{item.description}</div>}
-                  {item.collapsibles?.map((collapsible, idx) => (
-                    <Collapsible key={idx} className="border-t py-2 ps-6 pe-4">
-                      <CollapsibleTrigger className="flex gap-2 text-lg leading-6 font-semibold [&[data-state=open]>svg]:rotate-180">
-                        <IoChevronDown className="mt-1 size-4 shrink-0 opacity-60 transition-transform duration-200" />
-                        <span className="flex items-center gap-3">
-                          <span className="opacity-60">•</span>
-                          <span className='font-light'>{collapsible.title}</span>
-                        </span>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="text-muted-foreground data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down mt-1 overflow-hidden ps-6 text-sm transition-all">
-                        {collapsible.content}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  ))}
-                  {item.note && <div className="px-4 py-2 text-xs text-muted-foreground border-t">{item.note}</div>}
-                  {item.link && (
-                    <div className="px-4 py-2 text-xs text-muted-foreground border-t">
-                      <a href={item.link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        {item.link.text}
-                      </a>
-                    </div>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+            {items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <AccordionItem key={item.id} value={item.id} className="has-focus-visible:border-ring has-focus-visible:ring-ring/50 outline-none has-focus-visible:ring-[3px]">
+                  <AccordionTrigger className="justify-start gap-3 text-xl leading-6 font-semibold outline-none hover:no-underline [&>svg]:hidden">
+                    <span className="flex items-center gap-3">
+                      {Icon ? <Icon className="h-4 w-4 opacity-60" /> : <span className="opacity-60">{item.title.slice(0, 1)}</span>}
+                      <span>{item.title}</span>
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="p-0">
+                    {item.description && <div className="px-4 pb-2 text-sm text-muted-foreground">{item.description}</div>}
+                    {item.collapsibles?.map((collapsible, idx) => (
+                      <Collapsible key={idx} className="border-t py-2 ps-6 pe-4">
+                        <CollapsibleTrigger className="flex gap-2 text-lg leading-6 font-semibold [&[data-state=open]>svg]:rotate-180">
+                          <ChevronDown className="mt-1 h-4 w-4 shrink-0 opacity-60 transition-transform duration-200" />
+                          <span className="flex items-center gap-3">
+                            <span className="opacity-60">•</span>
+                            <span className='font-light'>{collapsible.title}</span>
+                          </span>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="text-muted-foreground data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down mt-1 overflow-hidden ps-6 text-sm transition-all">
+                          {collapsible.content}
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </div>
 

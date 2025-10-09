@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     await newSearch.save();
     await generateMedicineResponse(searchId, searchType, query)
 
-    return NextResponse.json({ searchId }, { status: 201 });
+    return NextResponse.json({ searchId, searchType, query }, { status: 201 });
 
   } catch (error) {
     console.error(error);

@@ -56,7 +56,7 @@ export default async function MedicineSearchResultPage({ params }: PageProps) {
   }
 
   return (
-    <section className="relative overflow-x-hidden flex flex-col font-inter min-h-svh">
+    <section className="relative overflow-x-hidden flex flex-col min-h-svh">
       <div className="w-full px-[1.15rem] py-8 lg:px-8 lg:py-10">
         <header className='relative flex items-center lg:mb-10 mb-6 space-y-8'>
           <h1 className="shadow-heading">Medicine Search</h1>

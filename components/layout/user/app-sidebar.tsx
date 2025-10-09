@@ -62,10 +62,6 @@ const data = {
           url: "/tools/exercises",
         },
         {
-          title: "Sleep Tracker",
-          url: "/dashboard/sleep-tracker",
-        },
-        {
           title: "Health Tools",
           url: "/tools",
         },
@@ -87,15 +83,10 @@ const data = {
       icon: ScanSearch,
     },
     {
-      title: "Personalized AI",
-      url: "/dashboard/ai",
+      title: "Medical Conditions",
+      url: "/tools/conditions",
       icon: FileUserIcon,
     },
-    {
-      title: "Smart Watch Dashboard",
-      url: "/dashboard/watch",
-      icon: Newspaper
-    }
   ],
   projects: [
     {
