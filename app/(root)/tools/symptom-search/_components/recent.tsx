@@ -21,6 +21,7 @@ import { RecentSearch } from "@/types/recent-search"
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Clock, ExternalLink, HeartPulse, PersonStandingIcon } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface RecentProps {
   items: RecentSearch[]
@@ -50,68 +51,82 @@ export default function Recent({ items }: RecentProps) {
   })
 
   return (
-    <Timeline defaultValue={groupEntries.length || 1}>
-      {groupEntries.map(([dateLabel, groupItems], gIndex) => (
-        <TimelineItem key={dateLabel} step={gIndex + 1}>
-          <TimelineHeader>
-            <TimelineSeparator />
-            <TimelineDate className='flex-center-2'>{dateLabel} <Badge className='py-0'>{groupItems.length > 1 ? `${groupItems.length} searches` : '1 search'}</Badge></TimelineDate>
-            <TimelineTitle className='sr-only'></TimelineTitle>
-            <TimelineIndicator />
-          </TimelineHeader>
-          <TimelineContent>
-            {groupItems.length > 3 ? (
-              <Collapsible>
+    <ScrollArea className='overflow-y-auto my-2 h-96'>
+      <Timeline defaultValue={groupEntries.length || 1}>
+        {groupEntries.map(([dateLabel, groupItems], gIndex) => (
+          <TimelineItem key={dateLabel} step={gIndex + 1}>
+            <TimelineHeader>
+              <TimelineSeparator />
+              <TimelineDate className='flex-center-2'>{dateLabel} <Badge className='py-0'>{groupItems.length > 1 ? `${groupItems.length} searches` : '1 search'}</Badge></TimelineDate>
+              <TimelineTitle className='sr-only'></TimelineTitle>
+              <TimelineIndicator />
+            </TimelineHeader>
+            <TimelineContent>
+              {groupItems.length > 3 ? (
+                <Collapsible>
+                  <div className="space-y-2">
+                    {groupItems.slice(0, 2).map((item, idx) => (
+                      <div key={item.searchId || idx} className="flex flex-col items-start justify-between p-2">
+                        <div className="flex-1">
+                          <Link href={`/tools/symptom-search/${item.searchId}`} className="text-sm font-medium underline text-primary flex-center-1 line-clamp-1"><ExternalLink className="inline shrink-0 size-3" /> <span className='line-clamp-1'>{item.title || 'Untitled'}</span> </Link>
+                          <div className="text-xs text-muted-foreground flex-center-1 line-clamp-1">
+                            <HeartPulse className="inline w-3 h-3 shrink-0" />
+                            <span className='line-clamp-1'>{item.symptoms.charAt(0).toUpperCase() + item.symptoms.slice(1)}</span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground flex-center-1">
+                          <Clock className="inline w-3 h-3" />
+                          {format(new Date(item.createdAt), 'HH:mm')}
+                        </div>
+                      </div>
+                    ))}
+
+                    <CollapsibleTrigger className="w-full text-left text-sm text-primary mt-1">Show {groupItems.length - 2} more</CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="space-y-2 mt-2">
+                        {groupItems.slice(2).map((item, idx) => (
+                          <div key={item.searchId || idx} className="flex flex-col items-start justify-between p-2">
+                            <div className="flex-1">
+                              <Link href={`/tools/symptom-search/${item.searchId}`} className="text-sm font-medium underline text-primary flex-center-1 truncate"><ExternalLink className="inline shrink-0 size-3" /> <span className='line-clamp-1'>{item.title || 'Untitled'}</span> </Link>
+                              <div className="text-xs text-muted-foreground flex-center-1 line-clamp-1 truncate">
+                                <HeartPulse className="inline w-3 h-3" />
+                                <span className='line-clamp-1'>{item.symptoms.charAt(0).toUpperCase() + item.symptoms.slice(1)}</span>
+                              </div>
+                            </div>
+                            <div className="text-xs text-muted-foreground flex-center-1">
+                              <Clock className="inline w-3 h-3" />
+                              {format(new Date(item.createdAt), 'HH:mm')}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </div>
+                </Collapsible>
+              ) : (
                 <div className="space-y-2">
-                  {groupItems.slice(0, 2).map((item, idx) => (
+                  {groupItems.map((item, idx) => (
                     <div key={item.searchId || idx} className="flex flex-col items-start justify-between p-2">
                       <div className="flex-1">
-                        <div className="text-sm font-medium">{item.title || 'Untitled'}</div>
-                        <div className="text-xs text-muted-foreground line-clamp-1">{item.symptoms}</div>
+                        <Link href={`/tools/symptom-search/${item.searchId}`} className="text-sm font-medium underline text-primary flex-center-1"><ExternalLink className="inline shrink-0 size-3" /> <span className='line-clamp-1'>{item.title || 'Untitled'}</span> </Link>
+                        <div className="text-xs text-muted-foreground flex-center-1 line-clamp-1">
+                          <HeartPulse className="inline w-3 h-3" />
+                          <span className='line-clamp-1'>{item.symptoms.charAt(0).toUpperCase() + item.symptoms.slice(1)}</span>
+                        </div>
                       </div>
-                      <div className="ml-3 text-xs text-muted-foreground">{format(new Date(item.createdAt), 'HH:mm')}</div>
+
+                      <div className="text-xs text-muted-foreground flex-center-1">
+                        <Clock className="inline w-3 h-3" />
+                        {format(new Date(item.createdAt), 'HH:mm')}
+                      </div>
                     </div>
                   ))}
-
-                  <CollapsibleTrigger className="w-full text-left text-sm text-primary mt-1">Show {groupItems.length - 2} more</CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="space-y-2 mt-2">
-                      {groupItems.slice(2).map((item, idx) => (
-                        <div key={item.searchId || idx} className="flex flex-col items-start justify-between p-2">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{item.title || 'Untitled'}</div>
-                            <div className="text-xs text-muted-foreground line-clamp-1">{item.symptoms}</div>
-                          </div>
-                          <div className="ml-3 text-xs text-muted-foreground">{format(new Date(item.createdAt), 'HH:mm')}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </CollapsibleContent>
                 </div>
-              </Collapsible>
-            ) : (
-              <div className="space-y-2">
-                {groupItems.map((item, idx) => (
-                  <div key={item.searchId || idx} className="flex flex-col items-start justify-between p-2">
-                    <div className="flex-1">
-                      <Link href={`/tools/symptom-search/${item.searchId}`} className="text-sm font-medium underline text-primary flex-center-1"><ExternalLink className="inline shrink-0 size-3" /> {item.title || 'Untitled'} </Link>
-                      <div className="text-xs text-muted-foreground flex-center-1 line-clamp-1">
-                        <HeartPulse className="inline w-3 h-3" />
-                        {item.symptoms.charAt(0).toUpperCase() + item.symptoms.slice(1)}
-                      </div>
-                    </div>
-
-                    <div className="text-xs text-muted-foreground flex-center-1">
-                      <Clock className="inline w-3 h-3" />
-                      {format(new Date(item.createdAt), 'HH:mm')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </TimelineContent>
-        </TimelineItem>
-      ))}
-    </Timeline>
+              )}
+            </TimelineContent>
+          </TimelineItem>
+        ))}
+      </Timeline>
+    </ScrollArea>
   )
 }

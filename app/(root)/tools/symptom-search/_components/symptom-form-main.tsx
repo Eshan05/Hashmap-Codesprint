@@ -17,6 +17,7 @@ import { AutosizeTextarea } from '@/components/ui/autoresize-textarea'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import InputTags from '@/components/ui/input-tags'
 import { Label } from '@/components/ui/label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useSymptomStore } from '@/lib/store/symptom-select-store'
@@ -40,19 +41,31 @@ export default function SymptomFormMain() {
       otherInfo: '',
     },
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagMode, setTagMode] = useState(false);
   const router = useRouter();
+  const addSymptom = useSymptomStore((s) => s.addSymptom);
+  const clearSymptoms = useSymptomStore((s) => s.clearSymptoms);
 
   const selectedSymptoms = useSymptomStore((state) => state.selectedSymptoms);
 
   useEffect(() => {
     const symptomsArray = Array.from(selectedSymptoms);
-    // This creates a clean, comma-separated string for your NLP model
     const symptomString = symptomsArray.join(', ');
     form.setValue('symptoms', symptomString, { shouldValidate: true });
+    // When tagMode is enabled, keep local tags in sync with the selector
+    if (tagMode) {
+      setTags(symptomsArray);
+    }
   }, [selectedSymptoms, form]);
+
+  useEffect(() => {
+    if (!tagMode) {
+      form.setValue('symptoms', tags.join(', '), { shouldValidate: true });
+    }
+  }, [tags, tagMode, form]);
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setLoading(true);
@@ -111,7 +124,12 @@ export default function SymptomFormMain() {
                   <article className='flex flex-col items-start lg:gap-1'>
                     <span className='text-base -mt-0.5'>Symptoms</span>
                     <div className='gap-2 space-evenly items-start lg:flex hidden'>
-                      <ToggleGroup type='multiple' className='p-1'>
+                      <ToggleGroup
+                        type='single'
+                        className='p-1'
+                        value={tagMode ? 'symptom-list' : 'symptom-nlp'}
+                        onValueChange={(value) => setTagMode(value === 'symptom-list')}
+                      >
                         <ToggleGroupItem variant={'outline'} value="symptom-list" aria-label='symptom-list'><ListOrderedIcon className='w-4 h-4' /></ToggleGroupItem>
                         <ToggleGroupItem variant={'outline'} value="symptom-nlp" aria-label='symptom-nlp'><TextCursorInputIcon className='w-4 h-4' /></ToggleGroupItem>
                       </ToggleGroup>
@@ -122,7 +140,22 @@ export default function SymptomFormMain() {
               </FormLabel>
               <div className='w-full lg:col-span-2 -mt-4 lg:mt-0 p-1'>
                 <FormControl className=''>
-                  <AutosizeTextarea {...field} className='my-1' placeholder='Enter your symptoms here...' />
+                  {tagMode ? (
+                    <InputTags
+                      value={tags}
+                      onChange={(v) => {
+                        const newTags = typeof v === 'function' ? (v as (prev: string[]) => string[])(tags) : v
+                        setTags(newTags)
+                        clearSymptoms()
+                        newTags.forEach((sym) => addSymptom(sym))
+                      }}
+                      className='my-1'
+                      readOnly
+                      placeholder='Add symptoms via the selector drawer'
+                    />
+                  ) : (
+                    <AutosizeTextarea {...field} className='my-1' placeholder='Enter your symptoms here...' />
+                  )}
                 </FormControl>
                 <div className='gap-2 space-evenly items-start flex lg:hidden'>
                   <ToggleGroup type='single' className='p-1'>
@@ -227,26 +260,6 @@ export default function SymptomFormMain() {
               disabled={loading}>
               {loading ? 'Forming Response...' : 'Analyze'}
             </Button>
-            {/* <Drawer direction='left' shouldScaleBackground setBackgroundColorOnScale={false}>
-              <DrawerTrigger asChild>
-                <Button type="button" variant={'secondary'}>
-                  List of Symptoms
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className='max-w-sm'>
-                <div className="mx-auto w-full max-w-sm py-4">
-                  <DrawerHeader>
-                    <DrawerTitle className='text-lg font-semibold'>Known Symptoms List</DrawerTitle>
-                    <DrawerDescription className='text-sm text-muted-foreground'>
-                      Here is a list of common symptoms you can choose from when using the symptom list input mode.
-                    </DrawerDescription>
-                  </DrawerHeader>
-                  <div className="my-4 p-1">
-                    
-                  </div>
-                </div>
-              </DrawerContent>
-            </Drawer> */}
             <SymptomDrawer />
           </div>
           <div className='flex items-center space-x-2'>
