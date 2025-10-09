@@ -9,6 +9,7 @@ import {
   FileUserIcon,
   Frame,
   GalleryVerticalEnd,
+  HeartPulse,
   Map,
   Newspaper,
   PieChart,
@@ -83,9 +84,14 @@ const data = {
       icon: ScanSearch,
     },
     {
+      title: "Personal Notes",
+      url: "/notes",
+      icon: FileUserIcon,
+    },
+    {
       title: "Medical Conditions",
       url: "/tools/conditions",
-      icon: FileUserIcon,
+      icon: HeartPulse,
     },
   ],
   projects: [
