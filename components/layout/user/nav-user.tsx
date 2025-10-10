@@ -56,6 +56,17 @@ import { Button } from "@/components/ui/button"
 import { PasswordInput } from "@/components/ui/password-input"
 import CopyButton from "@/components/ui/copy-button"
 import { Trash } from "lucide-react"
+import PasskeysPanel, { AddPasskeyInline } from "@/components/auth/passkeys-panel"
+import {
+  Credenza,
+  CredenzaTrigger,
+  CredenzaContent,
+  CredenzaBody,
+  CredenzaHeader,
+  CredenzaDescription,
+  CredenzaTitle,
+  CredenzaFooter,
+} from "@/components/ui/credenza"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -86,7 +97,6 @@ export function NavUser({
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
-  const [passkeysOpen, setPasskeysOpen] = useState(false)
   const [twoFaOpen, setTwoFaOpen] = useState(false)
   const [sessionsOpen, setSessionsOpen] = useState(false)
   const [twoFaUri, setTwoFaUri] = useState("")
@@ -163,10 +173,28 @@ export function NavUser({
                 <Edit />
                 Edit Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setPasskeysOpen(true) }}>
-                <Fingerprint />
-                Manage Passkeys
-              </DropdownMenuItem>
+              <Credenza>
+                <CredenzaTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <Fingerprint />
+                    Manage Passkeys
+                  </DropdownMenuItem>
+                </CredenzaTrigger>
+                <CredenzaContent className="">
+                  <CredenzaHeader>
+                    <CredenzaTitle>Passkeys</CredenzaTitle>
+                    <CredenzaDescription>Manage registered passkeys for your account.</CredenzaDescription>
+                  </CredenzaHeader>
+                  <CredenzaBody>
+                    <div className="flex items-center justify-between mb-4">
+                      <AddPasskeyInline />
+                    </div>
+                    <PasskeysPanel />
+                  </CredenzaBody>
+                </CredenzaContent>
+              </Credenza>
               <DropdownMenuItem onClick={() => { setTwoFaOpen(true) }}>
                 <QrCode />
                 Manage 2FA
@@ -258,49 +286,6 @@ export function NavUser({
                 }
               }}>Save</Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Passkeys Dialog */}
-        <Dialog open={passkeysOpen} onOpenChange={setPasskeysOpen}>
-          <DialogContent className="sm:max-w-[520px] w-11/12">
-            <DialogHeader>
-              <DialogTitle>Passkeys</DialogTitle>
-              <DialogDescription>Manage registered passkeys for your account.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-3">
-              <div className="flex gap-2">
-                <Input placeholder="Passkey name" value={passkeyName} onChange={(e) => setPasskeyName(e.target.value)} />
-                <Button onClick={async () => {
-                  if (!passkeyName) { toast.error("Name required"); return; }
-                  const res = await client.passkey.addPasskey({ name: passkeyName });
-                  if (res?.error) toast.error(res.error.message);
-                  else { toast.success("Passkey created"); setPasskeyName(""); refetchPasskeys?.(); }
-                }}>Create</Button>
-              </div>
-              <div className="max-h-64 overflow-auto">
-                {isPasskeysLoading ? <div>Loading...</div> : passkeysData && passkeysData.length ? (
-                  passkeysData.map((pk: any) => (
-                    <div key={pk.id} className="flex items-center justify-between p-2">
-                      <div>
-                        <div className="font-medium">{pk.name || 'Passkey'}</div>
-                        <div className="text-xs text-muted-foreground">{pk.createdAt ? new Date(pk.createdAt).toLocaleString() : null}</div>
-                      </div>
-                      <div>
-                        <Button size="sm" variant="secondary" onClick={async () => {
-                          setIsDeletingPasskey(pk.id); const r = await client.passkey.deletePasskey({ id: pk.id });
-                          if (r?.error) toast.error(r.error.message); else { toast.success('Deleted'); refetchPasskeys?.(); }
-                          setIsDeletingPasskey(null);
-                        }}>{isDeletingPasskey === pk.id ? <Loader2 className="animate-spin" /> : <Trash />}</Button>
-                      </div>
-                    </div>
-                  ))
-                ) : (<div>No passkeys</div>)}
-              </div>
-              <DialogFooter>
-                <Button onClick={() => setPasskeysOpen(false)}>Close</Button>
-              </DialogFooter>
-            </div>
           </DialogContent>
         </Dialog>
 
