@@ -9,21 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useState, useTransition } from "react";
-import { Loader2, MailIcon, KeyIcon, EyeIcon, EyeOffIcon, UserPlus2Icon, ExternalLinkIcon } from "lucide-react";
-import { signUp } from "@/lib/auth-client";
-import { toast } from "sonner";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { getCallbackURL } from "@/lib/shared";
+import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import ImageUploadField from "@/components/ui/image-upload-field";
-import { Form } from "@/components/ui/form";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { signUp } from "@/lib/auth-client";
+import { getCallbackURL } from "@/lib/shared";
 import { calculatePasswordStrength } from "@/utils/password-strength";
-import { CheckCircle, XCircle } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { ExternalLinkIcon, EyeIcon, EyeOffIcon, KeyIcon, Loader2, MailIcon, UserPlus2Icon } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
 import type { SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type FormValues = {
   firstName: string;

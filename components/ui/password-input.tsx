@@ -7,24 +7,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+interface PasswordInputProps extends React.ComponentProps<typeof Input> {
+  leftIcon?: React.ReactNode;
+}
+
 const PasswordInput = ({
   ref,
   className,
+  leftIcon,
   ...props
-}: any & {
-  ref: React.RefObject<HTMLInputElement>;
-}) => {
+}: PasswordInputProps) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const disabled =
     props.value === "" || props.value === undefined || props.disabled;
 
   return (
     <div className="relative">
+      {leftIcon && (
+        <div className="absolute left-0 top-0 h-full px-2.5 justify-center flex items-center">
+          {leftIcon}
+        </div>
+      )}
       <Input
         {...props}
         type={showPassword ? "text" : "password"}
         name="password_fake"
-        className={cn("hide-password-toggle pr-10", className)}
+        className={cn(
+          "hide-password-toggle pr-10",
+          leftIcon && "pl-8",
+          className
+        )}
         ref={ref}
       />
       <Button
@@ -45,7 +57,6 @@ const PasswordInput = ({
         </span>
       </Button>
 
-      {/* hides browsers password toggles */}
       <style>{`
                 .hide-password-toggle::-ms-reveal,
                 .hide-password-toggle::-ms-clear {

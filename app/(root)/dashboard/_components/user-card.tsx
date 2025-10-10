@@ -50,6 +50,7 @@ import {
   Apple,
   Monitor,
   MapPin,
+  LockIcon,
 } from "lucide-react";
 import {
   Accordion,
@@ -65,6 +66,7 @@ import {
   CredenzaHeader,
   CredenzaDescription,
   CredenzaTitle,
+  CredenzaFooter,
 } from "@/components/ui/credenza";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -382,7 +384,8 @@ export default function UserCard(props: {
               <div className="px-2 w-max gap-1 flex flex-col">
                 {/* <p className="text-xs font-medium">Passkeys</p> */}
                 <CredenzaTrigger asChild>
-                  <Button variant="ghost" size="sm" className="mt-2">
+                  <Button variant="outline" size="sm">
+                    <Fingerprint />
                     Manage passkeys
                   </Button>
                 </CredenzaTrigger>
@@ -687,8 +690,8 @@ function ChangePassword() {
   const [open, setOpen] = useState<boolean>(false);
   const [signOutDevices, setSignOutDevices] = useState<boolean>(false);
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button className="gap-2 z-10" variant="outline" size="sm">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -703,14 +706,15 @@ function ChangePassword() {
           </svg>
           <span className="text-sm text-muted-foreground">Change Password</span>
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] w-11/12">
-        <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
-          <DialogDescription>Change your password</DialogDescription>
-        </DialogHeader>
+      </CredenzaTrigger>
+      <CredenzaContent className="p-4">
+        <CredenzaHeader>
+          <CredenzaTitle>Change Password</CredenzaTitle>
+          <CredenzaDescription>To change your password, please enter your current password and the new password you would like to use.</CredenzaDescription>
+        </CredenzaHeader>
         <div className="grid gap-2">
-          <Label htmlFor="current-password">Current Password</Label>
+          <Label htmlFor="current-password" className="">Current Password</Label>
+          <p className="text-xs text-muted-foreground -mt-1">Enter your current password correctly to proceed.</p>
           <PasswordInput
             id="current-password"
             value={currentPassword}
@@ -719,8 +723,10 @@ function ChangePassword() {
             }
             autoComplete="new-password"
             placeholder="Password"
+            leftIcon={<LockIcon className="size-4 shrink-0 text-muted-foreground" />}
           />
-          <Label htmlFor="new-password">New Password</Label>
+          <Label htmlFor="new-password" className="mt-4">New Password</Label>
+          <p className="text-xs text-muted-foreground -mt-1">Enter a new password as per requirements and re-enter to confirm it.</p>
           <PasswordInput
             value={newPassword}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -728,14 +734,15 @@ function ChangePassword() {
             }
             autoComplete="new-password"
             placeholder="New Password"
+            leftIcon={<LockIcon className="size-4 shrink-0 text-muted-foreground" />}
           />
-          <Label htmlFor="password">Confirm Password</Label>
           <PasswordInput
             value={confirmPassword}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setConfirmPassword(e.target.value)
             }
             autoComplete="new-password"
+            leftIcon={<LockIcon className="size-4 shrink-0 text-muted-foreground" />}
             placeholder="Confirm Password"
           />
           <div className="flex gap-2 items-center">
@@ -747,7 +754,7 @@ function ChangePassword() {
             <p className="text-sm">Sign out from other devices</p>
           </div>
         </div>
-        <DialogFooter>
+        <CredenzaFooter>
           <Button
             onClick={async () => {
               if (newPassword !== confirmPassword) {
@@ -785,9 +792,9 @@ function ChangePassword() {
               "Change Password"
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </CredenzaFooter>
+      </CredenzaContent>
+    </Credenza>
   );
 }
 
@@ -932,7 +939,7 @@ function AddPasskey() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2 mx-auto">
+        <Button variant="outline" size={'sm'} className="gap-2 mx-auto">
           <Plus size={15} />
           Add New Passkey
         </Button>
@@ -971,129 +978,6 @@ function AddPasskey() {
               </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function ListPasskeys() {
-  const { data } = client.useListPasskeys();
-  const [isOpen, setIsOpen] = useState(false);
-  const [passkeyName, setPasskeyName] = useState("");
-
-  const handleAddPasskey = async () => {
-    if (!passkeyName) {
-      toast.error("Passkey name is required");
-      return;
-    }
-    setIsLoading(true);
-    const res = await client.passkey.addPasskey({
-      name: passkeyName,
-    });
-    setIsLoading(false);
-    if (res?.error) {
-      toast.error(res?.error.message);
-    } else {
-      toast.success("Passkey added successfully. You can now use it to login.");
-    }
-  };
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDeletePasskey, setIsDeletePasskey] = useState<boolean>(false);
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="text-xs md:text-sm">
-          <Fingerprint className="mr-2 h-4 w-4" />
-          <span>Passkeys {data?.length ? `[${data?.length}]` : ""}</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] w-11/12">
-        <DialogHeader>
-          <DialogTitle>Passkeys</DialogTitle>
-          <DialogDescription>List of passkeys</DialogDescription>
-        </DialogHeader>
-        {data?.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((passkey) => (
-                <TableRow
-                  key={passkey.id}
-                  className="flex  justify-between items-center"
-                >
-                  <TableCell>{passkey.name || "My Passkey"}</TableCell>
-                  <TableCell className="text-right">
-                    <button
-                      onClick={async () => {
-                        const res = await client.passkey.deletePasskey({
-                          id: passkey.id,
-                          fetchOptions: {
-                            onRequest: () => {
-                              setIsDeletePasskey(true);
-                            },
-                            onSuccess: () => {
-                              toast("Passkey deleted successfully");
-                              setIsDeletePasskey(false);
-                            },
-                            onError: (error) => {
-                              toast.error(error.error.message);
-                              setIsDeletePasskey(false);
-                            },
-                          },
-                        });
-                      }}
-                    >
-                      {isDeletePasskey ? (
-                        <Loader2 size={15} className="animate-spin" />
-                      ) : (
-                        <Trash
-                          size={15}
-                          className="cursor-pointer text-red-600"
-                        />
-                      )}
-                    </button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <p className="text-sm text-muted-foreground">No passkeys found</p>
-        )}
-        {!data?.length && (
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="passkey-name" className="text-sm">
-                New Passkey
-              </Label>
-              <Input
-                id="passkey-name"
-                value={passkeyName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setPasskeyName(e.target.value)
-                }
-                placeholder="My Passkey"
-              />
-            </div>
-            <Button type="submit" onClick={handleAddPasskey} className="w-full">
-              {isLoading ? (
-                <Loader2 size={15} className="animate-spin" />
-              ) : (
-                <>
-                  <Fingerprint className="mr-2 h-4 w-4" />
-                  Create Passkey
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-        <DialogFooter>
-          <Button onClick={() => setIsOpen(false)}>Close</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
