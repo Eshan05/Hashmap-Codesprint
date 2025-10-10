@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { FormControl } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import {
@@ -51,6 +52,9 @@ import {
   Monitor,
   MapPin,
   LockIcon,
+  KeyIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from "lucide-react";
 import {
   Accordion,
@@ -73,11 +77,13 @@ import { useRouter } from "next/navigation";
 import QRCodeStyling from "qr-code-styling";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { calculatePasswordStrength } from "@/utils/password-strength";
 import { UAParser } from "ua-parser-js";
 import { TbBrandAndroid, TbBrandApple, TbBrandWindows } from "react-icons/tb";
 import { FaLinux } from "react-icons/fa6";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ChangePassword from "@/components/auth/change-password";
 
 function MobileIcon() {
   return (
@@ -682,122 +688,6 @@ async function convertImageToBase64(file: File): Promise<string> {
   });
 }
 
-function ChangePassword() {
-  const [currentPassword, setCurrentPassword] = useState<string>("");
-  const [newPassword, setNewPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
-  const [signOutDevices, setSignOutDevices] = useState<boolean>(false);
-  return (
-    <Credenza open={open} onOpenChange={setOpen}>
-      <CredenzaTrigger asChild>
-        <Button className="gap-2 z-10" variant="outline" size="sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="1em"
-            height="1em"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M2.5 18.5v-1h19v1zm.535-5.973l-.762-.442l.965-1.693h-1.93v-.884h1.93l-.965-1.642l.762-.443L4 9.066l.966-1.643l.761.443l-.965 1.642h1.93v.884h-1.93l.965 1.693l-.762.442L4 10.835zm8 0l-.762-.442l.966-1.693H9.308v-.884h1.93l-.965-1.642l.762-.443L12 9.066l.966-1.643l.761.443l-.965 1.642h1.93v.884h-1.93l.965 1.693l-.762.442L12 10.835zm8 0l-.762-.442l.966-1.693h-1.931v-.884h1.93l-.965-1.642l.762-.443L20 9.066l.966-1.643l.761.443l-.965 1.642h1.93v.884h-1.93l.965 1.693l-.762.442L20 10.835z"
-            ></path>
-          </svg>
-          <span className="text-sm text-muted-foreground">Change Password</span>
-        </Button>
-      </CredenzaTrigger>
-      <CredenzaContent className="p-4">
-        <CredenzaHeader>
-          <CredenzaTitle>Change Password</CredenzaTitle>
-          <CredenzaDescription>To change your password, please enter your current password and the new password you would like to use.</CredenzaDescription>
-        </CredenzaHeader>
-        <div className="grid gap-2">
-          <Label htmlFor="current-password" className="">Current Password</Label>
-          <p className="text-xs text-muted-foreground -mt-1">Enter your current password correctly to proceed.</p>
-          <PasswordInput
-            id="current-password"
-            value={currentPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setCurrentPassword(e.target.value)
-            }
-            autoComplete="new-password"
-            placeholder="Password"
-            leftIcon={<LockIcon className="size-4 shrink-0 text-muted-foreground" />}
-          />
-          <Label htmlFor="new-password" className="mt-4">New Password</Label>
-          <p className="text-xs text-muted-foreground -mt-1">Enter a new password as per requirements and re-enter to confirm it.</p>
-          <PasswordInput
-            value={newPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setNewPassword(e.target.value)
-            }
-            autoComplete="new-password"
-            placeholder="New Password"
-            leftIcon={<LockIcon className="size-4 shrink-0 text-muted-foreground" />}
-          />
-          <PasswordInput
-            value={confirmPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setConfirmPassword(e.target.value)
-            }
-            autoComplete="new-password"
-            leftIcon={<LockIcon className="size-4 shrink-0 text-muted-foreground" />}
-            placeholder="Confirm Password"
-          />
-          <div className="flex gap-2 items-center">
-            <Checkbox
-              onCheckedChange={(checked) =>
-                checked ? setSignOutDevices(true) : setSignOutDevices(false)
-              }
-            />
-            <p className="text-sm">Sign out from other devices</p>
-          </div>
-        </div>
-        <CredenzaFooter>
-          <Button
-            onClick={async () => {
-              if (newPassword !== confirmPassword) {
-                toast.error("Passwords do not match");
-                return;
-              }
-              if (newPassword.length < 8) {
-                toast.error("Password must be at least 8 characters");
-                return;
-              }
-              setLoading(true);
-              const res = await client.changePassword({
-                newPassword: newPassword,
-                currentPassword: currentPassword,
-                revokeOtherSessions: signOutDevices,
-              });
-              setLoading(false);
-              if (res.error) {
-                toast.error(
-                  res.error.message ||
-                  "Couldn't change your password! Make sure it's correct",
-                );
-              } else {
-                setOpen(false);
-                toast.success("Password changed successfully");
-                setCurrentPassword("");
-                setNewPassword("");
-                setConfirmPassword("");
-              }
-            }}
-          >
-            {loading ? (
-              <Loader2 size={15} className="animate-spin" />
-            ) : (
-              "Change Password"
-            )}
-          </Button>
-        </CredenzaFooter>
-      </CredenzaContent>
-    </Credenza>
-  );
-}
-
 function EditUserDialog() {
   const { data, isPending, error } = useSession();
   const [name, setName] = useState<string>();
@@ -991,7 +881,7 @@ function PasskeysPanel() {
   const loading = isPending || isRefetching;
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-3 max-sm:mb-4">
       {loading ? (
         <div className="text-sm text-muted-foreground">Loading passkeys...</div>
       ) : data && data.length > 0 ? (
