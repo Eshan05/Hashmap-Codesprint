@@ -378,11 +378,30 @@ export default function UserCard(props: {
         </Credenza>
         <div className="border-y py-4 flex items-center flex-wrap justify-between gap-2">
           <div className="flex flex-col gap-2">
-            <p className="text-sm">Passkeys</p>
-            <div className="flex gap-2 flex-wrap">
-              <AddPasskey />
-              <ListPasskeys />
-            </div>
+            <Credenza>
+              <div className="px-2 w-max gap-1 flex flex-col">
+                {/* <p className="text-xs font-medium">Passkeys</p> */}
+                <CredenzaTrigger asChild>
+                  <Button variant="ghost" size="sm" className="mt-2">
+                    Manage passkeys
+                  </Button>
+                </CredenzaTrigger>
+              </div>
+              <CredenzaContent>
+                <CredenzaHeader>
+                  <CredenzaTitle>Passkeys</CredenzaTitle>
+                  <CredenzaDescription>
+                    Manage registered passkeys for your account.
+                  </CredenzaDescription>
+                </CredenzaHeader>
+                <CredenzaBody>
+                  <div className="flex items-center justify-between mb-4">
+                    <AddPasskey />
+                  </div>
+                  <PasskeysPanel />
+                </CredenzaBody>
+              </CredenzaContent>
+            </Credenza>
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-sm">Two Factor</p>
@@ -913,7 +932,7 @@ function AddPasskey() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2 text-xs md:text-sm">
+        <Button variant="outline" className="gap-2 mx-auto">
           <Plus size={15} />
           Add New Passkey
         </Button>
@@ -1078,5 +1097,68 @@ function ListPasskeys() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PasskeysPanel() {
+  const { data, isPending, isRefetching, refetch } = client.useListPasskeys();
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  const loading = isPending || isRefetching;
+
+  return (
+    <div className="grid gap-3">
+      {loading ? (
+        <div className="text-sm text-muted-foreground">Loading passkeys...</div>
+      ) : data && data.length > 0 ? (
+        <div className="grid gap-2">
+          {data.map((pk) => (
+            <div
+              key={pk.id}
+              className="flex items-center justify-between gap-2 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800"
+            >
+              <div className="flex items-center gap-3">
+                <Fingerprint />
+                <div>
+                  <div className="text-sm font-medium">{pk.name || "Passkey"}</div>
+                  <div className="text-xs text-muted-foreground">{pk.createdAt ? new Date(pk.createdAt).toLocaleString() : null}</div>
+                </div>
+              </div>
+              <div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={async () => {
+                    setIsDeleting(pk.id);
+                    const res = await client.passkey.deletePasskey({
+                      id: pk.id,
+                    });
+                    if (res?.error) {
+                      toast.error(res.error.message);
+                    } else {
+                      toast.success("Passkey deleted");
+                      try {
+                        refetch?.();
+                      } catch (e) {
+                        // ignore
+                      }
+                    }
+                    setIsDeleting(null);
+                  }}
+                >
+                  {isDeleting === pk.id ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Trash size={14} />
+                  )}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-sm text-muted-foreground">No passkeys found</div>
+      )}
+    </div>
   );
 }
