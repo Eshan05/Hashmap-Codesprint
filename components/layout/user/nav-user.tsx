@@ -1,97 +1,70 @@
 "use client"
 
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
-  Loader2,
-  LogOut,
-  Sparkles,
-  Edit,
-  Fingerprint,
-  QrCode,
   ShieldCheck,
-  ShieldOff,
-  Key as KeyIcon,
-  Eye,
-  EyeOff,
-  Laptop,
-  Smartphone,
+  ShieldOff
 } from "lucide-react"
 
+import ChangePassword from "@/components/auth/change-password"
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import Image from "next/image"
-import { useTransition, useRef, useEffect, useState } from "react"
-import { calculatePasswordStrength } from "@/utils/password-strength"
-import ChangePassword from "@/components/auth/change-password"
-import { authClient as client } from "@/lib/auth-client"
-import { toast } from "sonner"
-import { UAParser } from "ua-parser-js"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
-import { PasswordInput } from "@/components/ui/password-input"
-import CopyButton from "@/components/ui/copy-button"
-import { Trash } from "lucide-react"
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
-import PasskeysPanel, { AddPasskeyInline } from "@/components/auth/passkeys-panel"
-import {
-  Credenza,
-  CredenzaTrigger,
-  CredenzaContent,
-  CredenzaBody,
-  CredenzaHeader,
-  CredenzaDescription,
-  CredenzaTitle,
-  CredenzaFooter,
-} from "@/components/ui/credenza"
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { signOut } from "@/lib/auth-client"
-import { useRouter } from "next/navigation"
-import { Session } from "@/lib/auth-types";
-import QRCodeStyling from "qr-code-styling"
+import { authClient as client } from "@/lib/auth-client"
+import { Session } from "@/lib/auth-types"
 import dynamic from 'next/dynamic'
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import QRCodeStyling from "qr-code-styling"
+import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
 
-const EditProfileItem = dynamic(() => import('./dropdown/edit-profile-item'), { ssr: false })
-const SessionsItem = dynamic(() => import('./dropdown/sessions-item'), { ssr: false })
-const PasskeysItem = dynamic(() => import('./dropdown/passkeys-item'), { ssr: false })
-const TwoFaScanItem = dynamic(() => import('./dropdown/twofa-scan-item'), { ssr: false })
-const TwoFaToggleItem = dynamic(() => import('./dropdown/twofa-toggle-item'), { ssr: false })
-const VerifyEmailItem = dynamic(() => import('./dropdown/verify-email-item'), { ssr: false })
-const BillingItem = dynamic(() => import('./dropdown/billing-item'), { ssr: false })
-const NotificationsItem = dynamic(() => import('./dropdown/notifications-item'), { ssr: false })
-const SignOutItem = dynamic(() => import('./dropdown/signout-item'), { ssr: false })
+const dmiClasses = 'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden'
+
+const QL = () => (
+  <div className={`${dmiClasses}`}>
+    <Skeleton className="size-4 shrink-0 rounded-full" />
+    <Skeleton className="h-4 w-20 shrink-0 rounded-md" />
+  </div>
+)
+
+const EditProfileItem = dynamic(() => import('./dropdown/edit-profile-item'), { ssr: false, loading: () => <QL /> })
+const SessionsItem = dynamic(() => import('./dropdown/sessions-item'), { ssr: false, loading: () => <QL /> })
+const PasskeysItem = dynamic(() => import('./dropdown/passkeys-item'), { ssr: false, loading: () => <QL /> })
+const TwoFaScanItem = dynamic(() => import('./dropdown/twofa-scan-item'), { ssr: false, loading: () => <QL /> })
+const TwoFaToggleItem = dynamic(() => import('./dropdown/twofa-toggle-item'), { ssr: false, loading: () => <QL /> })
+const VerifyEmailItem = dynamic(() => import('./dropdown/verify-email-item'), { ssr: false, loading: () => <QL /> })
+const BillingItem = dynamic(() => import('./dropdown/billing-item'), { ssr: false, loading: () => <QL /> })
+const NotificationsItem = dynamic(() => import('./dropdown/notifications-item'), { ssr: false, loading: () => <QL /> })
+const SignOutItem = dynamic(() => import('./dropdown/signout-item'), { ssr: false, loading: () => <QL /> })
 
 async function convertImageToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
