@@ -81,6 +81,17 @@ import { signOut } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { Session } from "@/lib/auth-types";
 import QRCodeStyling from "qr-code-styling"
+import dynamic from 'next/dynamic'
+
+const EditProfileItem = dynamic(() => import('./dropdown/edit-profile-item'), { ssr: false })
+const SessionsItem = dynamic(() => import('./dropdown/sessions-item'), { ssr: false })
+const PasskeysItem = dynamic(() => import('./dropdown/passkeys-item'), { ssr: false })
+const TwoFaScanItem = dynamic(() => import('./dropdown/twofa-scan-item'), { ssr: false })
+const TwoFaToggleItem = dynamic(() => import('./dropdown/twofa-toggle-item'), { ssr: false })
+const VerifyEmailItem = dynamic(() => import('./dropdown/verify-email-item'), { ssr: false })
+const BillingItem = dynamic(() => import('./dropdown/billing-item'), { ssr: false })
+const NotificationsItem = dynamic(() => import('./dropdown/notifications-item'), { ssr: false })
+const SignOutItem = dynamic(() => import('./dropdown/signout-item'), { ssr: false })
 
 async function convertImageToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -205,288 +216,25 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => { setEditOpen(true) }}>
-                <Edit />
-                Edit Profile
-              </DropdownMenuItem>
-              <Credenza>
-                <CredenzaTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => {
-                    e.preventDefault(); (async () => {
-                      try {
-                        const r = await fetch('/api/auth/list-sessions', { credentials: 'same-origin' });
-                        const json = await r.json();
-                        setSessions(json || []);
-                      } catch (err) {
-                        console.error(err);
-                        toast.error('Failed to load sessions');
-                      }
-                    })()
-                  }}>
-                    <Laptop />
-                    Manage Sessions
-                  </DropdownMenuItem>
-                </CredenzaTrigger>
-                <CredenzaContent>
-                  <CredenzaHeader>
-                    <CredenzaTitle>Active Sessions</CredenzaTitle>
-                    <CredenzaDescription>Manage active sessions across devices.</CredenzaDescription>
-                  </CredenzaHeader>
-                  <CredenzaBody>
-                    <ScrollArea className="h-64">
-                      <div className="grid gap-2">
-                        {sessions ? (() => {
-                          const groups: Record<string, any[]> = {};
-                          sessions.filter((s: any) => s.userAgent).forEach((s: any) => {
-                            const os = new UAParser(s.userAgent || "").getOS().name || "Unknown";
-                            let key = "Other";
-                            if (/windows/i.test(os)) key = "Windows";
-                            else if (/mac os|macos|ios/i.test(os)) key = "Mac/iOS";
-                            else if (/android/i.test(os)) key = "Android";
-                            else if (/linux/i.test(os)) key = "Linux";
-                            if (!groups[key]) groups[key] = [];
-                            groups[key].push(s);
-                          });
-                          const entries = Object.entries(groups);
-                          if (!entries.length) return <p className="text-sm text-muted-foreground">No active sessions</p>;
-
-                          const getIcon = (key: string) => {
-                            if (key === "Windows") return <Laptop size={16} />;
-                            if (key === "Mac/iOS") return <Laptop size={16} />;
-                            if (key === "Android") return <Smartphone size={16} />;
-                            if (key === "Linux") return <Laptop size={16} />;
-                            return <Laptop size={16} />;
-                          };
-
-                          return (
-                            <Accordion type="multiple" className="w-full mt-2">
-                              {entries.map(([key, list]) => (
-                                <AccordionItem key={key} value={key} className="border-b-0 w-full">
-                                  <AccordionTrigger className="flex items-center justify-between gap-3 px-2 py-2 rounded-md hover:bg-muted w-full">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-muted-foreground">{getIcon(key)}</span>
-                                      <div className="font-medium">{key}</div>
-                                      <Badge variant={'secondary'} className="py-0">{`${list.length} ${list.length === 1 ? 'session' : 'sessions'}`}</Badge>
-                                    </div>
-                                  </AccordionTrigger>
-                                  <AccordionContent className="px-2 py-1">
-                                    <div className="grid gap-2">
-                                      {list.map((s: any) => {
-                                        const parser = new UAParser(s.userAgent || "");
-                                        const device = parser.getDevice();
-                                        const osName = parser.getOS().name || "Unknown";
-                                        const deviceName = device.model || device.vendor || osName;
-                                        const location = s.location || s.geo || s.city || s.ipLocation || null;
-                                        const ip = s.ip || s.ipAddress || s.clientIp || s.remoteAddress || null;
-                                        const isCurrent = s.id === session?.session?.id;
-                                        return (
-                                          <div key={s.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800">
-                                            <div className="flex items-start gap-3">
-                                              <div className="pt-0.5">{device.type === 'mobile' ? <Smartphone size={16} /> : <Laptop size={16} />}</div>
-                                              <div>
-                                                <header className="flex items-center gap-2">
-                                                  {isCurrent && <Badge className="py-0">Current</Badge>}
-                                                  <div className="font-medium">{deviceName}</div>
-                                                </header>
-                                                <div className="text-xs text-muted-foreground">{parser.getBrowser().name || 'Unknown'} · {parser.getOS().version || 'Unknown'}</div>
-                                                {location ? <div className="text-xs text-muted-foreground">{location}</div> : ip ? <div className="text-xs text-muted-foreground">{ip}</div> : null}
-                                              </div>
-                                            </div>
-                                            <div>
-                                              <Button size="sm" variant={isCurrent ? 'default' : 'secondary'} onClick={async () => {
-                                                setIsTerminating(s.id);
-                                                const r = await client.revokeSession({ token: s.token });
-                                                if (r?.error) toast.error(r.error.message); else { toast.success('Session revoked'); setSessions(sessions.filter((x) => x.id !== s.id)); }
-                                                if (s.id === session?.session?.id) router.refresh();
-                                                setIsTerminating(null);
-                                              }}>
-                                                {isTerminating === s.id ? <Loader2 size={15} className="animate-spin" /> : isCurrent ? <LogOut size={15} /> : <Trash size={15} />}
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        )
-                                      })}
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              ))}
-                            </Accordion>
-                          )
-                        })() : <div className="text-sm text-muted-foreground">Loading sessions...</div>}
-                      </div>
-                    </ScrollArea>
-                  </CredenzaBody>
-                </CredenzaContent>
-              </Credenza>
-              <Credenza>
-                <CredenzaTrigger asChild>
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                  >
-                    <Fingerprint />
-                    Manage Passkeys
-                  </DropdownMenuItem>
-                </CredenzaTrigger>
-                <CredenzaContent className="">
-                  <CredenzaHeader>
-                    <CredenzaTitle>Passkeys</CredenzaTitle>
-                    <CredenzaDescription>Manage registered passkeys for your account.</CredenzaDescription>
-                  </CredenzaHeader>
-                  <CredenzaBody>
-                    <div className="flex items-center justify-between mb-4">
-                      <AddPasskeyInline />
-                    </div>
-                    <PasskeysPanel />
-                  </CredenzaBody>
-                </CredenzaContent>
-              </Credenza>
+              {/* Edit profile (lazy) */}
+              <EditProfileItem session={session} />
+              {/* Sessions (lazy) */}
+              <SessionsItem session={session} />
+              <PasskeysItem />
               {/* Scan QR Code (only for users with 2FA enabled) */}
-              {!!session?.user.twoFactorEnabled && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <QrCode />
-                      Scan QR Code
-                    </DropdownMenuItem>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] w-11/12">
-                    <DialogHeader>
-                      <DialogTitle>Scan QR Code</DialogTitle>
-                      <DialogDescription>Scan the QR code with your TOTP app</DialogDescription>
-                    </DialogHeader>
-
-                    {twoFactorVerifyURI ? (
-                      <>
-                        <div className="flex items-center justify-center">
-                          <div ref={qrCodeRef1} />
-                        </div>
-                        <div className="flex gap-2 items-center justify-center">
-                          <p className="text-sm text-muted-foreground">Copy URI to clipboard</p>
-                          <CopyButton textToCopy={twoFactorVerifyURI} />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        <PasswordInput value={twoFaPassword} onChange={(e) => setTwoFaPassword(e.target.value)} placeholder="Enter Password" />
-                        <Button onClick={async () => {
-                          if (twoFaPassword.length < 8) { toast.error('Password must be at least 8 characters'); return; }
-                          await client.twoFactor.getTotpUri({ password: twoFaPassword }, { onSuccess(ctx) { setTwoFactorVerifyURI(ctx.data.totpURI); } });
-                          setTwoFaPassword("");
-                        }}>Show QR Code</Button>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
-              )}
+              {session?.user.twoFactorEnabled && <TwoFaScanItem />}
 
               {/* Enable / Disable 2FA dialog */}
-              <Dialog open={twoFactorDialog} onOpenChange={setTwoFactorDialog}>
-                <DialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    {session?.user.twoFactorEnabled ? <ShieldOff /> : <ShieldCheck />}
-                    {session?.user.twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
-                  </DropdownMenuItem>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px] w-11/12">
-                  <DialogHeader>
-                    <DialogTitle>{session?.user.twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}</DialogTitle>
-                    <DialogDescription>{session?.user.twoFactorEnabled ? 'Disable the second factor authentication from your account' : 'Enable 2FA to secure your account'}</DialogDescription>
-                  </DialogHeader>
+              <TwoFaToggleItem enabled={!!session?.user.twoFactorEnabled} />
 
-                  {twoFactorVerifyURI ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-center">
-                        <div ref={qrCodeRef2} />
-                      </div>
-                      <Label htmlFor="password">Scan the QR code with your TOTP app</Label>
-                      <Input value={twoFaPassword} onChange={(e) => setTwoFaPassword(e.target.value)} placeholder="Enter OTP" />
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="password">Password</Label>
-                      <PasswordInput id="password" placeholder="Password" value={twoFaPassword} onChange={(e) => setTwoFaPassword(e.target.value)} />
-                    </div>
-                  )}
-                  <DialogFooter>
-                    <Button disabled={isPendingTwoFa} onClick={async () => {
-                      if (twoFaPassword.length < 8 && !twoFactorVerifyURI) { toast.error('Password must be at least 8 characters'); return; }
-                      setIsPendingTwoFa(true);
-                      if (session?.user.twoFactorEnabled) {
-                        await client.twoFactor.disable({ password: twoFaPassword, fetchOptions: { onError(ctx) { toast.error(ctx.error.message); }, onSuccess() { toast('2FA disabled successfully'); setTwoFactorDialog(false); } } });
-                        setIsPendingTwoFa(false);
-                        return;
-                      }
-                      if (twoFactorVerifyURI) {
-                        await client.twoFactor.verifyTotp({ code: twoFaPassword, fetchOptions: { onError(ctx) { setIsPendingTwoFa(false); setTwoFaPassword(''); toast.error(ctx.error.message); }, onSuccess() { toast('2FA enabled successfully'); setTwoFactorVerifyURI(''); setIsPendingTwoFa(false); setTwoFaPassword(''); setTwoFactorDialog(false); } } });
-                        return;
-                      }
-                      await client.twoFactor.enable({ password: twoFaPassword, fetchOptions: { onError(ctx) { toast.error(ctx.error.message); }, onSuccess(ctx) { setTwoFactorVerifyURI(ctx.data.totpURI); } } });
-                      setIsPendingTwoFa(false);
-                      setTwoFaPassword("");
-                    }}>
-                      {isPendingTwoFa ? <Loader2 size={15} className="animate-spin" /> : session?.user.twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
-              <div className="px-2 py-2">
-                <ChangePassword />
-              </div>
+              <ChangePassword />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+            <BillingItem />
+            <NotificationsItem />
             <DropdownMenuSeparator />
-            {!user.emailVerified && (
-              <DropdownMenuItem onClick={async () => {
-                try {
-                  await client.sendVerificationEmail({ email: user.email }, {
-                    onSuccess() { toast.success('Verification email sent'); },
-                    onError(ctx) { toast.error(ctx.error.message); }
-                  });
-                } catch (e) { console.error(e); toast.error('Failed to send verification email'); }
-              }}>
-                <BadgeCheck />
-                Verify email
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={async () => {
-                if (isSigningOut) return
-                setIsSigningOut(true)
-                try {
-                  await signOut({
-                    fetchOptions: { onSuccess() { router.push("/") }, },
-                  })
-                } catch (e) {
-                  console.error("signOut failed", e)
-                } finally {
-                  setIsSigningOut(false)
-                }
-              }}
-            >
-              {isSigningOut ? (
-                <>
-                  <Loader2 className="animate-spin" />
-                  <span>Signing out...</span>
-                </>
-              ) : (
-                <>
-                  <LogOut />
-                  <span className="">Log out</span>
-                </>
-              )}
-            </DropdownMenuItem>
+            {!user.emailVerified && <VerifyEmailItem email={user.email} />}
+            <SignOutItem />
           </DropdownMenuContent>
         </DropdownMenu>
 

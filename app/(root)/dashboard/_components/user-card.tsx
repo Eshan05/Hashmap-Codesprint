@@ -83,7 +83,6 @@ import { TbBrandAndroid, TbBrandApple, TbBrandWindows } from "react-icons/tb";
 import { FaLinux } from "react-icons/fa6";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ChangePassword from "@/components/auth/change-password";
 import PasskeysPanel, { AddPasskeyInline } from "@/components/auth/passkeys-panel"
 
 function MobileIcon() {
@@ -621,7 +620,7 @@ export default function UserCard(props: {
         </div>
       </CardContent>
       <CardFooter className="gap-2 justify-between items-center">
-        <ChangePassword />
+        {/* <ChangePassword /> */}
         {session?.session.impersonatedBy ? (
           <Button
             className="gap-2 z-10"
