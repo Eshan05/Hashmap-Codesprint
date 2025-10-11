@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import dbConnect from '@/utils/db-conn';
 import SymptomSearch from '@/models/symptom-search';
+import UserProfile from '@/models/user-profile'
 import User from '@/models/user';
 import { v4 as uuidv4 } from 'uuid';
 import { retryWithExponentialBackoff } from '@/lib/utils';
@@ -60,6 +61,28 @@ export async function POST(req: Request) {
     }
 
     const searchId = uuidv4();
+    // Fetch user profile (only fields relevant to symptom analysis)
+    let profileSummary = ''
+    try {
+      const userProfile = await UserProfile.findOne({ user: user?._id }).lean()
+      if (userProfile) {
+        const medical = userProfile.medicalProfile || {}
+        const dob = medical.dob ? new Date(medical.dob) : null
+        const age = dob ? Math.floor((Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25)) : null
+
+        const chronic = Array.isArray(medical.chronicConditions) ? medical.chronicConditions.map((c: any) => (c.name ? c.name : String(c))).join(', ') : ''
+        const allergiesList = Array.isArray(medical.allergies) ? medical.allergies.map((a: any) => (a.name ? a.name : String(a))).join(', ') : ''
+        const medsList = Array.isArray(medical.medications) ? medical.medications.map((m: any) => (m.brand_name || m.generic_name || m.name || String(m))).join(', ') : ''
+        const mental = medical.mentalHealth?.diagnoses && Array.isArray(medical.mentalHealth.diagnoses)
+          ? medical.mentalHealth.diagnoses.map((d: any) => (d.disorder_name || d.name || String(d))).join(', ')
+          : ''
+
+        profileSummary = `Patient profile:\n- age: ${age ?? 'unknown'}\n- sex: ${medical.sex ?? 'unknown'}\n- bloodType: ${medical.bloodType ?? 'unknown'}\n- city: ${userProfile.city ?? 'unknown'}\n- country: ${userProfile.countryCode ?? 'unknown'}\n- chronicConditions: ${chronic || 'none'}\n- allergies: ${allergiesList || 'none'}\n- medications: ${medsList || 'none'}\n- pregnancy: ${medical.pregnancy ? JSON.stringify(medical.pregnancy) : 'no'}\n- mentalHealthDiagnoses: ${mental || 'none'}\n`
+      }
+    } catch (err) {
+      console.warn('Failed to load user profile for symptom analysis', err)
+    }
+
     // New document but before response
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 401 });
@@ -70,7 +93,8 @@ export async function POST(req: Request) {
       user: user._id,
       symptoms,
       pastContext,
-      otherInfo,
+      // Preserve provided otherInfo and append profile summary useful for symptom analysis
+      otherInfo: [otherInfo, profileSummary].filter(Boolean).join('\n\n'),
     });
 
     await newSearch.save();
@@ -80,6 +104,7 @@ export async function POST(req: Request) {
       User Symptoms Information: ${symptoms}
       Past Related Context: ${pastContext || 'None'}
       Other Information: ${otherInfo || 'None'}
+      ${profileSummary ? `\nAdditional patient profile:\n${profileSummary}` : ''}
 `;
     await generateGeminiResponses(searchId, prompt);
     return NextResponse.json({ searchId }, { status: 201 });
