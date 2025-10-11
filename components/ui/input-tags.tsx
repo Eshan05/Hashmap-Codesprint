@@ -5,14 +5,18 @@ import type { ComponentProps, Dispatch, SetStateAction } from 'react'
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
 
-const InputTags = ({
+const InputTags = <T extends string | Record<string, any>>({
   className,
   onChange,
   value: tags,
+  getTagValue = (tag: T) => (typeof tag === 'string' ? tag : String(tag)),
+  createTag = (value: string) => value as T,
   ...props
 }: Omit<ComponentProps<'input'>, 'onChange' | 'value'> & {
-  onChange: Dispatch<SetStateAction<string[]>>
-  value: string[]
+  onChange: Dispatch<SetStateAction<T[]>>
+  value: T[]
+  getTagValue?: (tag: T) => string
+  createTag?: (value: string) => T
 }) => (
   <label
     className={cn(
@@ -22,11 +26,11 @@ const InputTags = ({
   >
     {tags.map(t => (
       <span
-        key={t}
+        key={getTagValue(t)}
         className="inline-flex items-center gap-1.5 rounded-md bg-neutral-600/10 px-2 py-1 text-ss font-medium text-neutral-700 dark:text-neutral-200 transition-colors hover:bg-neutral-600/20 focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:outline-none"
         tabIndex={0}
         role="button"
-        aria-label={`Remove tag ${t}`}
+        aria-label={`Remove tag ${getTagValue(t)}`}
         onKeyDown={e => {
           if (e.key === 'Delete' || e.key === 'Backspace') {
             e.preventDefault()
@@ -34,7 +38,7 @@ const InputTags = ({
           }
         }}
       >
-        <span>{t}</span>
+        <span>{getTagValue(t)}</span>
         <X
           className="size-3 cursor-pointer text-muted-foreground transition-colors hover:text-destructive"
           onClick={() => onChange(tags.filter(i => i !== t))}
@@ -57,7 +61,7 @@ const InputTags = ({
         if (values.length) {
           if ([',', ';', 'Enter'].includes(e.key)) {
             e.preventDefault()
-            onChange([...new Set([...tags, ...values])])
+            onChange([...new Set([...tags, ...values.map(createTag)])])
             e.currentTarget.value = ''
           }
         } else if (e.key === 'Backspace' && tags.length) {

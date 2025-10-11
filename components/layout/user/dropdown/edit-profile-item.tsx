@@ -196,16 +196,16 @@ export default function EditProfileItem({ session }: { session: any }) {
           </DropdownMenuItem>
         </DialogTrigger>
 
-        <DialogContent className="max-w-4xl w-[94vw]">
+        <DialogContent className="max-w-4xl w-[94vw] max-h-[80vh] overflow-x-clip overflow-y-auto no-scrollbar">
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
             <DialogDescription>Update your public profile and account settings.</DialogDescription>
           </DialogHeader>
 
           <Form {...form}>
-            <Tabs defaultValue="profile" className="w-full flex-row" orientation="vertical">
+            <Tabs defaultValue="profile" className="w-full flex-col" orientation="vertical">
               {/* <ScrollArea className="bg-transparent h-60 w-full flex-0"> */}
-              <TabsList className="gap-1 flex-col bg-transparent h-full">
+              <TabsList className="gap-1 bg-transparent">
                 <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -216,17 +216,6 @@ export default function EditProfileItem({ session }: { session: any }) {
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="right">Profile</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <TabsTrigger value="personal" className="" aria-label="Personal">
-                          <CalIcon />
-                        </TabsTrigger>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Personal</TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
@@ -243,14 +232,13 @@ export default function EditProfileItem({ session }: { session: any }) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span>
-                        <TabsTrigger value="prefs" className="" aria-label="Preferences">
+                        <TabsTrigger value="system" className="" aria-label="System">
                           <SettingsIcon />
                         </TabsTrigger>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent side="right">Preferences</TooltipContent>
+                    <TooltipContent side="right">System</TooltipContent>
                   </Tooltip>
-
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span>
@@ -259,24 +247,13 @@ export default function EditProfileItem({ session }: { session: any }) {
                         </TabsTrigger>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent side="right">System</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <TabsTrigger value="account" className="" aria-label="Account">
-                          <LockIcon />
-                        </TabsTrigger>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Account</TooltipContent>
+                    <TooltipContent side="right">Others</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </TabsList>
               {/* </ScrollArea> */}
 
-              <ScrollArea className="h-60 w-full flex-1 p-1">
+              <ScrollArea className="w-full flex-1 p-1">
                 <div className="rounded-md bg-background">
                   <TabsContent value="profile">
                     <div className="flex flex-col gap-4">
@@ -444,8 +421,6 @@ export default function EditProfileItem({ session }: { session: any }) {
                           </FormItem>
                         )}
                       />
-
-
                     </div>
                   </TabsContent>
 
@@ -453,45 +428,25 @@ export default function EditProfileItem({ session }: { session: any }) {
                     <div className="grid grid-cols-1 gap-4">
                       <FormField
                         control={form.control}
-                        name="profile.sex"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Sex</FormLabel>
-                            <FormControl>
-                              <Select onValueChange={field.onChange} value={field.value || 'unknown'}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="male">Male</SelectItem>
-                                  <SelectItem value="female">Female</SelectItem>
-                                  <SelectItem value="other">Other</SelectItem>
-                                  <SelectItem value="unknown">Prefer not to say</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
                         name="profile.bloodType"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className='gap-1'>
                             <FormLabel>Blood Type</FormLabel>
                             <FormControl>
                               <Select onValueChange={field.onChange} value={field.value || ''}>
-                                <SelectTrigger>
+                                <SelectTrigger className='w-full'>
                                   <SelectValue placeholder="Select blood type" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                  {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(bt => (
-                                    <SelectItem key={bt} value={bt}>{bt}</SelectItem>
-                                  ))}
+                                <SelectContent className="">
+                                  <div className="columns-4">
+                                    {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(bt => (
+                                      <SelectItem key={bt} value={bt}>{bt}</SelectItem>
+                                    ))}
+                                  </div>
                                 </SelectContent>
                               </Select>
                             </FormControl>
+                            <FormDescription>Select your blood type.</FormDescription>
                           </FormItem>
                         )}
                       />
@@ -500,15 +455,14 @@ export default function EditProfileItem({ session }: { session: any }) {
                         control={form.control}
                         name="profile.chronicConditions"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="gap-1">
                             <FormLabel>Chronic conditions</FormLabel>
                             <FormControl>
                               <InputTags
-                                value={Array.isArray(field.value) ? field.value.map((c: any) => c.name || c.code || '') : []}
-                                onChange={(next) => {
-                                  const vals = typeof next === 'function' ? next(Array.isArray(field.value) ? field.value.map((c: any) => c.name || c.code || '') : []) : next
-                                  field.onChange(vals.map((v: string) => ({ name: v })))
-                                }}
+                                value={field.value || []}
+                                onChange={field.onChange}
+                                getTagValue={(c) => c.name || c.code || ''}
+                                createTag={(v) => ({ name: v })}
                               />
                             </FormControl>
                             <FormDescription>List of ongoing medical conditions.</FormDescription>
@@ -545,42 +499,6 @@ export default function EditProfileItem({ session }: { session: any }) {
                         <h4 className="text-sm font-medium mb-2">Pregnancy</h4>
                         <PregnancyEditor name="profile.pregnancy" />
                       </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="prefs">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="profile.locale"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Language / Locale</FormLabel>
-                            <FormControl>
-                              <Input {...field} value={field.value ?? ''} placeholder="en-US" />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="profile.timezone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Timezone</FormLabel>
-                            <FormControl>
-                              <Input {...field} value={field.value ?? ''} placeholder="America/New_York" />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="meta">
-                    <div className="grid grid-cols-1 gap-4">
-
                     </div>
                   </TabsContent>
 
