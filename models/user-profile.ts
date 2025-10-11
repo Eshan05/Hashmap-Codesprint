@@ -1,14 +1,5 @@
+import { Pregnancy, Allergy, FamilyHistoryItem, FavouriteMedicine, Immunization, MedicalCondition, Medication, MentalHealth, SavedSearch } from '@/types/user-profile';
 import mongoose, { Schema, type Document, type Model } from 'mongoose';
-
-interface MedicalCondition { code?: string; name?: string; active?: boolean; onsetYear?: number | null }
-interface Allergy { substanceCode?: string; name?: string; severity?: 'mild' | 'moderate' | 'severe' | 'unknown'; confirmed?: boolean }
-interface Medication { name?: string; rxNorm?: string; dosage?: string | null; current?: boolean }
-interface FamilyHistoryItem { relation?: string; conditionCode?: string; name?: string; ageAtOnset?: number | null }
-interface Immunization { code?: string; name?: string; date?: string }
-interface MentalHealth { diagnoses?: Array<{ code?: string; name?: string }>; isUnderCare?: boolean }
-interface Pregnancy { status?: 'pregnant' | 'not_pregnant' | 'unknown'; dueDate?: string | null }
-interface NotesMetadata { flags?: string[]; lastUpdatedBy?: string | null }
-interface LocaleHints { measuredAt?: Date; timezoneOffset?: number }
 
 export interface IUserProfile extends Document {
   _id: string;
@@ -17,18 +8,19 @@ export interface IUserProfile extends Document {
   // Public profile
   displayName?: string | null;
   bio?: string | null;
-  pronouns?: string | null;
-  pronounsVerified?: boolean;
+  gender?: string | null;
   locale?: string | null;
   timezone?: string | null;
   profileVisibility?: 'public' | 'private' | 'members-only';
 
   city?: string | null;
   countryCode?: string | null;
-  location?: { type: 'Point'; coordinates: [number, number] } | null;
+  location?: { type: 'Point'; coordinates: [number, number] } | null; // System inputted
 
   medicalProfile: {
     dob?: string | null;
+    weight?: number | null;
+    height?: number | null;
     sex?: 'male' | 'female' | 'other' | 'unknown' | null;
     bloodType?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | null;
     chronicConditions?: MedicalCondition[];
@@ -38,16 +30,10 @@ export interface IUserProfile extends Document {
     immunizations?: Immunization[];
     pregnancy?: Pregnancy | null;
     mentalHealth?: MentalHealth | null;
-    notesMetadata?: NotesMetadata;
-    clinicalNotes?: { stored: boolean };
   };
 
-  symptomPreferences: Record<string, any>;
-  favouriteMedicines: Array<Record<string, any>>;
-  savedSearches: Array<Record<string, any>>;
-
-  tags: string[];
-  metadata: Record<string, any>;
+  favouriteMedicines: FavouriteMedicine[];
+  savedSearches: SavedSearch[];
 
   lastPrivacyConsentAt?: Date | null;
   healthDataConsentVersion?: string | null;
@@ -55,7 +41,6 @@ export interface IUserProfile extends Document {
   searchAliases?: string[];
   onboardingCompleted?: boolean;
   onboardingStep?: number;
-  localeHints?: LocaleHints | null;
 
   isPublicProfile: boolean;
   consentToResearch: boolean;
@@ -95,13 +80,19 @@ const FamilyHistorySchema = new Schema({ relation: String, conditionCode: String
 const ImmunizationSchema = new Schema({ code: String, name: String, date: String }, { _id: false });
 const MentalHealthSchema = new Schema({ diagnoses: { type: [Object], default: [] }, isUnderCare: { type: Boolean, default: false } }, { _id: false });
 const PregnancySchema = new Schema({ status: { type: String, enum: ['pregnant', 'not_pregnant', 'unknown'], default: 'unknown' }, dueDate: { type: String, default: null } }, { _id: false });
-const NotesMetadataSchema = new Schema({ flags: { type: [String], default: [] }, lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null } }, { _id: false });
-const EmergencyContactSchema = new Schema({ name: String, phone: String, relation: String }, { _id: false });
-const AvatarVariantSchema = new Schema({ color: String, emoji: String }, { _id: false });
-const LocaleHintsSchema = new Schema({ measuredAt: Date, timezoneOffset: Number }, { _id: false });
-const RecoveryEmailSchema = new Schema({ emailHash: String, label: String }, { _id: false });
-const AccessibilityNeedSchema = new Schema({ key: String, description: String }, { _id: false });
-const OnboardingHealthSummarySchema = new Schema({ completed: Boolean, summaryCode: String }, { _id: false });
+const FavouriteMedicineSchema = new Schema({ // NEW: for structured favourite medicines
+  rxNorm: { type: String, required: true },
+  name: { type: String, required: true },
+  reasonForFavoriting: String,
+  addedAt: { type: Date, default: Date.now }
+}, { _id: false });
+const SavedSearchSchema = new Schema({
+  query: { type: String, required: true },
+  type: { type: String, enum: ['symptom', 'condition', 'medicine', 'general'], default: 'general' },
+  filters: { type: Schema.Types.Mixed, default: {} },
+  savedAt: { type: Date, default: Date.now }
+}, { _id: false });
+
 
 const UserProfileSchema: Schema = new Schema(
   {
@@ -109,8 +100,7 @@ const UserProfileSchema: Schema = new Schema(
 
     displayName: { type: String, default: null },
     bio: { type: String, default: null },
-    pronouns: { type: String, default: null },
-    pronounsVerified: { type: Boolean, default: false },
+    gender: { type: String, default: null },
     locale: { type: String, default: null },
     timezone: { type: String, default: null },
     profileVisibility: { type: String, enum: ['public', 'private', 'members-only'], default: 'private' },
@@ -132,29 +122,20 @@ const UserProfileSchema: Schema = new Schema(
       immunizations: { type: [ImmunizationSchema], default: [] },
       pregnancy: { type: PregnancySchema, default: null },
       mentalHealth: { type: MentalHealthSchema, default: null },
-      notesMetadata: { type: NotesMetadataSchema, default: {} },
-      clinicalNotes: { stored: { type: Boolean, default: false } }
     },
 
-    symptomPreferences: { type: Schema.Types.Mixed, default: {} },
-    favouriteMedicines: { type: Array, default: [] },
-    savedSearches: { type: Array, default: [] },
+    favouriteMedicines: { type: [FavouriteMedicineSchema], default: [] },
+    savedSearches: { type: [SavedSearchSchema], default: [] },
 
-    tags: { type: [String], default: [] },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-
-    // suggested additions
     lastPrivacyConsentAt: { type: Date, default: null },
     healthDataConsentVersion: { type: String, default: null },
     anonymizedId: { type: String, index: true, default: null },
     searchAliases: { type: [String], default: [] },
     onboardingCompleted: { type: Boolean, default: false },
     onboardingStep: { type: Number, default: 0 },
-    localeHints: { type: LocaleHintsSchema, default: null },
 
     isPublicProfile: { type: Boolean, default: false },
     consentToResearch: { type: Boolean, default: false },
-    dataSharingOptIn: { type: Boolean, default: false },
     gdprDataRetentionUntil: { type: Date, default: null },
     deletionRequestedAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null },

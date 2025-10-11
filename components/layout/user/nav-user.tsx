@@ -67,52 +67,7 @@ export function NavUser({
   session: Session | null
 }) {
   const { isMobile } = useSidebar()
-
   const router = useRouter()
-  const [isSigningOut, setIsSigningOut] = useState(false)
-  const [editOpen, setEditOpen] = useState(false)
-  const [twoFactorDialog, setTwoFactorDialog] = useState(false)
-  const [twoFactorVerifyURI, setTwoFactorVerifyURI] = useState("")
-  const [twoFaPassword, setTwoFaPassword] = useState("")
-  const [isPendingTwoFa, setIsPendingTwoFa] = useState(false)
-  const qrCodeRef1 = useRef<HTMLDivElement | null>(null)
-  const qrCodeRef2 = useRef<HTMLDivElement | null>(null)
-  const qrCode1 = useRef<QRCodeStyling | null>(null)
-  const qrCode2 = useRef<QRCodeStyling | null>(null)
-
-  useEffect(() => {
-    if (twoFactorVerifyURI && qrCodeRef1.current) {
-      if (!qrCode1.current) {
-        qrCode1.current = new QRCodeStyling({
-          width: 200,
-          height: 200,
-          data: twoFactorVerifyURI,
-          dotsOptions: { color: "#000000", type: "rounded" },
-          backgroundOptions: { color: "#ffffff" },
-        })
-      } else {
-        qrCode1.current.update({ data: twoFactorVerifyURI })
-      }
-      try { qrCode1.current.append(qrCodeRef1.current) } catch (e) { /* ignore */ }
-    }
-  }, [twoFactorVerifyURI])
-
-  useEffect(() => {
-    if (twoFactorVerifyURI && qrCodeRef2.current) {
-      if (!qrCode2.current) {
-        qrCode2.current = new QRCodeStyling({
-          width: 200,
-          height: 200,
-          data: twoFactorVerifyURI,
-          dotsOptions: { color: "#000000", type: "rounded" },
-          backgroundOptions: { color: "#ffffff" },
-        })
-      } else {
-        qrCode2.current.update({ data: twoFactorVerifyURI })
-      }
-      try { qrCode2.current.append(qrCodeRef2.current) } catch (e) { /* ignore */ }
-    }
-  }, [twoFactorVerifyURI])
 
 
   if (!session?.user) return null
@@ -152,17 +107,16 @@ export function NavUser({
                   <AvatarFallback className="rounded-lg">{user.name.split(' ').map(n => n[0]).join('').toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate font-medium">{user.name} {user.emailVerified ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 text-xs p-1">
-                        <ShieldCheck size={10} />
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-800 text-xs p-1">
-                        <ShieldOff size={10} />
-                      </span>
-                    )}</span>
-                  </div>
+                  <header className="truncate font-medium flex-center-1"><span>{user.name}</span> <div className="flex items-center">{user.emailVerified ? (
+                    <span className="inline-flex items-center gap-1 rounded-full dark:text-green-100 text-green-800">
+                      <ShieldCheck size={12} />
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full dark:text-yellow-100 text-yellow-800">
+                      <ShieldOff size={10} />
+                    </span>
+                  )}
+                  </div></header>
                   <span className="truncate text-xs">{user.email}</span>
 
                 </div>
