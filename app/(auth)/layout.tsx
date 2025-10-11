@@ -1,8 +1,8 @@
 import PublicNavbar from "@/components/layout/public-navbar";
 
 export const metadata = {
-  title: "NabhaCare | Authentication",
-  description: "Telemedicine for Nabha and surrounding rural areas",
+  title: "PHT | Authentication",
+  description: "Personal Health Tools",
 };
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {

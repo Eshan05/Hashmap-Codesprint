@@ -95,7 +95,7 @@ export default function PublicNavbar() {
           <div className="flex-1 flex items-center">
             <Link href="/" className="flex items-center gap-2">
               <Logo />
-              <span className="font-bold text-lg text-black">NabhaCare</span>
+              <span className="font-bold text-lg text-black">PHT</span>
             </Link>
           </div>
 

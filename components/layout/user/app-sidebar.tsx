@@ -6,15 +6,18 @@ import {
   BookOpen,
   Bot,
   Command,
+  CommandIcon,
   FileUserIcon,
   Frame,
   GalleryVerticalEnd,
   HeartPulse,
   Map,
   Newspaper,
+  PersonStanding,
   PieChart,
   ScanSearch,
-  User2Icon
+  User2Icon,
+  Wrench
 } from "lucide-react"
 import type * as React from "react"
 
@@ -56,17 +59,16 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: User2Icon,
-      isActive: true,
-      items: [
-        {
-          title: "Exercises",
-          url: "/tools/exercises",
-        },
-        {
-          title: "Health Tools",
-          url: "/tools",
-        },
-      ],
+    },
+    {
+      title: "Exercises",
+      url: "/tools/exercises",
+      icon: PersonStanding,
+    },
+    {
+      title: "Health Tools",
+      url: "/tools",
+      icon: CommandIcon
     },
     {
       title: "Symptom Search",

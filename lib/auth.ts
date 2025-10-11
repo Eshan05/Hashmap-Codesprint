@@ -135,7 +135,7 @@ export const auth = betterAuth({
     }),
     lastLoginMethod(),
   ],
-  trustedOrigins: ["exp://", "http://localhost:3000", "http://192.168.1.*:3000"],
+  trustedOrigins: ["exp://", "http://localhost:3000", "http://192.168.1.*:3000", process.env.NEXT_PUBLIC_BETTER_AUTH_BASE! || "pht.esn.qzz.io"],
   advanced: {
     crossSubDomainCookies: {
       enabled: process.env.NODE_ENV === "production",
