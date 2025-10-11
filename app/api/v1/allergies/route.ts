@@ -1,4 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { redis } from '@/lib/redis'
+import { upstashRedis } from '@/lib/redis'
+import { Ratelimit } from '@upstash/ratelimit'
+
+const ratelimit = new Ratelimit({
+  redis: upstashRedis,
+  limiter: Ratelimit.slidingWindow(100, "1 h"), // 100 requests per hour per IP
+})
 
 const allergyData = {
   food: [
@@ -36,9 +44,23 @@ const allergyData = {
 // GET /api/allergies?q=search&category=food - Get allergies with optional filtering
 export async function GET(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-vercel-forwarded-for') || request.headers.get('x-vercel-real-ip') || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const { success } = await ratelimit.limit(ip)
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('q')?.toLowerCase() || ''
     const categoryFilter = searchParams.get('category')?.toLowerCase()
+
+    const cacheKey = `allergies:${query}:${categoryFilter || 'all'}`
+
+    // Check cache
+    const cached = await redis.get(cacheKey)
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached), { status: 200 })
+    }
 
     let filtered = Object.keys(allergyData).reduce((acc, category) => {
       const cat = category as keyof typeof allergyData
@@ -53,7 +75,12 @@ export async function GET(request: NextRequest) {
       filtered = { [categoryFilter]: filtered[categoryFilter as keyof typeof allergyData] } as typeof allergyData
     }
 
-    return NextResponse.json({ data: filtered, error: null }, { status: 200 })
+    const response = { data: filtered, error: null }
+
+    // Cache for 1 hour
+    await redis.setex(cacheKey, 3600, JSON.stringify(response))
+
+    return NextResponse.json(response, { status: 200 })
   } catch (error) {
     return NextResponse.json({ data: null, error: 'Failed to fetch allergies' }, { status: 500 })
   }
@@ -61,6 +88,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-vercel-forwarded-for') || request.headers.get('x-vercel-real-ip') || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const { success } = await ratelimit.limit(ip)
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
     const body = await request.json()
     const { category, name, description } = body
 

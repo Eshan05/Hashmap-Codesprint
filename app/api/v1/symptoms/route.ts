@@ -6,6 +6,14 @@ import UserProfile from '@/models/user-profile'
 import User from '@/models/user';
 import { v4 as uuidv4 } from 'uuid';
 import { retryWithExponentialBackoff } from '@/lib/utils';
+import { auth } from '@/lib/auth';
+import { upstashRedis } from '@/lib/redis';
+import { Ratelimit } from '@upstash/ratelimit';
+
+const ratelimit = new Ratelimit({
+  redis: upstashRedis,
+  limiter: Ratelimit.slidingWindow(10, "1 h"), // 10 requests per hour per user
+});
 
 async function generateSummaryHash(text: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -28,6 +36,14 @@ const model = genAI.getGenerativeModel({
 export async function GET(req: Request) {
   try {
     await dbConnect();
+    const session = await auth.api.getSession({ headers: req.headers })
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    }
+    const { success } = await ratelimit.limit(session.user.id)
+    if (!success) {
+      return NextResponse.json({ message: "Too many requests" }, { status: 429 })
+    }
     const { searchParams } = new URL(req.url);
     const searchId = searchParams.get('searchId');
 
@@ -51,6 +67,16 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await dbConnect();
+    const session = await auth.api.getSession({ headers: req.headers })
+    console.log('SESSION:', session)
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    }
+    const { success } = await ratelimit.limit(session.user.id)
+    if (!success) {
+      return NextResponse.json({ message: "Too many requests" }, { status: 429 })
+    }
     const body = await req.json();
     const { symptoms, pastContext, otherInfo } = body;
 
@@ -59,36 +85,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Symptoms are required" }, { status: 400 });
     }
 
-    let user = null;
-    try {
-      // This is a placeholder - you need to implement proper session handling
-      // For example using better-auth session
-      // const session = await auth.api.getSession({ headers });
-      // if (session?.user) {
-      //   user = await User.findOne({ email: session.user.email });
-      // }
-
-      // For demo purposes, create or find a demo user
-      user = await User.findOneAndUpdate(
-        { email: 'demo@example.com' },
-        {
-          name: 'Demo User',
-          email: 'demo@example.com',
-          emailVerified: new Date(),
-          role: 'user',
-          banned: false
-        },
-        { upsert: true, new: true }
-      );
-    } catch (error) {
-      console.error('Error getting user session:', error);
-    }
-
     const searchId = uuidv4();
     // Fetch user profile (only fields relevant to symptom analysis)
     let profileSummary = ''
     try {
-      const userProfile = await UserProfile.findOne({ user: user?._id }).lean()
+      const userProfile = await UserProfile.findOne({ user: session.user.id }).lean()
       if (userProfile) {
         const medical = userProfile.medicalProfile || {}
         const dob = medical.dob ? new Date(medical.dob) : null
@@ -107,14 +108,9 @@ export async function POST(req: Request) {
       console.warn('Failed to load user profile for symptom analysis', err)
     }
 
-    // New document but before response
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 401 });
-    }
-
     const newSearch = new SymptomSearch({
       searchId,
-      user: user._id,
+      user: session.user.id,
       symptoms,
       pastContext,
       // Preserve provided otherInfo and append profile summary useful for symptom analysis
@@ -328,6 +324,14 @@ async function generateGeminiResponses(searchId: string, initialPrompt: string) 
 export async function DELETE(req: Request) {
   try {
     await dbConnect();
+    const session = await auth.api.getSession({ headers: req.headers })
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    }
+    const { success } = await ratelimit.limit(session.user.id)
+    if (!success) {
+      return NextResponse.json({ message: "Too many requests" }, { status: 429 })
+    }
     const { searchParams } = new URL(req.url);
     const searchId = searchParams.get('searchId');
 
