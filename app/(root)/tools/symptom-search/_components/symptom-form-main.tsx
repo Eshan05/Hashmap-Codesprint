@@ -158,7 +158,9 @@ export default function SymptomFormMain() {
                   )}
                 </FormControl>
                 <div className='gap-2 space-evenly items-start flex lg:hidden'>
-                  <ToggleGroup type='single' className='p-1'>
+                  <ToggleGroup type='single' className='p-1'
+                    value={tagMode ? 'symptom-list' : 'symptom-nlp'}
+                    onValueChange={(value) => setTagMode(value === 'symptom-list')}>
                     <ToggleGroupItem value="symptom-list" aria-label='Toggle symptom list mode'><ListOrderedIcon className='w-4 h-4' /></ToggleGroupItem>
                     <ToggleGroupItem value="symptom-nlp" aria-label='Toggle symptom NLP mode'><TextCursorInputIcon className='w-4 h-4' /></ToggleGroupItem>
                   </ToggleGroup>
