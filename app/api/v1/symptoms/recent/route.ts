@@ -3,7 +3,7 @@ import dbConnect from '@/utils/db-conn';
 import SymptomSearch from '@/models/symptom-search';
 import { auth } from '@/lib/auth';
 
-// GET /api/symptoms/recent?userId=xxx&page=1&limit=10 - Get recent symptom searches
+// GET /api/v1/symptoms/recent?userId=xxx&page=1&limit=10 - Get recent symptom searches
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
@@ -12,12 +12,12 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    // Build query - if userId provided, filter by user, otherwise get all
-    const query: any = {};
+    // TODO: Fix user session handling to properly associate searches with logged-in users
+    const query = {};
+    /*
     if (userId) {
       query.user = userId;
     } else {
-      // If no userId, try to get from session
       try {
         const session = await auth.api.getSession({ headers: req.headers });
         if (session?.user?.id) {
@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
         console.warn('Could not get session:', error);
       }
     }
+    */
 
     const skip = (page - 1) * limit;
     const searches = await SymptomSearch.find(query)
