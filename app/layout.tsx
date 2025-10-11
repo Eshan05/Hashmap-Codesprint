@@ -26,6 +26,7 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en">
       <body
+        data-vaul-drawer-wrapper=""
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <Toaster />
