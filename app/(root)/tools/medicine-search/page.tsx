@@ -23,11 +23,12 @@ const MedSearchForm = dynamic(() => import('./_components/med-search-form'), { s
 
 const fetchRecentSearches = async (): Promise<RecentSearch[]> => {
   // TODO: Make new table to map user medicine searches and use it here
-  const response = await fetch('/api/symptom-search/recent');
+  const response = await fetch('/api/symptoms/recent');
   if (!response.ok) {
     throw new Error('Failed to fetch recent searches');
   }
-  return response.json();
+  const result = await response.json();
+  return result.data || result;
 };
 
 export default function MedicineSearchPage() {

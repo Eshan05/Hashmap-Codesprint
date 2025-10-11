@@ -2,7 +2,7 @@ import { retryWithExponentialBackoff } from '@/lib/utils';
 import MedicineSearch from '@/models/medicine-search';
 import dbConnect from '@/utils/db-conn';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API || "");
@@ -13,6 +13,51 @@ const model = genAI.getGenerativeModel({
   generationConfig: { responseMimeType: "application/json" }
 });
 
+// GET /api/medicines?searchId=xxx - Retrieve a specific medicine search result
+// GET /api/medicines - List all medicine searches (with optional pagination)
+export async function GET(req: NextRequest) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const searchId = searchParams.get('searchId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+
+    if (searchId) {
+      // Get specific search
+      const search = await MedicineSearch.findOne({ searchId }).lean();
+      if (!search) {
+        return NextResponse.json({ message: "Search not found" }, { status: 404 });
+      }
+      return NextResponse.json(search, { status: 200 });
+    }
+
+    // List searches with pagination
+    const skip = (page - 1) * limit;
+    const searches = await MedicineSearch.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await MedicineSearch.countDocuments({});
+
+    return NextResponse.json({
+      data: searches,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "An error occurred", error: error }, { status: 500 });
+  }
+}
+
+// POST /api/medicines - Create a new medicine search
 export async function POST(req: Request) {
   try {
     await dbConnect();
@@ -126,5 +171,28 @@ async function generateMedicineResponse(searchId: string, searchType: string, qu
         result: "An error occurred.",
       }
     );
+  }
+}
+
+// DELETE /api/medicines?searchId=xxx - Delete a specific medicine search
+export async function DELETE(req: NextRequest) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const searchId = searchParams.get('searchId');
+
+    if (!searchId) {
+      return NextResponse.json({ message: "searchId is required" }, { status: 400 });
+    }
+
+    const deletedSearch = await MedicineSearch.findOneAndDelete({ searchId });
+    if (!deletedSearch) {
+      return NextResponse.json({ message: "Search not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Search deleted successfully" }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "An error occurred", error: error }, { status: 500 });
   }
 }

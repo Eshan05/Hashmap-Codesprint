@@ -175,3 +175,126 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: false, errors: { general: 'Internal server error' } }, { status: 500 })
   }
 }
+
+// PATCH /api/profile - Partially update user profile
+export async function PATCH(request: NextRequest) {
+  try {
+    await dbConnect()
+    const session = await auth.api.getSession({ headers: request.headers })
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, errors: { general: 'Unauthorized' } }, { status: 401 })
+    }
+
+    const body = await request.json()
+
+    if (body.user) {
+      const userUpdates: any = {}
+      const allowedUserFields = ['name', 'email', 'phone', 'image', 'twoFactorEnabled', 'role', 'banned']
+
+      for (const field of allowedUserFields) {
+        if (body.user[field] !== undefined) {
+          userUpdates[field] = body.user[field]
+        }
+      }
+
+      if (Object.keys(userUpdates).length > 0) {
+        await User.findByIdAndUpdate(session.user.id, userUpdates)
+      }
+    }
+
+    if (body.profile) {
+      const profileUpdates: any = {}
+      const profileData = body.profile
+
+      if (profileData.dob || profileData.weight || profileData.height || profileData.sex ||
+        profileData.bloodType || profileData.chronicConditions || profileData.allergies ||
+        profileData.medications || profileData.familyHistory || profileData.immunizations ||
+        profileData.pregnancy || profileData.mentalHealth) {
+
+        const existingProfile = await UserProfile.findOne({ user: session.user.id })
+        const medicalProfile = existingProfile?.medicalProfile || {}
+
+        if (profileData.dob !== undefined) medicalProfile.dob = profileData.dob
+        if (profileData.weight !== undefined) medicalProfile.weight = profileData.weight
+        if (profileData.height !== undefined) medicalProfile.height = profileData.height
+        if (profileData.sex !== undefined) medicalProfile.sex = profileData.sex
+        if (profileData.bloodType !== undefined) medicalProfile.bloodType = profileData.bloodType
+        if (profileData.chronicConditions !== undefined) medicalProfile.chronicConditions = profileData.chronicConditions
+        if (profileData.allergies !== undefined) medicalProfile.allergies = profileData.allergies
+        if (profileData.medications !== undefined) medicalProfile.medications = profileData.medications
+        if (profileData.familyHistory !== undefined) medicalProfile.familyHistory = profileData.familyHistory
+        if (profileData.immunizations !== undefined) medicalProfile.immunizations = profileData.immunizations
+        if (profileData.pregnancy !== undefined) medicalProfile.pregnancy = profileData.pregnancy
+
+        if (profileData.mentalHealth !== undefined) {
+          medicalProfile.mentalHealth = {
+            ...profileData.mentalHealth,
+            diagnoses: profileData.mentalHealth.diagnoses?.map((d: any) => ({
+              name: d.disorder_name,
+              code: d.abbreviation,
+            })) || [],
+          }
+        }
+
+        profileUpdates.medicalProfile = medicalProfile
+      }
+
+      // Handle other profile fields
+      const allowedProfileFields = [
+        'displayName', 'bio', 'gender', 'locale', 'timezone', 'city', 'countryCode',
+        'profileVisibility', 'location', 'favouriteMedicines', 'savedSearches',
+        'lastPrivacyConsentAt', 'healthDataConsentVersion', 'anonymizedId',
+        'searchAliases', 'onboardingCompleted', 'onboardingStep', 'isPublicProfile',
+        'consentToResearch', 'gdprDataRetentionUntil', 'deletionRequestedAt',
+        'deletedAt', 'isActive'
+      ]
+
+      for (const field of allowedProfileFields) {
+        if (profileData[field] !== undefined) {
+          profileUpdates[field] = profileData[field]
+        }
+      }
+
+      if (Object.keys(profileUpdates).length > 0) {
+        await UserProfile.findOneAndUpdate(
+          { user: session.user.id },
+          profileUpdates,
+          { new: true }
+        )
+      }
+    }
+
+    return NextResponse.json({ success: true, message: 'Profile partially updated' })
+  } catch (error) {
+    console.error('Profile patch error:', error)
+    return NextResponse.json({ success: false, errors: { general: 'Internal server error' } }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await dbConnect()
+    const session = await auth.api.getSession({ headers: request.headers })
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, errors: { general: 'Unauthorized' } }, { status: 401 })
+    }
+
+    await UserProfile.findOneAndUpdate(
+      { user: session.user.id },
+      {
+        deletedAt: new Date(),
+        isActive: false,
+        deletionRequestedAt: new Date()
+      }
+    )
+
+    await User.findByIdAndUpdate(session.user.id, {
+      banned: true
+    })
+
+    return NextResponse.json({ success: true, message: 'Profile marked for deletion' }, { status: 200 })
+  } catch (error) {
+    console.error('Profile deletion error:', error)
+    return NextResponse.json({ success: false, errors: { general: 'Internal server error' } }, { status: 500 })
+  }
+}

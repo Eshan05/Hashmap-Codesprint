@@ -24,6 +24,30 @@ const model = genAI.getGenerativeModel({
   generationConfig: { responseMimeType: "application/json" }
 });
 
+// GET /api/symptoms?searchId=xxx - Retrieve a specific symptom search result
+export async function GET(req: Request) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const searchId = searchParams.get('searchId');
+
+    if (!searchId) {
+      return NextResponse.json({ message: "searchId is required" }, { status: 400 });
+    }
+
+    const search = await SymptomSearch.findOne({ searchId }).lean();
+    if (!search) {
+      return NextResponse.json({ message: "Search not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(search, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "An error occurred", error: error }, { status: 500 });
+  }
+}
+
+// POST /api/symptoms - Create a new symptom search
 export async function POST(req: Request) {
   try {
     await dbConnect();
@@ -297,5 +321,28 @@ async function generateGeminiResponses(searchId: string, initialPrompt: string) 
         reliefIdeas: "An error occurred for relief ideas.",
       }
     );
+  }
+}
+
+// DELETE /api/symptoms?searchId=xxx - Delete a specific symptom search
+export async function DELETE(req: Request) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const searchId = searchParams.get('searchId');
+
+    if (!searchId) {
+      return NextResponse.json({ message: "searchId is required" }, { status: 400 });
+    }
+
+    const deletedSearch = await SymptomSearch.findOneAndDelete({ searchId });
+    if (!deletedSearch) {
+      return NextResponse.json({ message: "Search not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Search deleted successfully" }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "An error occurred", error: error }, { status: 500 });
   }
 }

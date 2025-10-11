@@ -33,17 +33,60 @@ const allergyData = {
   ],
 }
 
+// GET /api/allergies?q=search&category=food - Get allergies with optional filtering
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const query = searchParams.get('q')?.toLowerCase() || ''
+  try {
+    const { searchParams } = new URL(request.url)
+    const query = searchParams.get('q')?.toLowerCase() || ''
+    const categoryFilter = searchParams.get('category')?.toLowerCase()
 
-  const filtered = Object.keys(allergyData).reduce((acc, category) => {
-    const cat = category as keyof typeof allergyData
-    acc[cat] = allergyData[cat].filter((allergy) =>
-      allergy.name.toLowerCase().includes(query)
+    let filtered = Object.keys(allergyData).reduce((acc, category) => {
+      const cat = category as keyof typeof allergyData
+      acc[cat] = allergyData[cat].filter((allergy) =>
+        allergy.name.toLowerCase().includes(query)
+      )
+      return acc
+    }, {} as typeof allergyData)
+
+    // Filter by category if specified
+    if (categoryFilter && allergyData[categoryFilter as keyof typeof allergyData]) {
+      filtered = { [categoryFilter]: filtered[categoryFilter as keyof typeof allergyData] } as typeof allergyData
+    }
+
+    return NextResponse.json({ data: filtered, error: null }, { status: 200 })
+  } catch (error) {
+    return NextResponse.json({ data: null, error: 'Failed to fetch allergies' }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { category, name, description } = body
+
+    if (!category || !name || !description) {
+      return NextResponse.json(
+        { error: 'category, name, and description are required' },
+        { status: 400 }
+      )
+    }
+
+    if (!allergyData[category as keyof typeof allergyData]) {
+      return NextResponse.json(
+        { error: 'Invalid category. Must be one of: food, medical, environmental, contact' },
+        { status: 400 }
+      )
+    }
+
+    // TODO: Actually save to DB
+    return NextResponse.json(
+      {
+        message: 'Allergy added successfully',
+        data: { category, name, description }
+      },
+      { status: 201 }
     )
-    return acc
-  }, {} as typeof allergyData)
-
-  return NextResponse.json(filtered)
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to add allergy' }, { status: 500 })
+  }
 }

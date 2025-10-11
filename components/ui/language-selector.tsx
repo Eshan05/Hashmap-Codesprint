@@ -9,6 +9,12 @@ import { HiOutlineTranslate } from "react-icons/hi";
 
 const LANGUAGES: { code: string; native: string; latin: string }[] = [
   { code: "en", native: "English", latin: "English" },
+  { code: "es", native: "Español", latin: "Spanish" },
+  { code: "fr", native: "Français", latin: "French" },
+  { code: "de", native: "Deutsch", latin: "German" },
+  { code: "zh", native: "中文", latin: "Chinese" },
+  { code: "ja", native: "日本語", latin: "Japanese" },
+  { code: "ru", native: "Русский", latin: "Russian" },
   { code: "pa", native: "ਪੰਜਾਬੀ", latin: "Punjabi" },
   { code: "hi", native: "हिन्दी", latin: "Hindi" },
 ]

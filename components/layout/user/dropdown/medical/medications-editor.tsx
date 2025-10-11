@@ -44,7 +44,7 @@ export default function MedicationsEditor({ name = 'profile.medications' }: { na
     if (search.trim()) {
       fetch(`/api/medications?q=${encodeURIComponent(search)}`)
         .then(res => res.json())
-        .then(setAvailableMeds)
+        .then(response => setAvailableMeds(response.data || response))
         .catch(console.error)
     } else {
       setAvailableMeds([])
