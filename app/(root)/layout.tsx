@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/sidebar';
 import { ThemeProvider } from "next-themes";
 
-export default function AuthLayout({
+export default function RLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

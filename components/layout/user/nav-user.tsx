@@ -32,6 +32,7 @@ import dynamic from 'next/dynamic'
 import { useRouter } from "next/navigation"
 import QRCodeStyling from "qr-code-styling"
 import { useEffect, useRef, useState } from "react"
+import { Providers } from "@/components/providers"
 
 const dmiClasses = 'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden'
 
@@ -124,7 +125,9 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <EditProfileItem session={session} />
+              <Providers>
+                <EditProfileItem session={session} />
+              </Providers>
               <SessionsItem session={session} />
               <PasskeysItem />
               {session?.user.twoFactorEnabled && <TwoFaScanItem />}

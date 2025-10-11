@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { CalendarIcon, MailIcon, PencilIcon, PhoneIcon, User2Icon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Calendar } from '@/components/ui/calendar'
@@ -52,6 +52,7 @@ import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { AutocompleteComponent } from '@/components/address-autocomplete'
+import { useQuery } from '@tanstack/react-query'
 
 type UserModel = {
   name: string
@@ -179,11 +180,56 @@ export default function EditProfileItem({ session }: { session: any }) {
     },
   })
 
-  function onSave(values: unknown) {
-    // For now just log and toast; backend wiring later
-    console.log('Save payload', values)
-    toast.success('Profile changes saved (frontend only)')
-    setOpen(false)
+  const { data, error } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => fetch('/api/profile').then(res => res.json()),
+    enabled: open,
+  })
+
+  useEffect(() => {
+    if (data?.success) {
+      form.reset({
+        user: data.data.user,
+        profile: data.data.profile,
+      })
+    }
+  }, [data, form])
+
+  useEffect(() => {
+    if (error) {
+      console.error('Error fetching profile:', error)
+      toast.error('Error loading profile')
+    }
+  }, [error])
+
+  async function onSave(values: { user: UserModel; profile: ProfileModel }) {
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+      const result = await response.json()
+      if (result.success) {
+        toast.success('Profile updated successfully')
+        setOpen(false)
+      } else {
+        if (result.errors) {
+          Object.entries(result.errors).forEach(([key, message]) => {
+            if (key === 'general') {
+              toast.error(message as string)
+            } else {
+              form.setError(key as any, { message: message as string })
+            }
+          })
+        } else {
+          toast.error('Failed to update profile')
+        }
+      }
+    } catch (error) {
+      console.error('Save error:', error)
+      toast.error('An error occurred while saving')
+    }
   }
 
   return (
@@ -368,6 +414,7 @@ export default function EditProfileItem({ session }: { session: any }) {
                                 <Calendar
                                   mode="single"
                                   selected={field.value ? new Date(field.value) : undefined}
+                                  captionLayout="dropdown"
                                   onSelect={(date) => field.onChange(date ? date.toISOString() : null)}
                                 />
                               </PopoverContent>
