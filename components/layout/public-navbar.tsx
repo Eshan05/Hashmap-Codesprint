@@ -137,7 +137,7 @@ export default function PublicNavbar() {
                   <HiOutlineMenuAlt3 /> Menu
                 </Button>
               </DrawerTrigger>
-              <DrawerContent>
+              <DrawerContent className=''>
                 <div className="mx-auto w-full max-w-sm py-4">
                   <DrawerHeader className='sr-only'>
                     <DrawerTitle></DrawerTitle>
