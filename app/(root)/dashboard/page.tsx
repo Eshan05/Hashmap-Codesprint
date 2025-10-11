@@ -39,7 +39,6 @@ export default async function Dashboard() {
 
   return (
     <div className="">
-      <UserCard session={sessionData} activeSessions={activeSessions} />
     </div>
   )
 }

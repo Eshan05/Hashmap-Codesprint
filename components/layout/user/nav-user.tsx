@@ -12,15 +12,6 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,23 +20,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { authClient as client } from "@/lib/auth-client"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Session } from "@/lib/auth-types"
 import dynamic from 'next/dynamic'
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import QRCodeStyling from "qr-code-styling"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
-import { Skeleton } from "@/components/ui/skeleton"
 
 const dmiClasses = 'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden'
 
@@ -128,11 +114,6 @@ export function NavUser({
     }
   }, [twoFactorVerifyURI])
 
-  const [editName, setEditName] = useState<string | undefined>(session?.user?.name)
-  const [editImage, setEditImage] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [sessions, setSessions] = useState<any[] | null>(null)
-  const [isTerminating, setIsTerminating] = useState<string | null>(null)
 
   if (!session?.user) return null
   const user = session.user
@@ -189,17 +170,11 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {/* Edit profile (lazy) */}
               <EditProfileItem session={session} />
-              {/* Sessions (lazy) */}
               <SessionsItem session={session} />
               <PasskeysItem />
-              {/* Scan QR Code (only for users with 2FA enabled) */}
               {session?.user.twoFactorEnabled && <TwoFaScanItem />}
-
-              {/* Enable / Disable 2FA dialog */}
               <TwoFaToggleItem enabled={!!session?.user.twoFactorEnabled} />
-
               <ChangePassword />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -210,47 +185,6 @@ export function NavUser({
             <SignOutItem />
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Edit Profile Dialog */}
-        <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="sm:max-w-[425px] w-11/12">
-            <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
-              <DialogDescription>Update your display name and profile image.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" value={editName || ""} onChange={(e) => setEditName(e.target.value)} />
-              <Label htmlFor="image">Profile Image</Label>
-              <Input id="image" type="file" accept="image/*" onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setEditImage(file);
-                  const r = new FileReader();
-                  r.onloadend = () => setImagePreview(r.result as string);
-                  r.readAsDataURL(file);
-                }
-              }} />
-              {imagePreview && (
-                <div className="relative w-24 h-24 rounded overflow-hidden">
-                  <Image src={imagePreview} alt="preview" fill sizes="(max-width: 48px) 48px" />
-                </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button onClick={async () => {
-                try {
-                  await client.updateUser({ name: editName, image: editImage ? await convertImageToBase64(editImage) : undefined });
-                  toast.success("Profile updated");
-                  setEditOpen(false);
-                } catch (e) {
-                  toast.error("Failed to update profile");
-                }
-              }}>Save</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
 
       </SidebarMenuItem>
     </SidebarMenu>
