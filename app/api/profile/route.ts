@@ -5,6 +5,7 @@ import UserProfile from '@/models/user-profile'
 
 export async function GET(request: NextRequest) {
   try {
+    await dbConnect()
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, errors: { general: 'Unauthorized' } }, { status: 401 })
