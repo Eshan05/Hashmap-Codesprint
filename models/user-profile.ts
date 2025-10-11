@@ -154,7 +154,7 @@ UserProfileSchema.index({ displayName: 'text', bio: 'text', searchAliases: 'text
 
 // Pre-save hook to ensure updatedAt is refreshed when using some update flows
 UserProfileSchema.pre('save', function (next) {
-  (this as any).updatedAt = new Date();
+  (this).updatedAt = new Date();
   next();
 });
 

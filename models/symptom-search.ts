@@ -76,12 +76,12 @@ SymptomSearchSchema.methods.getPotentialConditions = function (): Condition[] {
       const parsed = JSON.parse(raw);
       // Ensure each condition has expected fields used by the UI
       if (Array.isArray(parsed)) {
-        return parsed.map((c: any, idx: number) => ({
-          name: (c && c.name) || 'Unknown',
-          description: (c && c.description) || '',
-          explanation: (c && c.explanation) || '',
+        return parsed.map((c: Record<string, unknown>, idx: number) => ({
+          name: (c && typeof c.name === 'string') ? c.name : 'Unknown',
+          description: (c && typeof c.description === 'string') ? c.description : '',
+          explanation: (c && typeof c.explanation === 'string') ? c.explanation : '',
           // UI uses ranking to determine labels like 'Primary signal'
-          severityTrend: (c && c.severityTrend) || (idx === 0 ? 'Elevated' : idx === 1 ? 'Stable' : 'Mild'),
+          severityTrend: (c && typeof c.severityTrend === 'string') ? c.severityTrend : (idx === 0 ? 'Elevated' : idx === 1 ? 'Stable' : 'Mild'),
         }));
       }
       return [];
@@ -99,11 +99,11 @@ SymptomSearchSchema.methods.getMedicines = function (): Medicine[] {
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        return parsed.map((m: any, idx: number) => ({
-          name: (m && m.name) || 'Unknown',
-          commonUse: (m && m.commonUse) || '',
-          sideEffects: Array.isArray(m && m.sideEffects) ? m.sideEffects : [],
-          adherence: (m && m.adherence) || (idx === 0 ? 'High' : 'Moderate'),
+        return parsed.map((m: Record<string, unknown>, idx: number) => ({
+          name: (m && typeof m.name === 'string') ? m.name : 'Unknown',
+          commonUse: (m && typeof m.commonUse === 'string') ? m.commonUse : '',
+          sideEffects: Array.isArray(m.sideEffects) ? m.sideEffects as string[] : [],
+          adherence: (m && typeof m.adherence === 'string') ? m.adherence : (idx === 0 ? 'High' : 'Moderate'),
         }));
       }
       return [];
@@ -121,12 +121,12 @@ SymptomSearchSchema.methods.getWhenToSeekHelp = function (): WhenToSeekHelp[] {
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        return parsed.map((w: any, idx: number) => ({
-          title: (w && w.title) || `Alert ${idx + 1}`,
-          explanation: (w && w.explanation) || '',
-          criticality: (w && w.criticality) || (idx === 0 ? 'High' : 'Medium'),
-          immediateSteps: Array.isArray(w && w.immediateSteps) ? w.immediateSteps : [],
-          curability: (w && w.curability) || 'Unknown',
+        return parsed.map((w: Record<string, unknown>, idx: number) => ({
+          title: (w && typeof w.title === 'string') ? w.title : `Alert ${idx + 1}`,
+          explanation: (w && typeof w.explanation === 'string') ? w.explanation : '',
+          criticality: (w && typeof w.criticality === 'string') ? w.criticality : (idx === 0 ? 'High' : 'Medium'),
+          immediateSteps: Array.isArray(w.immediateSteps) ? w.immediateSteps as string[] : [],
+          curability: (w && typeof w.curability === 'string') ? w.curability : 'Unknown',
         }));
       }
       return [];
@@ -169,11 +169,17 @@ SymptomSearchSchema.methods.getReliefIdeas = function (): ReliefIdea[] {
     try {
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return [];
-      return parsed.map((r: any) => ({
-        title: (r && r.title) || 'Relief tip',
-        description: (r && r.description) || '',
-        icon: (r && r.icon) || undefined,
-      }));
+      return parsed.map((r) => {
+        if (typeof r === 'object' && r !== null) {
+          const relief = r as Record<string, unknown>;
+          return {
+            title: typeof relief.title === 'string' ? relief.title : 'Relief tip',
+            description: typeof relief.description === 'string' ? relief.description : '',
+            icon: typeof relief.icon === 'string' ? relief.icon : undefined,
+          };
+        }
+        return { title: 'Relief tip', description: '', icon: undefined };
+      });
     } catch (e) {
       return [];
     }

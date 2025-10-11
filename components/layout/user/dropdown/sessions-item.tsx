@@ -21,8 +21,28 @@ import { authClient as client } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export default function SessionsItem({ session }: { session: any }) {
-  const [sessions, setSessions] = useState<any[] | null>(null);
+interface SessionItem {
+  id: string;
+  userAgent?: string;
+  token: string;
+  location?: string;
+  geo?: string;
+  city?: string;
+  ipLocation?: string;
+  ip?: string;
+  ipAddress?: string;
+  clientIp?: string;
+  remoteAddress?: string;
+}
+
+interface SessionProp {
+  session?: {
+    id: string;
+  };
+}
+
+export default function SessionsItem({ session }: { session: SessionProp }) {
+  const [sessions, setSessions] = useState<SessionItem[] | null>(null);
   const [isTerminating, setIsTerminating] = useState<string | null>(null);
   const router = useRouter();
 
@@ -57,8 +77,8 @@ export default function SessionsItem({ session }: { session: any }) {
           <ScrollArea className="h-64">
             <div className="grid gap-2">
               {sessions ? (() => {
-                const groups: Record<string, any[]> = {};
-                sessions.filter((s: any) => s.userAgent).forEach((s: any) => {
+                const groups: Record<string, SessionItem[]> = {};
+                sessions.filter((s: SessionItem) => s.userAgent).forEach((s: SessionItem) => {
                   const os = new UAParser(s.userAgent || "").getOS().name || "Unknown";
                   let key = "Other";
                   if (/windows/i.test(os)) key = "Windows";
@@ -92,7 +112,7 @@ export default function SessionsItem({ session }: { session: any }) {
                         </AccordionTrigger>
                         <AccordionContent className="px-2 py-1">
                           <div className="grid gap-2">
-                            {list.map((s: any) => {
+                            {list.map((s: SessionItem) => {
                               const parser = new UAParser(s.userAgent || "");
                               const device = parser.getDevice();
                               const osName = parser.getOS().name || "Unknown";

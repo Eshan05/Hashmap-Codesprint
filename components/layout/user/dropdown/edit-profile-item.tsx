@@ -471,27 +471,26 @@ export default function EditProfileItem({ session }: { session: any }) {
                       />
 
                       <div>
-                        <h4 className="text-sm font-medium mb-2">Medications</h4>
+                        <h4 className="text-sm font-medium mt-1">Current Medications</h4>
+                        <p className="text-sm text-muted-foreground my-1">Add or remove medications you are currently taking. After opening it, wait a moment for the list to load.</p>
                         <MedicationsEditor name="profile.medications" />
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-medium mb-2">Allergies</h4>
+                        <h4 className="text-sm font-medium mt-1">Allergies</h4>
+                        <p className="text-sm text-muted-foreground my-1">Add or remove allergies you have. After opening it, wait a moment for the list to load.</p>
                         <AllergiesEditor name="profile.allergies" />
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-medium mb-2">Family history</h4>
+                        <h4 className="text-sm font-medium mt-1">Family history</h4>
+                        <p className="text-sm text-muted-foreground my-1">Add or remove relevant family medical history items.</p>
                         <FamilyHistoryEditor name="profile.familyHistory" />
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-medium mb-2">Immunizations</h4>
-                        <ImmunizationsEditor name="profile.immunizations" />
-                      </div>
-
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Mental health</h4>
+                        <h4 className="text-sm font-medium mt-1">Mental health</h4>
+                        <p className="text-sm text-muted-foreground my-1">Add or remove mental health diagnoses. Only add clinically relevant diagnoses, not self-made ones.</p>
                         <MentalHealthEditor name="profile.mentalHealth.diagnoses" />
                       </div>
 

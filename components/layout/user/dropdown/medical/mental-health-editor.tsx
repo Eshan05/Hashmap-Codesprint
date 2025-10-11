@@ -18,15 +18,6 @@ export default function MentalHealthEditor({ name = 'profile.mentalHealth.diagno
 
   return (
     <div>
-      <div className="flex items-center gap-2">
-        <FormItem className="flex-1">
-          <FormLabel>Is under care</FormLabel>
-          <FormControl>
-            <Input {...register(`${base}.isUnderCare` as const)} placeholder="true/false" />
-          </FormControl>
-        </FormItem>
-      </div>
-
       <div className="mt-2 space-y-2">
         {fields.map((f, idx) => (
           <div key={f.id} className="flex items-center gap-2">

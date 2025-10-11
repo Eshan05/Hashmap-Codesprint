@@ -30,8 +30,12 @@ interface Medication {
 }
 
 export default function MedicationsEditor({ name = 'profile.medications' }: { name?: string }) {
-  const { watch, setValue } = useFormContext()
-  const medications = watch(name) || []
+  const { setValue, getValues } = useFormContext()
+  const [medications, setMedications] = useState<Medication[]>([])
+
+  useEffect(() => {
+    setMedications((getValues(name) as Medication[]) || [])
+  }, [getValues, name])
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [availableMeds, setAvailableMeds] = useState<Medication[]>([])
@@ -49,13 +53,15 @@ export default function MedicationsEditor({ name = 'profile.medications' }: { na
 
   const addMedication = (med: Medication) => {
     const newValue = [...medications, med]
+    setMedications(newValue)
     setValue(name, newValue)
     setOpen(false)
     setSearch('')
   }
 
   const removeMedication = (index: number) => {
-    const newValue = medications.filter((_: any, i: number) => i !== index)
+    const newValue = medications.filter((_: Medication, i: number) => i !== index)
+    setMedications(newValue)
     setValue(name, newValue)
   }
 
@@ -63,12 +69,11 @@ export default function MedicationsEditor({ name = 'profile.medications' }: { na
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
         {medications.map((med: Medication, index: number) => (
-          <Badge key={index} variant="secondary" className="flex items-center gap-1">
+          <Badge key={index} variant="secondary" className="flex items-center gap-1 pr-1">
             {med.brand_name || med.generic_name || 'Unknown'}
-            <X
-              className="h-3 w-3 cursor-pointer"
-              onClick={() => removeMedication(index)}
-            />
+            <Button type="button" variant={'ghost'} onClick={(e) => { removeMedication(index); }} className="ml-1 hover:bg-muted rounded !p-0.5 h-min z-10">
+              <X className="!size-3" />
+            </Button>
           </Badge>
         ))}
       </div>
