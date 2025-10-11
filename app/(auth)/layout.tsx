@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div data-vaul-drawer-wrapper="">
+    <div>
       <PublicNavbar />
       <main>{children}</main>
     </div>

@@ -29,7 +29,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <Toaster />
-        <div data-vaul-drawer-wrapper="">
+        <div data-vaul-drawer-wrapper="" className="overflow-x-hidden">
           {children}
         </div>
       </body>
