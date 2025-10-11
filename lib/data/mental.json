@@ -1,0 +1,201 @@
+[
+  {
+    "category": "Anxiety Disorders",
+    "disorder_name": "Generalized Anxiety Disorder",
+    "abbreviation": "GAD"
+  },
+  {
+    "category": "Anxiety Disorders",
+    "disorder_name": "Panic Disorder"
+  },
+  {
+    "category": "Anxiety Disorders",
+    "disorder_name": "Social Anxiety Disorder"
+  },
+  {
+    "category": "Anxiety Disorders",
+    "disorder_name": "Agoraphobia"
+  },
+  {
+    "category": "Anxiety Disorders",
+    "disorder_name": "Specific Phobias"
+  },
+  {
+    "category": "Obsessive-Compulsive and Related Disorders",
+    "disorder_name": "Obsessive-Compulsive Disorder",
+    "abbreviation": "OCD"
+  },
+  {
+    "category": "Obsessive-Compulsive and Related Disorders",
+    "disorder_name": "Body Dysmorphic Disorder"
+  },
+  {
+    "category": "Obsessive-Compulsive and Related Disorders",
+    "disorder_name": "Hoarding Disorder"
+  },
+  {
+    "category": "Trauma- and Stressor-Related Disorders",
+    "disorder_name": "Post-Traumatic Stress Disorder",
+    "abbreviation": "PTSD"
+  },
+  {
+    "category": "Trauma- and Stressor-Related Disorders",
+    "disorder_name": "Acute Stress Disorder"
+  },
+  {
+    "category": "Trauma- and Stressor-Related Disorders",
+    "disorder_name": "Adjustment Disorder"
+  },
+  {
+    "category": "Depressive Disorders",
+    "disorder_name": "Major Depressive Disorder",
+    "abbreviation": "MDD"
+  },
+  {
+    "category": "Depressive Disorders",
+    "disorder_name": "Persistent Depressive Disorder (Dysthymia)"
+  },
+  {
+    "category": "Bipolar and Related Disorders",
+    "disorder_name": "Bipolar I Disorder"
+  },
+  {
+    "category": "Bipolar and Related Disorders",
+    "disorder_name": "Bipolar II Disorder"
+  },
+  {
+    "category": "Bipolar and Related Disorders",
+    "disorder_name": "Cyclothymia"
+  },
+  {
+    "category": "Schizophrenia Spectrum and Other Psychotic Disorders",
+    "disorder_name": "Schizophrenia"
+  },
+  {
+    "category": "Schizophrenia Spectrum and Other Psychotic Disorders",
+    "disorder_name": "Schizoaffective Disorder"
+  },
+  {
+    "category": "Schizophrenia Spectrum and Other Psychotic Disorders",
+    "disorder_name": "Delusional Disorder"
+  },
+  {
+    "category": "Neurodevelopmental Disorders",
+    "disorder_name": "Attention-Deficit/Hyperactivity Disorder",
+    "abbreviation": "ADHD"
+  },
+  {
+    "category": "Neurodevelopmental Disorders",
+    "disorder_name": "Autism Spectrum Disorder",
+    "abbreviation": "ASD"
+  },
+  {
+    "category": "Neurodevelopmental Disorders",
+    "disorder_name": "Intellectual Disability"
+  },
+  {
+    "category": "Neurodevelopmental Disorders",
+    "disorder_name": "Tourette Syndrome"
+  },
+  {
+    "category": "Eating Disorders",
+    "disorder_name": "Anorexia Nervosa"
+  },
+  {
+    "category": "Eating Disorders",
+    "disorder_name": "Bulimia Nervosa"
+  },
+  {
+    "category": "Eating Disorders",
+    "disorder_name": "Binge-Eating Disorder"
+  },
+  {
+    "category": "Substance-Related and Addictive Disorders",
+    "disorder_name": "Substance Use Disorder (e.g., Alcohol, Opioid, Cannabis)"
+  },
+  {
+    "category": "Substance-Related and Addictive Disorders",
+    "disorder_name": "Gambling Disorder"
+  },
+  {
+    "category": "Dissociative Disorders",
+    "disorder_name": "Dissociative Identity Disorder",
+    "abbreviation": "DID"
+  },
+  {
+    "category": "Dissociative Disorders",
+    "disorder_name": "Depersonalization/Derealization Disorder"
+  },
+  {
+    "category": "Somatic Symptom and Related Disorders",
+    "disorder_name": "Somatic Symptom Disorder"
+  },
+  {
+    "category": "Somatic Symptom and Related Disorders",
+    "disorder_name": "Conversion Disorder (Functional Neurological Symptom Disorder)"
+  },
+  {
+    "category": "Somatic Symptom and Related Disorders",
+    "disorder_name": "Illness Anxiety Disorder (formerly Hypochondriasis)"
+  },
+  {
+    "category": "Disruptive, Impulse-Control, and Conduct Disorders",
+    "disorder_name": "Conduct Disorder"
+  },
+  {
+    "category": "Disruptive, Impulse-Control, and Conduct Disorders",
+    "disorder_name": "Oppositional Defiant Disorder",
+    "abbreviation": "ODD"
+  },
+  {
+    "category": "Disruptive, Impulse-Control, and Conduct Disorders",
+    "disorder_name": "Intermittent Explosive Disorder"
+  },
+  {
+    "category": "Neurocognitive Disorders",
+    "disorder_name": "Delirium"
+  },
+  {
+    "category": "Neurocognitive Disorders",
+    "disorder_name": "Major or Mild Neurocognitive Disorder (Dementia)"
+  },
+  {
+    "category": "Sleep-Wake Disorders",
+    "disorder_name": "Insomnia Disorder"
+  },
+  {
+    "category": "Sleep-Wake Disorders",
+    "disorder_name": "Narcolepsy"
+  },
+  {
+    "category": "Sleep-Wake Disorders",
+    "disorder_name": "Sleep Apnea"
+  },
+  {
+    "category": "Sleep-Wake Disorders",
+    "disorder_name": "Restless Legs Syndrome"
+  },
+  {
+    "category": "Personality Disorders (Cluster B)",
+    "disorder_name": "Borderline Personality Disorder",
+    "abbreviation": "BPD"
+  },
+  {
+    "category": "Personality Disorders (Cluster B)",
+    "disorder_name": "Antisocial Personality Disorder",
+    "abbreviation": "ASPD"
+  },
+  {
+    "category": "Personality Disorders (Cluster B)",
+    "disorder_name": "Narcissistic Personality Disorder",
+    "abbreviation": "NPD"
+  },
+  {
+    "category": "Personality Disorders (Cluster C)",
+    "disorder_name": "Avoidant Personality Disorder"
+  },
+  {
+    "category": "Other",
+    "disorder_name": "Gender Dysphoria"
+  }
+]

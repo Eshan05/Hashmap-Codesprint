@@ -228,27 +228,6 @@ export default function EditProfileItem({ session }: { session: any }) {
                     </TooltipTrigger>
                     <TooltipContent side="right">Medical</TooltipContent>
                   </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <TabsTrigger value="system" className="" aria-label="System">
-                          <SettingsIcon />
-                        </TabsTrigger>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">System</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <TabsTrigger value="system" className="" aria-label="System">
-                          <Info />
-                        </TabsTrigger>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Others</TooltipContent>
-                  </Tooltip>
                 </TooltipProvider>
               </TabsList>
               {/* </ScrollArea> */}
