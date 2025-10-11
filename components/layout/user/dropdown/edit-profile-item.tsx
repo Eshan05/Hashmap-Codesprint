@@ -10,7 +10,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { MailIcon, PencilIcon, PhoneIcon, User2Icon } from 'lucide-react'
+import { CalendarIcon, MailIcon, PencilIcon, PhoneIcon, User2Icon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -48,6 +48,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { AdornedInputField } from '@/components/accessible-sleek-input'
 import { Separator } from '@/components/ui/separator'
 import GenderSelector from '@/components/profile-gender-selector'
+import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import { PhoneInput } from '@/components/ui/phone-input'
+import { AutocompleteComponent } from '@/components/address-autocomplete'
 
 type UserModel = {
   name: string
@@ -272,11 +276,11 @@ export default function EditProfileItem({ session }: { session: any }) {
               </TabsList>
               {/* </ScrollArea> */}
 
-              <ScrollArea className="h-60 w-full flex-1">
+              <ScrollArea className="h-60 w-full flex-1 p-1">
                 <div className="rounded-md bg-background">
                   <TabsContent value="profile">
                     <div className="flex flex-col gap-4">
-                      <section>
+                      <section className='flex flex-col gap-2'>
                         <FormField
                           control={form.control}
                           name="profile.displayName"
@@ -324,13 +328,18 @@ export default function EditProfileItem({ session }: { session: any }) {
                             <FormItem>
                               {/* <FormLabel>Email</FormLabel> */}
                               <FormControl>
-                                <AdornedInputField
+                                {/* <AdornedInputField
                                   field={field}
                                   Icon={PhoneIcon}
                                   inputProps={{ readOnly: true }}
                                   placeholder="+1 (555) 123-4567"
                                   popoverLabel="Phone Information"
                                   popoverContent={<p className=''>Your account phone number (Readonly).</p>}
+                                /> */}
+                                <PhoneInput
+                                  placeholder="Enter your phone number"
+                                  value={field.value as string}
+                                  onChange={field.onChange}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -375,6 +384,55 @@ export default function EditProfileItem({ session }: { session: any }) {
                       </section>
                       <FormField
                         control={form.control}
+                        name="profile.dob"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Date of birth</FormLabel>
+                            <FormDescription className="-mt-1">Used for better AI results.</FormDescription>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-[240px] justify-start items-center text-left font-normal my-1",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    <CalendarIcon className="h-4 w-4" />
+                                    {field.value ? (
+                                      format(new Date(field.value), "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value ? new Date(field.value) : undefined}
+                                  onSelect={(date) => field.onChange(date ? date.toISOString() : null)}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <section className='flex flex-col gap-2'>
+                        <FormLabel>Address</FormLabel>
+                        <FormDescription className="-mt-1">Search and select your address to auto-fill city and country.</FormDescription>
+                        <AutocompleteComponent
+                          onAddressChange={(selectedAddress) => {
+                            form.setValue('profile.city', selectedAddress.city);
+                            form.setValue('profile.countryCode', selectedAddress.country);
+                          }}
+                        />
+                      </section>
+
+                      <FormField
+                        control={form.control}
                         name="profile.bio"
                         render={({ field }) => (
                           <FormItem className="col-span-2">
@@ -386,61 +444,8 @@ export default function EditProfileItem({ session }: { session: any }) {
                           </FormItem>
                         )}
                       />
-                    </div>
-                  </TabsContent>
 
-                  <TabsContent value="personal">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="profile.dob"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Date of birth</FormLabel>
-                            <FormControl>
-                              <Calendar mode="single" onSelect={(d: any) => field.onChange(d ? d.toISOString() : null)} selected={field.value ? new Date(field.value) : undefined} />
-                            </FormControl>
-                            <FormDescription>Used for age-based features. Not public.</FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
 
-                      <FormField
-                        control={form.control}
-                        name="profile.city"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>City</FormLabel>
-                            <FormControl>
-                              <Input {...field} value={field.value ?? ''} placeholder="City" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="profile.countryCode"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Country</FormLabel>
-                            <FormControl>
-                              <Select onValueChange={field.onChange} value={field.value || ''}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select country" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="US">United States</SelectItem>
-                                  <SelectItem value="IN">India</SelectItem>
-                                  <SelectItem value="GB">United Kingdom</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
                     </div>
                   </TabsContent>
 
