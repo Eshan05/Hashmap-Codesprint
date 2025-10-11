@@ -52,13 +52,13 @@ export default function AllergiesEditor({ name = 'profile.allergies' }: { name?:
 
   useEffect(() => {
     if (search.trim()) {
-      fetch(`/api/allergies?q=${encodeURIComponent(search)}`)
+      fetch(`/api/v1/allergies?q=${encodeURIComponent(search)}`)
         .then(res => res.json())
         .then(response => setAllergyGroups(response.data || response))
         .catch(console.error)
     } else {
       // Fetch all if no search
-      fetch('/api/allergies')
+      fetch('/api/v1/allergies')
         .then(res => res.json())
         .then(response => setAllergyGroups(response.data || response))
         .catch(console.error)

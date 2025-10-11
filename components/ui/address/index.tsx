@@ -73,7 +73,7 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
     // For real use case: /api/address/place?placeId=${selectedPlaceId}
     selectedPlaceId === ""
       ? null
-      : `/api/address/place?placeId=${selectedPlaceId}`,
+      : `/api/v1/address/place?placeId=${selectedPlaceId}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -186,7 +186,7 @@ function AddressAutoCompleteInput(props: CommonProps) {
 
   const { data, isLoading } = useSWR(
     // For real use case: /api/address/autocomplete?input=${debouncedSearchInput}
-    `/api/address/autocomplete?input=${debouncedSearchInput}`,
+    `/api/v1/address/autocomplete?input=${debouncedSearchInput}`,
     fetcher,
   );
 

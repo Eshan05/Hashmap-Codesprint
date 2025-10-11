@@ -44,13 +44,13 @@ export default function MentalHealthEditor({ name = 'profile.mentalHealth.diagno
 
   useEffect(() => {
     if (search.trim()) {
-      fetch(`/api/mental-health?q=${encodeURIComponent(search)}`)
+      fetch(`/api/v1/mental-health?q=${encodeURIComponent(search)}`)
         .then(res => res.json())
         .then(response => setMentalGroups(response.data || response))
         .catch(console.error)
     } else {
       // Fetch all if no search
-      fetch('/api/mental-health')
+      fetch('/api/v1/mental-health')
         .then(res => res.json())
         .then(response => setMentalGroups(response.data || response))
         .catch(console.error)

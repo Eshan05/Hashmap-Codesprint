@@ -16,7 +16,7 @@ import dynamic from 'next/dynamic';
 const SymptomFormMain = dynamic(() => import('./_components/symptom-form-main'), { ssr: false });
 
 const fetchRecentSearches = async (): Promise<RecentSearch[]> => {
-  const response = await fetch('/api/symptoms/recent');
+  const response = await fetch('/api/v1/symptoms/recent');
   if (!response.ok) {
     throw new Error('Failed to fetch recent searches');
   }

@@ -66,7 +66,7 @@ export default function MedSearchForm() {
     setError('');
     // console.log(data);
     try {
-      const response = await fetch('/api/medicines', {
+      const response = await fetch('/api/v1/medicines', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -182,7 +182,7 @@ export default function EditProfileItem({ session }: { session: any }) {
 
   const { data, error } = useQuery({
     queryKey: ['profile'],
-    queryFn: () => fetch('/api/profile').then(res => res.json()),
+    queryFn: () => fetch('/api/v1/profile').then(res => res.json()),
     enabled: open,
   })
 
@@ -204,7 +204,7 @@ export default function EditProfileItem({ session }: { session: any }) {
 
   async function onSave(values: { user: UserModel; profile: ProfileModel }) {
     try {
-      const response = await fetch('/api/profile', {
+      const response = await fetch('/api/v1/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
