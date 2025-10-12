@@ -17,8 +17,7 @@ export const baseURL: string | undefined =
 export const cookieDomain: string | undefined =
   process.env.VERCEL === "1"
     ? process.env.VERCEL_ENV === "production"
-      ? cleanUrlForCookieDomain(process.env.VERCEL_URL)
-      // ? cleanUrlForCookieDomain(process.env.NEXT_PUBLIC_BETTER_AUTH_BASE)
+      ? cleanUrlForCookieDomain(process.env.NEXT_PUBLIC_BETTER_AUTH_BASE)
       : process.env.VERCEL_ENV === "preview"
         ? `.${process.env.VERCEL_URL}`
         : undefined
