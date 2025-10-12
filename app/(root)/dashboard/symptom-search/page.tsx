@@ -26,7 +26,7 @@ const fetchRecentSearches = async (): Promise<RecentSearch[]> => {
 
 export default function SymptomSearchPage() {
   const { data: recentSearches = [], isLoading, error: queryError } = useQuery<RecentSearch[]>({
-    queryKey: ['recent-searches'],
+    queryKey: ['symp-recents'],
     queryFn: fetchRecentSearches,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
