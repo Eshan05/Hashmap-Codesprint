@@ -1,26 +1,94 @@
 import mongoose, { Schema, type Document, type Model } from 'mongoose';
+import type {
+  LLMMedicineCommonPayload,
+  LLMMedicineModePayload,
+  MedicineSearchDocumentCore,
+  MedicineSearchMode
+} from '@/types/medicine-search';
 
-export interface IMedicineSearch extends Document {
-  searchId: string;
-  searchType: 'disease' | 'name' | 'sideEffects' | 'ingredient' | 'similar';
-  query: string;
-  result: string;
-  createdAt: Date;
+export interface IMedicineSearch extends Document, MedicineSearchDocumentCore {
+  result?: string;
+  getCommonPayload(): LLMMedicineCommonPayload;
+  getModePayload<T extends LLMMedicineModePayload>(): T;
 }
 
-const MedicineSearchSchema: Schema = new Schema({
-  searchId: { type: String, required: true, unique: true },
-  searchType: { type: String, required: true, enum: ['disease', 'name', 'sideEffects', 'ingredient', 'similar'] },
-  query: { type: String, required: true },
-  result: { type: String, default: '' },
-  createdAt: { type: Date, default: Date.now },
-});
+const MedicineSearchSchema: Schema = new Schema(
+  {
+    searchId: { type: String, required: true, unique: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    searchType: {
+      type: String,
+      required: true,
+      enum: ['disease', 'name', 'sideEffects', 'ingredient', 'similar'] as MedicineSearchMode[]
+    },
+    query: { type: String, required: true },
+    queryHash: { type: String, default: '', index: true },
+    title: { type: String, default: '' },
+    summary: { type: String, default: '' },
+    status: { type: String, enum: ['pending', 'ready', 'errored'], default: 'pending' },
+    errorMessage: { type: String, default: '' },
+    commonPayload: { type: String, default: '{}' },
+    modePayload: { type: String, default: '{}' },
+    duration: { type: Number },
+    result: { type: String, default: '' },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-let MedicineSearch: Model<IMedicineSearch>
+MedicineSearchSchema.index({ user: 1, queryHash: 1 });
+
+MedicineSearchSchema.methods.getCommonPayload = function (): LLMMedicineCommonPayload {
+  const raw = this.commonPayload;
+  if (!raw) {
+    return {
+      summary: '',
+      keyTakeaways: [],
+      clinicalActions: [],
+      riskAlerts: [],
+      interactionNotes: [],
+      monitoringGuidance: [],
+      references: [],
+      followUpPrompts: [],
+      patientCounseling: [],
+      disclaimer: ''
+    };
+  }
+
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as LLMMedicineCommonPayload;
+    } catch (error) {
+      console.error('Failed to parse commonPayload for MedicineSearch', error);
+    }
+  }
+
+  return raw as LLMMedicineCommonPayload;
+};
+
+MedicineSearchSchema.methods.getModePayload = function <T extends LLMMedicineModePayload>(): T {
+  const raw = this.modePayload;
+  if (!raw) {
+    return {} as T;
+  }
+
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as T;
+    } catch (error) {
+      console.error('Failed to parse modePayload for MedicineSearch', error);
+    }
+  }
+
+  return raw as T;
+};
+
+let MedicineSearch: Model<IMedicineSearch>;
 try {
-  MedicineSearch = mongoose.model<IMedicineSearch>('MedicineSearch')
+  MedicineSearch = mongoose.model<IMedicineSearch>('MedicineSearch');
 } catch (error) {
-  MedicineSearch = mongoose.model<IMedicineSearch>('MedicineSearch', MedicineSearchSchema)
+  MedicineSearch = mongoose.model<IMedicineSearch>('MedicineSearch', MedicineSearchSchema);
 }
 
 export default MedicineSearch;

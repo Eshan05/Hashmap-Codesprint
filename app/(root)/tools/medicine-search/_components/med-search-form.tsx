@@ -57,9 +57,8 @@ export default function MedSearchForm() {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  // const [searchType, setSearchType] = useState<'disease' | 'name' | 'sideEffects' | 'ingredient' | 'similar' | 'dosage' | '' | null>('');
-  const [searchType, setSearchType] = useState<string>('');
-  const [queryPlaceholder, setQueryPlaceholder] = useState<string>('');
+  const [searchType, setSearchType] = useState<string>('name');
+  const [queryPlaceholder, setQueryPlaceholder] = useState<string>(getQueryPlaceholder('name'));
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setLoading(true);
@@ -74,12 +73,12 @@ export default function MedSearchForm() {
         body: JSON.stringify(data),
       });
       if (response.ok) {
-        const data = await response.json();
-        if (data.searchType === 'disease' || data.searchType === 'name') {
-          const encodedQuery = encodeURIComponent(data.query);
-          router.push(`/medicine-search/${data.searchType}/${encodedQuery}`);
+        const payload = await response.json();
+        const destinationId = payload.searchId;
+        if (destinationId) {
+          router.push(`/tools/medicine-search/${destinationId}`);
         } else {
-          router.push(`/medicine-search/${data.searchId}`);
+          setError('Missing search identifier in response');
         }
       } else {
         const errorData = await response.json();
@@ -128,10 +127,10 @@ export default function MedSearchForm() {
               <div className='w-full lg:col-span-2 -mt-4 lg:mt-0 p-1'>
                 <FormControl>
                   <Select
-                    onValueChange={(v) => {
-                      field.onChange(v);
-                      setSearchType(v);
-                      setQueryPlaceholder(getQueryPlaceholder(v));
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setSearchType(value);
+                      setQueryPlaceholder(getQueryPlaceholder(value));
                     }}
                     defaultValue={field.value}
                   >
