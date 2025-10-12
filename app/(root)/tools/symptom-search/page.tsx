@@ -1,6 +1,6 @@
 'use client'
 
-import Recent from '@/app/(root)/tools/symptom-search/_components/recent';
+import Recent from '@/components/features/core/recent';
 import {
   Credenza,
   CredenzaBody,
