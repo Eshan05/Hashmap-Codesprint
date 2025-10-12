@@ -65,7 +65,7 @@ export default function SymptomSearchPage() {
                   </div>
                 ) : recentSearches.length > 0 ? (
                   <div className="space-y-3">
-                    <Recent items={recentSearches} />
+                    <Recent items={recentSearches} basePath='/dashboard/symptom-search' />
                   </div>
                 ) : (
                   <div className="text-center py-8">
