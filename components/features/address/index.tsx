@@ -1,6 +1,6 @@
 "use client";
 
-import { FormMessages } from "@/components/form-messages";
+import { FormMessages } from "@/components/features/address/form-messages";
 import { Button } from "@/components/ui/button";
 import {
   Command,

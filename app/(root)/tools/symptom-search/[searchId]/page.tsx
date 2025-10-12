@@ -1,7 +1,7 @@
-import FadeContent from '@/components/fade-content';
+import FadeContent from '@/components/visuals/fade-content';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { WrapDrawer, WDTrigger, WDContent } from '@/components/ui/wrap-drawer';
+import { WrapDrawer, WDTrigger, WDContent } from '@/components/common/wrap-drawer';
 import {
   Card,
   CardContent,

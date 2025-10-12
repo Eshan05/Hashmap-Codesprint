@@ -15,7 +15,7 @@ import type React from "react";
 import { type FormEvent, useEffect, useState } from "react";
 import { type ZodError, z } from "zod";
 import type { AddressType } from ".";
-import { FormMessages } from "@/components/form-messages";
+import { FormMessages } from "@/components/features/address/form-messages";
 import { Loader2 } from "lucide-react";
 
 interface AddressDialogProps {

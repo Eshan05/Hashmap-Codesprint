@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog'
-import { PasswordInput } from '@/components/ui/password-input'
+import { PasswordInput } from '@/components/derived/password-input'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'

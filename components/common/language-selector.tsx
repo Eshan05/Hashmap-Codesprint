@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Popover, PopoverTrigger, PopoverContent } from "./popover"
-import { ScrollArea } from "./scroll-area"
+import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover"
+import { ScrollArea } from "../ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { HiOutlineTranslate } from "react-icons/hi";
 

@@ -2,7 +2,7 @@
 
 import AddressAutoComplete, {
   AddressType,
-} from "@/components/ui/address";
+} from "@/components/features/address";
 import { useState } from "react";
 
 export const AutocompleteComponent = ({ onAddressChange }: { onAddressChange?: (address: AddressType) => void }) => {

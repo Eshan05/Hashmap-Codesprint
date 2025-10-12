@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import CopyButton from "@/components/ui/copy-button";
+import CopyButton from "@/components/derived/copy-button";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { FormControl } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordInput } from "@/components/derived/password-input";
 import {
   Table,
   TableBody,
@@ -83,7 +83,7 @@ import { TbBrandAndroid, TbBrandApple, TbBrandWindows } from "react-icons/tb";
 import { FaLinux } from "react-icons/fa6";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import PasskeysPanel, { AddPasskeyInline } from "@/components/auth/passkeys-panel"
+import PasskeysPanel, { AddPasskeyInline } from "@/components/features/auth/passkeys-panel"
 
 function MobileIcon() {
   return (

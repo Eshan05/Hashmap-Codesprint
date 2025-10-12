@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import PasskeysPanel, { AddPasskeyInline } from '@/components/auth/passkeys-panel'
+import PasskeysPanel, { AddPasskeyInline } from '@/components/features/auth/passkeys-panel'
 import { Credenza, CredenzaTrigger, CredenzaContent, CredenzaHeader, CredenzaBody, CredenzaTitle, CredenzaDescription } from '@/components/ui/credenza'
 import { Fingerprint } from 'lucide-react'
 

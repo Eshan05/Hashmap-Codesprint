@@ -10,9 +10,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { HiOutlineMenuAlt3 } from 'react-icons/hi';
 import type { IconType } from 'react-icons/lib';
 import { TbBuildingSkyscraper, TbHome, TbMailShare, TbVideo, TbWorldQuestion } from "react-icons/tb";
-import { Logo } from "../auth/logo";
-import { EButton } from '../ui/enhanced-button';
-import LanguageSelector from '../ui/language-selector';
+import { Logo } from "../common/logo";
+import { EButton } from '../derived/enhanced-button';
+import LanguageSelector from '../common/language-selector';
 
 interface NavItem {
   label: string;

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { ArrowLeftRight, ArrowUpRight, Mail, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Logo } from "@/components/auth/logo";
+import { Logo } from "@/components/common/logo";
 import Image from "next/image";
 import { ConsentBtns } from "./concet-buttons";
 

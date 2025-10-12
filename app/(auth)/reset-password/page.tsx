@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { calculatePasswordStrength } from "@/utils/password-strength";
-import { Logo } from "@/components/auth/logo";
+import { Logo } from "@/components/common/logo";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");

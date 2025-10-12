@@ -1,6 +1,6 @@
 "use client";
 
-import { Logo } from "@/components/auth/logo";
+import { Logo } from "@/components/common/logo";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
