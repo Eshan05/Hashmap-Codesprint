@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 
 import ChangePassword from "@/components/features/auth/change-password"
+import { Providers } from "@/components/providers"
 import {
   Avatar,
   AvatarFallback,
@@ -30,9 +31,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Session } from "@/lib/auth-types"
 import dynamic from 'next/dynamic'
 import { useRouter } from "next/navigation"
-import QRCodeStyling from "qr-code-styling"
-import { useEffect, useRef, useState } from "react"
-import { Providers } from "@/components/providers"
 
 const dmiClasses = 'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden'
 
@@ -43,15 +41,15 @@ const QL = () => (
   </div>
 )
 
-const EditProfileItem = dynamic(() => import('../../features/profile-dropdown/edit-profile-item'), { ssr: false, loading: () => <QL /> })
-const SessionsItem = dynamic(() => import('../../features/profile-dropdown/sessions-item'), { ssr: false, loading: () => <QL /> })
-const PasskeysItem = dynamic(() => import('../../features/profile-dropdown/passkeys-item'), { ssr: false, loading: () => <QL /> })
-const TwoFaScanItem = dynamic(() => import('../../features/profile-dropdown/twofa-scan-item'), { ssr: false, loading: () => <QL /> })
-const TwoFaToggleItem = dynamic(() => import('../../features/profile-dropdown/twofa-toggle-item'), { ssr: false, loading: () => <QL /> })
-const VerifyEmailItem = dynamic(() => import('../../features/profile-dropdown/verify-email-item'), { ssr: false, loading: () => <QL /> })
-const BillingItem = dynamic(() => import('../../features/profile-dropdown/billing-item'), { ssr: false, loading: () => <QL /> })
-const NotificationsItem = dynamic(() => import('../../features/profile-dropdown/notifications-item'), { ssr: false, loading: () => <QL /> })
-const SignOutItem = dynamic(() => import('../../features/profile-dropdown/signout-item'), { ssr: false, loading: () => <QL /> })
+const EditProfileItem = dynamic(() => import('../../features/profile/settings/edit-profile-item'), { ssr: false, loading: () => <QL /> })
+const SessionsItem = dynamic(() => import('../../features/profile/settings/sessions-item'), { ssr: false, loading: () => <QL /> })
+const PasskeysItem = dynamic(() => import('../../features/profile/settings/passkeys-item'), { ssr: false, loading: () => <QL /> })
+const TwoFaScanItem = dynamic(() => import('../../features/profile/settings/twofa-scan-item'), { ssr: false, loading: () => <QL /> })
+const TwoFaToggleItem = dynamic(() => import('../../features/profile/settings/twofa-toggle-item'), { ssr: false, loading: () => <QL /> })
+const VerifyEmailItem = dynamic(() => import('../../features/profile/settings/verify-email-item'), { ssr: false, loading: () => <QL /> })
+const BillingItem = dynamic(() => import('../../features/profile/settings/billing-item'), { ssr: false, loading: () => <QL /> })
+const NotificationsItem = dynamic(() => import('../../features/profile/settings/notifications-item'), { ssr: false, loading: () => <QL /> })
+const SignOutItem = dynamic(() => import('../../features/profile/settings/signout-item'), { ssr: false, loading: () => <QL /> })
 
 async function convertImageToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

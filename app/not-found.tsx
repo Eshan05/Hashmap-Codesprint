@@ -1,4 +1,4 @@
-import NFB from "@/app/(fallback)/404";
+import NFB from "@/components/common/404";
 
 export default function NotFound() {
   return (
