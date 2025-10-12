@@ -2,12 +2,6 @@
 
 import Recent from "@/app/(root)/tools/symptom-search/_components/recent";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   Credenza,
   CredenzaBody,
   CredenzaContent,
@@ -70,7 +64,7 @@ export default function MedicineSearchPage() {
                   </div>
                 ) : recentSearches.length > 0 ? (
                   <div className="space-y-3">
-                    <Recent items={recentSearches} />
+                    <Recent items={recentSearches} basePath="/tools/medicine-search" />
                   </div>
                 ) : (
                   <div className="text-center py-8">

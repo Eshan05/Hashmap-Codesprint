@@ -44,30 +44,44 @@ MedicineSearchSchema.index({ user: 1, queryHash: 1 });
 
 MedicineSearchSchema.methods.getCommonPayload = function (): LLMMedicineCommonPayload {
   const raw = this.commonPayload;
+  const fallback: LLMMedicineCommonPayload = {
+    summary: '',
+    bodyMechanismSummary: '',
+    keyTakeaways: [],
+    clinicalActions: [],
+    riskAlerts: [],
+    interactionNotes: [],
+    monitoringGuidance: [],
+    references: [],
+    followUpPrompts: [],
+    patientCounseling: [],
+    disclaimer: ''
+  };
+
   if (!raw) {
-    return {
-      summary: '',
-      keyTakeaways: [],
-      clinicalActions: [],
-      riskAlerts: [],
-      interactionNotes: [],
-      monitoringGuidance: [],
-      references: [],
-      followUpPrompts: [],
-      patientCounseling: [],
-      disclaimer: ''
-    };
+    return fallback;
   }
+
+  let parsed: Partial<LLMMedicineCommonPayload> | null = null;
 
   if (typeof raw === 'string') {
     try {
-      return JSON.parse(raw) as LLMMedicineCommonPayload;
+      parsed = JSON.parse(raw) as LLMMedicineCommonPayload;
     } catch (error) {
       console.error('Failed to parse commonPayload for MedicineSearch', error);
     }
+  } else {
+    parsed = raw as LLMMedicineCommonPayload;
   }
 
-  return raw as LLMMedicineCommonPayload;
+  if (!parsed) {
+    return fallback;
+  }
+
+  return {
+    ...fallback,
+    ...parsed,
+  };
 };
 
 MedicineSearchSchema.methods.getModePayload = function <T extends LLMMedicineModePayload>(): T {

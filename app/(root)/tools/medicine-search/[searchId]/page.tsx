@@ -16,6 +16,7 @@ import MedicineSearch from '@/models/medicine-search';
 import type {
   ComparisonRow,
   ComparisonValue,
+  LLMMedicineCommonPayload,
   LLMMedicineDiseasePayload,
   LLMMedicineIngredientPayload,
   LLMMedicineModePayload,
@@ -217,17 +218,18 @@ function CommonInsights({ search }: { search: MedicineSearchParsed }) {
         <div className="flex flex-col gap-2">
           <CardTitle className="text-2xl">Clinical overview</CardTitle>
           <CardDescription>
-            Baseline context compiled across safety, efficacy, and patient communication lanes.
+            A friendly walk-through for patients, followed by deeper clinician-grade details.
           </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        <InsightSection title="Executive summary">
-          <p className="text-sm leading-relaxed text-muted-foreground">{common.summary}</p>
-        </InsightSection>
+        <PatientPrimer common={common} />
 
         {common.keyTakeaways?.length ? (
-          <InsightSection title="Key takeaways">
+          <InsightSection
+            title="Key points to remember"
+            description="These are the most important highlights in everyday language."
+          >
             <ul className="grid gap-2 text-sm text-muted-foreground md:grid-cols-2">
               {common.keyTakeaways.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
@@ -239,8 +241,53 @@ function CommonInsights({ search }: { search: MedicineSearchParsed }) {
           </InsightSection>
         ) : null}
 
+        {common.patientCounseling?.length ? (
+          <InsightSection
+            title="How to use it safely"
+            description="Share these reminders with anyone helping you take this medicine."
+          >
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {common.patientCounseling.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Badge variant="secondary" className="mt-0.5 px-2 py-0 text-[10px] uppercase">
+                    tip
+                  </Badge>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
+        ) : null}
+
+        {common.interactionNotes?.length ? (
+          <InsightSection
+            title="Medicines & substances to mention"
+            description="Let your doctor or pharmacist know if you use anything on this list."
+          >
+            <div className="space-y-3">
+              {common.interactionNotes.map((note, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{note.interactingAgent}</p>
+                  <p className="mt-1 text-muted-foreground">{note.effect}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Care team advice:</span> {note.recommendation}
+                  </p>
+                  {note.evidenceLevel ? (
+                    <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">
+                      Evidence {note.evidenceLevel}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </InsightSection>
+        ) : null}
+
         {common.clinicalActions?.length ? (
-          <InsightSection title="Clinical actions" description="Prioritized next steps with supporting rationale.">
+          <InsightSection
+            title="Clinician follow-up plan"
+            description="Professional steps your care team may take next."
+          >
             <div className="grid gap-3 lg:grid-cols-2">
               {common.clinicalActions.map((action, idx) => (
                 <div key={idx} className="space-y-3 rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -263,7 +310,10 @@ function CommonInsights({ search }: { search: MedicineSearchParsed }) {
         ) : null}
 
         {common.riskAlerts?.length ? (
-          <InsightSection title="Risk alerts" description="Signals that warrant closer monitoring or escalation.">
+          <InsightSection
+            title="Watch-outs"
+            description="Keep an eye on these situations and call a professional if they pop up."
+          >
             <div className="grid gap-3 lg:grid-cols-2">
               {common.riskAlerts.map((risk, idx) => (
                 <div key={idx} className="space-y-3 rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -293,29 +343,11 @@ function CommonInsights({ search }: { search: MedicineSearchParsed }) {
           </InsightSection>
         ) : null}
 
-        {common.interactionNotes?.length ? (
-          <InsightSection title="Interaction notes">
-            <div className="space-y-3">
-              {common.interactionNotes.map((note, idx) => (
-                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
-                  <p className="font-semibold text-foreground">{note.interactingAgent}</p>
-                  <p className="mt-1 text-muted-foreground">{note.effect}</p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Recommendation:</span> {note.recommendation}
-                  </p>
-                  {note.evidenceLevel ? (
-                    <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">
-                      Evidence {note.evidenceLevel}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </InsightSection>
-        ) : null}
-
         {common.monitoringGuidance?.length ? (
-          <InsightSection title="Monitoring guidance">
+          <InsightSection
+            title="Check-ins your clinician may order"
+            description="Tests or measurements that help track how things are going."
+          >
             <div className="grid gap-3 md:grid-cols-2">
               {common.monitoringGuidance.map((tip, idx) => (
                 <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -329,24 +361,16 @@ function CommonInsights({ search }: { search: MedicineSearchParsed }) {
         ) : null}
 
         {common.followUpPrompts?.length ? (
-          <InsightSection title="Follow-up prompts">
+          <InsightSection
+            title="Questions to ask next"
+            description="Bring these to your next appointment or telehealth visit."
+          >
             <ul className="space-y-2 text-sm text-muted-foreground">
               {common.followUpPrompts.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </InsightSection>
-        ) : null}
-
-        {common.patientCounseling?.length ? (
-          <InsightSection title="Patient counseling">
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {common.patientCounseling.map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                  <Badge variant="outline" className="mt-0.5 px-2 py-0 text-[10px] uppercase">
+                    ask
+                  </Badge>
                   <span>{item}</span>
                 </li>
               ))}
@@ -355,7 +379,10 @@ function CommonInsights({ search }: { search: MedicineSearchParsed }) {
         ) : null}
 
         {common.references?.length ? (
-          <InsightSection title="References" description="Source material cited by the model for this run.">
+          <InsightSection
+            title="Sources we consulted"
+            description="Share these citations with your clinician if they would like to review the research."
+          >
             <ul className="space-y-2 text-sm text-muted-foreground">
               {common.references.map((ref, idx) => (
                 <li key={idx} className="flex items-start gap-2">
@@ -379,6 +406,13 @@ function CommonInsights({ search }: { search: MedicineSearchParsed }) {
             </ul>
           </InsightSection>
         ) : null}
+
+        <InsightSection
+          title="Clinician summary"
+          description="The full technical summary for healthcare professionals."
+        >
+          <p className="text-sm leading-relaxed text-muted-foreground">{common.summary}</p>
+        </InsightSection>
 
         <Separator />
         <p className="text-xs leading-relaxed text-muted-foreground">{common.disclaimer}</p>
@@ -499,17 +533,25 @@ function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
     <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
         <CardTitle className="text-2xl">Agent profile</CardTitle>
-        <CardDescription>Mechanistic and dosing insight for the specified medication.</CardDescription>
+        <CardDescription>Plain-language facts for everyday use, followed by clinician-ready detail.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        <InsightSection title="Mechanism">
+        <MedicineSnapshot payload={payload} />
+
+        <InsightSection
+          title="How it works in your body"
+          description="An everyday explanation of what the medicine is doing."
+        >
           <p className="text-sm leading-relaxed text-muted-foreground">
             {mechanism || 'No mechanism details were provided.'}
           </p>
         </InsightSection>
 
         {primaryIndications.length ? (
-          <InsightSection title="Primary indications">
+          <InsightSection
+            title="Why doctors use it"
+            description="Common situations where this medicine is prescribed."
+          >
             <div className="grid gap-3 md:grid-cols-2">
               {primaryIndications.map((item, idx) => (
                 <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -522,7 +564,10 @@ function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
         ) : null}
 
         {formulations.length ? (
-          <InsightSection title="Formulations">
+          <InsightSection
+            title="How it’s available"
+            description="Typical forms and strengths you might see at the pharmacy."
+          >
             <div className="grid gap-3 md:grid-cols-2">
               {formulations.map((form, idx) => (
                 <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -537,7 +582,10 @@ function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
         ) : null}
 
         {dosingGuidance.length ? (
-          <InsightSection title="Dosing guidance">
+          <InsightSection
+            title="Typical dosing examples"
+            description="Actual dosing comes from your clinician; these examples show the general pattern."
+          >
             <div className="space-y-3">
               {dosingGuidance.map((dose, idx) => (
                 <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -552,7 +600,10 @@ function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
         ) : null}
 
         {doseAdjustments.length ? (
-          <InsightSection title="Dose adjustments">
+          <InsightSection
+            title="When doses change"
+            description="Factors that might make your doctor raise or lower the dose."
+          >
             <div className="space-y-3">
               {doseAdjustments.map((item, idx) => (
                 <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -575,7 +626,10 @@ function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
         </InsightSection>
 
         {monitoringParameters.length ? (
-          <InsightSection title="Monitoring parameters">
+          <InsightSection
+            title="What your care team may monitor"
+            description="Lab work or vitals that help them check your progress."
+          >
             <div className="grid gap-3 md:grid-cols-2">
               {monitoringParameters.map((tip, idx) => (
                 <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
@@ -589,7 +643,10 @@ function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
         ) : null}
 
         {patientCounselingPoints.length ? (
-          <InsightSection title="Patient counseling">
+          <InsightSection
+            title="Everyday reminders from clinicians"
+            description="Bring these into your routine to stay on track."
+          >
             <ul className="space-y-2 text-sm text-muted-foreground">
               {patientCounselingPoints.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
@@ -1054,6 +1111,135 @@ function SafetyCallout() {
   );
 }
 
+function PatientPrimer({ common }: { common: LLMMedicineCommonPayload }) {
+  const friendlySummary = buildFriendlySummary(common);
+  const everydayTakeaways = (common.keyTakeaways ?? []).filter(Boolean).slice(0, 3);
+  const counselingClips = (common.patientCounseling ?? []).filter(Boolean).slice(0, 3);
+
+  return (
+    <section className="rounded-3xl border border-border/60 bg-muted/30 p-5 sm:p-6">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+          <Sparkles className="h-4 w-4" />
+          Quick take
+        </div>
+        <h2 className="text-xl font-semibold text-foreground">What this means for you</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">{friendlySummary}</p>
+        {common.bodyMechanismSummary ? (
+          <div className="rounded-2xl border border-border/60 bg-background/60 p-4">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">How it works inside you</p>
+            <p className="mt-2 text-sm text-foreground">{ensureSentence(common.bodyMechanismSummary)}</p>
+          </div>
+        ) : null}
+        <p className="text-xs text-muted-foreground">
+          This snapshot keeps the language simple so you can make sense of the results before diving into the
+          clinician details below.
+        </p>
+      </div>
+
+      {(everydayTakeaways.length || counselingClips.length) ? (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {everydayTakeaways.length ? (
+            <div className="space-y-2 rounded-2xl border border-border/60 bg-background/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Most helpful points
+              </p>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {everydayTakeaways.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {counselingClips.length ? (
+            <div className="space-y-2 rounded-2xl border border-border/60 bg-background/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Everyday guidance
+              </p>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {counselingClips.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-secondary/70" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function MedicineSnapshot({ payload }: { payload: LLMMedicineNamePayload }) {
+  const primary = payload.primaryIndications?.[0];
+  const formulation = payload.formulations?.[0];
+  const commonSideEffects = (payload.commonSideEffects ?? []).filter(Boolean).slice(0, 2);
+  const monitor = payload.monitoringParameters?.[0];
+
+  const snapshot = [
+    primary && {
+      icon: <Stethoscope className="h-4 w-4" />,
+      label: 'Primary use',
+      value: primary.condition,
+      description: primary.note,
+    },
+    formulation && {
+      icon: <Pill className="h-4 w-4" />,
+      label: 'Common form',
+      value: `${formulation.form}${formulation.strengths?.length ? ` · ${formulation.strengths[0]}` : ''}`,
+      description: formulation.notes || formulation.release,
+    },
+    commonSideEffects.length && {
+      icon: <AlertTriangle className="h-4 w-4" />,
+      label: 'Frequent side effects',
+      value: commonSideEffects.join(', '),
+      description: 'Tell your clinician if any become severe.',
+    },
+    monitor && {
+      icon: <ClipboardList className="h-4 w-4" />,
+      label: 'Likely monitoring',
+      value: monitor.metric,
+      description: `${monitor.frequency}${monitor.note ? ` · ${monitor.note}` : ''}`,
+    },
+  ].filter(Boolean) as Array<{
+    icon: ReactNode;
+    label: string;
+    value: string;
+    description?: string;
+  }>;
+
+  if (!snapshot.length) {
+    return null;
+  }
+
+  return (
+    <section className="rounded-3xl border border-border/60 bg-muted/30 p-5 sm:p-6">
+      <div className="space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Fast facts</p>
+        <p className="text-sm text-muted-foreground">Keep these quick notes in mind before diving deeper.</p>
+      </div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {snapshot.map((item, idx) => (
+          <div key={idx} className="rounded-2xl border border-border/60 bg-background/60 p-4 text-sm">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+              <span className="text-primary">{item.icon}</span>
+              {item.label}
+            </div>
+            <p className="mt-2 font-semibold text-foreground">{item.value}</p>
+            {item.description ? <p className="text-xs text-muted-foreground">{item.description}</p> : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function InsightSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
@@ -1169,6 +1355,37 @@ function formatTimestamp(input: Date | string | number | undefined): string {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
+}
+
+function buildFriendlySummary(common: LLMMedicineCommonPayload): string {
+  // if (common.bodyMechanismSummary?.trim()) {
+  //   return ensureSentence(common.bodyMechanismSummary.trim());
+  // }
+
+  // const counseling = (common.patientCounseling ?? []).filter(Boolean);
+  // if (counseling.length) {
+  //   return ensureSentence(counseling.slice(0, 2).join(' '));
+  // }
+
+  // const takeaways = (common.keyTakeaways ?? []).filter(Boolean);
+  // if (takeaways.length) {
+  //   return ensureSentence(takeaways[0]);
+  // }
+
+  if (common.summary?.trim()) {
+    return ensureSentence(common.summary.trim());
+  }
+
+  return 'We will add a plain-language explanation once more information is available.';
+}
+
+function ensureSentence(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return 'No plain-language summary is available yet.';
+  }
+
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
 }
 
 function priorityVariant(priority: 'urgent' | 'soon' | 'routine') {

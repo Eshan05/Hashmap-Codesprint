@@ -35,6 +35,7 @@ export interface Reference {
 
 export interface LLMMedicineCommonPayload {
   summary: string;
+  bodyMechanismSummary: string;
   keyTakeaways: string[];
   clinicalActions: ClinicalAction[];
   riskAlerts: RiskAlert[];

@@ -66,6 +66,7 @@ function commonPayloadSchema() {
     type: SchemaType.OBJECT,
     properties: {
       summary: { type: SchemaType.STRING },
+      bodyMechanismSummary: { type: SchemaType.STRING },
       keyTakeaways: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
       clinicalActions: {
         type: SchemaType.ARRAY,
@@ -134,7 +135,7 @@ function commonPayloadSchema() {
       patientCounseling: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
       disclaimer: { type: SchemaType.STRING },
     },
-    required: ['summary', 'keyTakeaways', 'clinicalActions', 'riskAlerts', 'interactionNotes', 'monitoringGuidance', 'references', 'followUpPrompts', 'patientCounseling', 'disclaimer'],
+    required: ['summary', 'bodyMechanismSummary', 'keyTakeaways', 'clinicalActions', 'riskAlerts', 'interactionNotes', 'monitoringGuidance', 'references', 'followUpPrompts', 'patientCounseling', 'disclaimer'],
   } satisfies Record<string, unknown>;
 }
 
@@ -363,7 +364,7 @@ function modePayloadSchema(searchType: MedicineSearchMode) {
 
 function buildPrompt(searchType: MedicineSearchMode, query: string, profileSummary: string) {
   const contextLine = profileSummary ? `\n\n${profileSummary}` : '';
-  const shared = `You are PharmAssistant, a meticulous clinical pharmacology expert. Respond with a single JSON object that strictly matches the provided schema. Be precise, cite evidence-based rationale, and tailor details for practicing clinicians.`;
+  const shared = `You are PharmAssistant, a meticulous clinical pharmacology expert. Respond with a single JSON object that strictly matches the provided schema. Be precise, cite evidence-based rationale, and tailor details for practicing clinicians. ALWAYS include a "bodyMechanismSummary" that explains in plain language how the medicine affects the body so a layperson can understand.`;
 
   const instructions: Record<MedicineSearchMode, string> = {
     disease: `Focus on evidence-backed regimens for managing ${query}. Highlight first-, second-line, and combination strategies. Include concise red-flag monitoring guidance for complications.`,
