@@ -145,7 +145,7 @@ function ReportState({
         </CardHeader>
         <CardContent className="flex justify-center">
           <Button asChild size="sm">
-            <Link href="/tools/medicine-search">
+            <Link href="/dashboard/medicine-search">
               <ArrowRight className="mr-2 h-4 w-4" />
               Start a new search
             </Link>
@@ -184,7 +184,7 @@ function ReportHero({ search }: { search: MedicineSearchParsed }) {
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="sm" className="gap-2">
-                <Link href="/tools/medicine-search">
+                <Link href="/dashboard/medicine-search">
                   <ArrowRight className="h-4 w-4" />
                   Run another query
                 </Link>

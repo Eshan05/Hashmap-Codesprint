@@ -13,7 +13,7 @@ import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/component
 import ImageUploadField from "@/components/ui/image-upload-field";
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth-client";
-import { getCallbackURL } from "@/lib/shared";
+import { getCallbackURL } from "@/utils/shared";
 import { calculatePasswordStrength } from "@/utils/password-strength";
 import { ExternalLinkIcon, EyeIcon, EyeOffIcon, KeyIcon, Loader2, MailIcon, UserPlus2Icon } from "lucide-react";
 import Link from "next/link";

@@ -5,7 +5,7 @@ const metadata: Metadata = {
   description: "Search for medicines via name, disease, side effects and more.",
 };
 
-export default function RootLayout({
+export default function MedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

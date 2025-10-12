@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { SymptomDrawer } from '@/app/(root)/tools/symptom-search/_components/symptom-drawer'
+import { SymptomDrawer } from '@/app/(root)/dashboard/symptom-search/_components/symptom-drawer'
 import { AutosizeTextarea } from '@/components/ui/autoresize-textarea'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -83,8 +83,8 @@ export default function SymptomFormMain() {
 
       if (response.ok) {
         const data = await response.json();
-        window.open(`/tools/symptom-search/${data.searchId}`, '_blank');
-        // router.push(`/symptom-search/${data.searchId}`);
+        // window.open(`/dashboard/symptom-search/${data.searchId}`, '_blank');
+        router.push(`/dashboard/symptom-search/${data.searchId}`);
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'An error occurred');

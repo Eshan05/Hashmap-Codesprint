@@ -76,7 +76,7 @@ export default function MedSearchForm() {
         const payload = await response.json();
         const destinationId = payload.searchId;
         if (destinationId) {
-          router.push(`/tools/medicine-search/${destinationId}`);
+          router.push(`/dashboard/medicine-search/${destinationId}`);
         } else {
           setError('Missing search identifier in response');
         }

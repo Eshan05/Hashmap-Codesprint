@@ -45,14 +45,14 @@ const toolkits = [
     description:
       "Explore guided symptom checks built with clinicians and see suggested questions for your care team.",
     icon: HeartPulse,
-    href: "/tools/symptom-search",
+    href: "/dashboard/symptom-search",
   },
   {
     title: "Medication clarity",
     description:
       "Log prescriptions, screen for interactions, and store pharmacy information without spreadsheets.",
     icon: ShieldCheck,
-    href: "/tools/medicine-search",
+    href: "/dashboard/medicine-search",
   },
   {
     title: "Health timeline",

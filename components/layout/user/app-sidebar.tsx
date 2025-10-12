@@ -62,32 +62,32 @@ const data = {
     },
     {
       title: "Exercises",
-      url: "/tools/exercises",
+      url: "/dashboard/exercises",
       icon: PersonStanding,
     },
     {
       title: "Symptom Search",
-      url: "/tools/symptom-search",
+      url: "/dashboard/symptom-search",
       icon: Bot,
     },
     {
       title: "Medicine Finder",
-      url: "/tools/medicine-search",
+      url: "/dashboard/medicine-search",
       icon: BookOpen,
     },
     {
       title: "Disease Glossary",
-      url: "/tools/diseases",
+      url: "/dashboard/diseases",
       icon: ScanSearch,
     },
     {
       title: "Personal Notes",
-      url: "/notes",
+      url: "/dashboard/notes",
       icon: FileUserIcon,
     },
     {
       title: "Medical Conditions",
-      url: "/tools/conditions",
+      url: "/dashboard/conditions",
       icon: HeartPulse,
     },
   ],

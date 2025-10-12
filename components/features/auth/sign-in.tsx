@@ -19,7 +19,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { getCallbackURL } from "@/lib/shared";
+import { getCallbackURL } from "@/utils/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function SignIn() {

@@ -28,7 +28,7 @@ interface RecentProps {
   basePath?: string
 }
 
-export default function Recent({ items, basePath = '/tools/symptom-search' }: RecentProps) {
+export default function Recent({ items, basePath = '/dashboard/symptom-search' }: RecentProps) {
   if (!items || items.length === 0) return null
   const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath
   // Group items by formatted date

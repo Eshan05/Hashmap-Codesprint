@@ -64,7 +64,7 @@ export default function MedicineSearchPage() {
                   </div>
                 ) : recentSearches.length > 0 ? (
                   <div className="space-y-3">
-                    <Recent items={recentSearches} basePath="/tools/medicine-search" />
+                    <Recent items={recentSearches} basePath="/dashboard/medicine-search" />
                   </div>
                 ) : (
                   <div className="text-center py-8">

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/sidebar';
 import { ThemeProvider } from "next-themes";
 
-export default function RLayout({
+export default async function RLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
