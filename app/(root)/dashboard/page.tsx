@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import UserCard from "@/app/(root)/dashboard/_components/user-card";
 
 export default async function Dashboard() {
   const [session, activeSessions, deviceSessions] =

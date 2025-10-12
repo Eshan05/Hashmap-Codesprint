@@ -58,17 +58,12 @@ const data = {
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: User2Icon,
+      icon: CommandIcon,
     },
     {
       title: "Exercises",
       url: "/tools/exercises",
       icon: PersonStanding,
-    },
-    {
-      title: "Health Tools",
-      url: "/tools",
-      icon: CommandIcon
     },
     {
       title: "Symptom Search",
