@@ -135,7 +135,7 @@ export const auth = betterAuth({
     }),
     lastLoginMethod(),
   ],
-  trustedOrigins: ["exp://", "http://localhost:3000", "http://192.168.1.*:3000", process.env.NEXT_PUBLIC_BETTER_AUTH_BASE!, "http://pht.esn.qzz.io", "https://pht.esn.qzz.io", "https://pht-proto.vercel.app"],
+  trustedOrigins: ["exp://", "http://localhost:3000", "http://192.168.1.*:3000", process.env.NEXT_PUBLIC_BETTER_AUTH_BASE!, "https://pht.esn.qzz.io", "https://pht-proto.vercel.app", (baseURL || "https://pht.esn.qzz.io")],
   advanced: {
     crossSubDomainCookies: {
       enabled: process.env.NODE_ENV === "production",
