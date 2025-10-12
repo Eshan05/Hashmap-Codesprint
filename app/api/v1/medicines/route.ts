@@ -398,11 +398,12 @@ async function generateMedicineResponse(options: {
     } as const;
 
     const result = await retryWithExponentialBackoff(() =>
+      // @ts-expect-error Pasting schema as is shows no error but putting `schema` does for some reason
       model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: 'application/json',
-          responseSchema: schema,
+          responseSchema: schema, //? Why does using the variable here cause a TS error?
         },
       })
     );
@@ -412,11 +413,11 @@ async function generateMedicineResponse(options: {
       summary: string;
       commonPayload: LLMMedicineCommonPayload;
       modePayload:
-        | LLMMedicineDiseasePayload
-        | LLMMedicineNamePayload
-        | LLMMedicineSideEffectsPayload
-        | LLMMedicineIngredientPayload
-        | LLMMedicineSimilarPayload;
+      | LLMMedicineDiseasePayload
+      | LLMMedicineNamePayload
+      | LLMMedicineSideEffectsPayload
+      | LLMMedicineIngredientPayload
+      | LLMMedicineSimilarPayload;
     };
 
     await MedicineSearch.findOneAndUpdate(

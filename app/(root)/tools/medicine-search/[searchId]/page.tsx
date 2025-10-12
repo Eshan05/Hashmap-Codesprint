@@ -1,23 +1,48 @@
-import { cache } from 'react';
+import { cache, type ReactNode } from 'react';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import MedicineSearch from '@/models/medicine-search';
 import type {
+  ComparisonRow,
+  ComparisonValue,
   LLMMedicineDiseasePayload,
   LLMMedicineIngredientPayload,
+  LLMMedicineModePayload,
   LLMMedicineNamePayload,
   LLMMedicineSideEffectsPayload,
   LLMMedicineSimilarPayload,
   MedicineSearchMode,
   MedicineSearchParsed,
-  ComparisonRow,
-  ComparisonValue,
+  SideEffectCulprit,
   TherapyOption,
 } from '@/types/medicine-search';
 import dbConnect from '@/utils/db-conn';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BookOpen,
+  ClipboardList,
+  Clock,
+  FlaskConical,
+  Gauge,
+  Pill,
+  ShieldAlert,
+  Sparkles,
+  Stethoscope,
+  Wallet,
+} from 'lucide-react';
 
 interface PageProps {
   params: {
@@ -25,7 +50,7 @@ interface PageProps {
   };
 }
 
-const loadSearch = cache(async (searchId: string) => {
+const loadSearch = cache(async (searchId: string): Promise<MedicineSearchParsed | null> => {
   await dbConnect();
   const doc = await MedicineSearch.findOne({ searchId });
   if (!doc) {
@@ -33,15 +58,16 @@ const loadSearch = cache(async (searchId: string) => {
   }
 
   const { commonPayload, modePayload, ...rest } = doc.toObject();
+
   return {
     ...rest,
     common: doc.getCommonPayload(),
-    modeSpecific: doc.getModePayload(),
+    modeSpecific: doc.getModePayload<LLMMedicineModePayload>(),
   } as MedicineSearchParsed;
 });
 
 export default async function MedicineSearchResultPage({ params }: PageProps) {
-  const { searchId } = params;
+  const { searchId } = await params;
   const search = await loadSearch(searchId);
 
   if (!search) {
@@ -50,55 +76,44 @@ export default async function MedicineSearchResultPage({ params }: PageProps) {
 
   if (search.status === 'errored') {
     return (
-      <section className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center gap-6 text-center">
-        <header className="space-y-2">
-          <Badge variant="destructive">errored</Badge>
-          <h1 className="text-2xl font-semibold">We could not complete this analysis</h1>
-          <p className="text-sm text-muted-foreground">
-            {search.errorMessage || 'Something went wrong while generating this report. Please try again in a few minutes.'}
-          </p>
-        </header>
-      </section>
+      <ReportState
+        statusLabel="errored"
+        tone="destructive"
+        title="We could not complete this analysis"
+        description={
+          search.errorMessage ||
+          'The clinical assistant was unable to finish this report. Please try again in a few minutes.'
+        }
+      />
     );
   }
 
   if (search.status !== 'ready') {
     return (
-      <section className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center gap-6 text-center">
-        <header className="space-y-2">
-          <Badge variant="secondary">{search.status}</Badge>
-          <h1 className="text-2xl font-semibold">Still preparing your medicine report</h1>
-          <p className="text-sm text-muted-foreground">
-            Check back in a few moments. We will refresh automatically once the analysis completes.
-          </p>
-        </header>
-      </section>
+      <ReportState
+        statusLabel={search.status}
+        tone="secondary"
+        title="Your medicine report is still generating"
+        description="We will refresh this page automatically once the structured analysis is ready."
+      />
     );
   }
 
   const mode = search.searchType as MedicineSearchMode;
 
   return (
-    <section className="relative flex min-h-svh flex-col overflow-hidden">
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 lg:px-8 lg:py-12">
-        <header className="mb-10 flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">{new Date(search.createdAt).toLocaleString()}</p>
-          <h1 className="text-3xl font-semibold tracking-tight">{search.title || 'Medicine Intelligence Report'}</h1>
-          <p className="text-base text-muted-foreground">{search.summary}</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Badge variant="outline">{mode.toUpperCase()}</Badge>
-            <Badge variant="default">ready</Badge>
-            {search.duration ? <Badge variant="outline">Generated in {(search.duration / 1000).toFixed(1)}s</Badge> : null}
-          </div>
-        </header>
+    <section className="relative min-h-svh overflow-hidden bg-gradient-to-b from-background via-background to-background">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-10 sm:px-6 lg:px-10">
+        <ReportHero search={search} />
 
-        <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <article className="flex flex-col gap-6">
-            <CommonInsights parsed={search} />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(280px,1fr)]">
+          <article className="space-y-6">
+            <CommonInsights search={search} />
             <ModeSpecific mode={mode} payload={search.modeSpecific} />
           </article>
-          <aside className="flex flex-col gap-6">
-            <AdvancedActions parsed={search} />
+          <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+            <SessionDetails search={search} />
+            <SafetyCallout />
           </aside>
         </div>
       </div>
@@ -106,152 +121,273 @@ export default async function MedicineSearchResultPage({ params }: PageProps) {
   );
 }
 
-function CommonInsights({ parsed }: { parsed: MedicineSearchParsed }) {
-  const { common } = parsed;
+function ReportState({
+  statusLabel,
+  tone,
+  title,
+  description,
+}: {
+  statusLabel: string;
+  tone: 'default' | 'secondary' | 'destructive';
+  title: string;
+  description: string;
+}) {
   return (
-    <Card>
+    <section className="flex min-h-svh items-center justify-center px-6">
+      <Card className="max-w-xl border border-border/60 bg-background/90 text-center shadow-xl backdrop-blur-lg">
+        <CardHeader className="space-y-4">
+          <Badge variant={tone} className="mx-auto w-fit uppercase">
+            {statusLabel}
+          </Badge>
+          <CardTitle className="text-2xl font-semibold">{title}</CardTitle>
+          <CardDescription className="text-base text-muted-foreground">{description}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center">
+          <Button asChild size="sm">
+            <Link href="/tools/medicine-search">
+              <ArrowRight className="mr-2 h-4 w-4" />
+              Start a new search
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
+
+function ReportHero({ search }: { search: MedicineSearchParsed }) {
+  const timestamp = formatTimestamp(search.createdAt);
+  const duration = typeof search.duration === 'number' ? `${(search.duration / 1000).toFixed(1)}s` : null;
+
+  return (
+    <Card className="relative mb-12 overflow-hidden border border-border/60 bg-[rgba(248,249,251,0.9)] shadow-2xl backdrop-blur-xl dark:bg-[rgba(19,20,24,0.9)]">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.2),_transparent_55%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.2),_transparent_45%)]" />
+      <CardContent className="flex flex-col gap-8 p-6 sm:p-8 md:p-10 lg:p-12">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-3xl space-y-4">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <Badge variant="secondary" className="uppercase tracking-wide">
+                {search.searchType}
+              </Badge>
+              <span className="flex items-center gap-1">
+                <Sparkles className="h-4 w-4" /> Medicine intelligence
+              </span>
+            </div>
+            <div className="space-y-3">
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+                {search.title || 'Medicine analysis overview'}
+              </h1>
+              <p className="text-base text-muted-foreground sm:text-lg">
+                {search.summary || 'Structured insights for cross-referencing treatment decisions and safety cues.'}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild size="sm" className="gap-2">
+                <Link href="/tools/medicine-search">
+                  <ArrowRight className="h-4 w-4" />
+                  Run another query
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Stethoscope className="h-4 w-4" />
+                Share with care team
+              </Button>
+            </div>
+          </div>
+          <div className="w-full max-w-xs rounded-3xl border border-border/70 bg-background/80 p-5 shadow-lg backdrop-blur-xl">
+            <div className="space-y-4">
+              <HeroStat icon={<Clock className="h-4 w-4" />} label="Generated" value={timestamp} />
+              <HeroStat icon={<Gauge className="h-4 w-4" />} label="Status" value="Ready" />
+              <HeroStat icon={<Pill className="h-4 w-4" />} label="Request" value={search.query} />
+              {duration ? <HeroStat icon={<Activity className="h-4 w-4" />} label="Completion" value={duration} /> : null}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CommonInsights({ search }: { search: MedicineSearchParsed }) {
+  const { common } = search;
+
+  return (
+    <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Clinical Overview</CardTitle>
+        <div className="flex flex-col gap-2">
+          <CardTitle className="text-2xl">Clinical overview</CardTitle>
+          <CardDescription>
+            Baseline context compiled across safety, efficacy, and patient communication lanes.
+          </CardDescription>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <section>
-          <h2 className="text-lg font-semibold">Summary</h2>
+      <CardContent className="space-y-8">
+        <InsightSection title="Executive summary">
           <p className="text-sm leading-relaxed text-muted-foreground">{common.summary}</p>
-        </section>
+        </InsightSection>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Key Takeaways</h2>
-          <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-            {common.keyTakeaways.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </section>
+        {common.keyTakeaways?.length ? (
+          <InsightSection title="Key takeaways">
+            <ul className="grid gap-2 text-sm text-muted-foreground md:grid-cols-2">
+              {common.keyTakeaways.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="mt-1 h-2 w-2 rounded-full bg-primary/70" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
+        ) : null}
 
-        {common.clinicalActions.length ? (
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Clinical Actions</h2>
-            <div className="grid gap-3">
+        {common.clinicalActions?.length ? (
+          <InsightSection title="Clinical actions" description="Prioritized next steps with supporting rationale.">
+            <div className="grid gap-3 lg:grid-cols-2">
               {common.clinicalActions.map((action, idx) => (
-                <div key={idx} className="rounded-md border p-3">
+                <div key={idx} className="space-y-3 rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-sm font-semibold">{action.title}</h3>
-                    <Badge variant={priorityVariant(action.priority)}>{action.priority}</Badge>
+                    <p className="font-semibold text-foreground">{action.title}</p>
+                    <Badge variant={priorityVariant(action.priority)} className="uppercase">
+                      {action.priority}
+                    </Badge>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{action.rationale}</p>
+                  <p className="text-muted-foreground">{action.rationale}</p>
                   {action.evidenceLevel ? (
-                    <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">Evidence {action.evidenceLevel}</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Evidence {action.evidenceLevel}
+                    </p>
                   ) : null}
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
 
-        {common.riskAlerts.length ? (
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Risk Alerts</h2>
-            <div className="flex flex-col gap-3">
+        {common.riskAlerts?.length ? (
+          <InsightSection title="Risk alerts" description="Signals that warrant closer monitoring or escalation.">
+            <div className="grid gap-3 lg:grid-cols-2">
               {common.riskAlerts.map((risk, idx) => (
-                <div key={idx} className="rounded-md border p-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-semibold">{risk.name}</h3>
-                    <Badge variant={severityVariant(risk.severity)}>{risk.severity}</Badge>
+                <div key={idx} className="space-y-3 rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-foreground">
+                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                      <p className="font-semibold">{risk.name}</p>
+                    </div>
+                    <Badge variant={severityVariant(risk.severity)} className="uppercase">
+                      {risk.severity}
+                    </Badge>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{risk.mitigation}</p>
+                  <p className="text-muted-foreground">{risk.mitigation}</p>
                   {risk.triggerNotes?.length ? (
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                    <ul className="space-y-1 text-xs text-muted-foreground">
                       {risk.triggerNotes.map((note, noteIdx) => (
-                        <li key={noteIdx}>{note}</li>
+                        <li key={noteIdx} className="flex items-start gap-2">
+                          <span className="mt-1 h-1.5 w-1.5 rounded-full bg-destructive/70" />
+                          <span>{note}</span>
+                        </li>
                       ))}
                     </ul>
                   ) : null}
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
 
-        {common.interactionNotes.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Interactions</h2>
-            <div className="flex flex-col gap-3">
+        {common.interactionNotes?.length ? (
+          <InsightSection title="Interaction notes">
+            <div className="space-y-3">
               {common.interactionNotes.map((note, idx) => (
-                <div key={idx} className="rounded-md border p-3">
-                  <h3 className="text-sm font-semibold">{note.interactingAgent}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{note.effect}</p>
-                  <p className="mt-2 text-sm text-muted-foreground"><span className="font-medium">Recommendation:</span> {note.recommendation}</p>
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{note.interactingAgent}</p>
+                  <p className="mt-1 text-muted-foreground">{note.effect}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Recommendation:</span> {note.recommendation}
+                  </p>
                   {note.evidenceLevel ? (
-                    <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">Evidence {note.evidenceLevel}</p>
+                    <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">
+                      Evidence {note.evidenceLevel}
+                    </p>
                   ) : null}
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
 
-        {common.monitoringGuidance.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Monitoring Guidance</h2>
+        {common.monitoringGuidance?.length ? (
+          <InsightSection title="Monitoring guidance">
             <div className="grid gap-3 md:grid-cols-2">
               {common.monitoringGuidance.map((tip, idx) => (
-                <div key={idx} className="rounded-md border p-3 text-sm">
-                  <p className="font-semibold">{tip.metric}</p>
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{tip.metric}</p>
                   <p className="text-muted-foreground">{tip.frequency}</p>
                   <p className="mt-2 text-xs text-muted-foreground">{tip.note}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
 
-        {common.followUpPrompts.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Follow-up Prompts</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {common.followUpPrompts.map((prompt, idx) => (
-                <li key={idx}>{prompt}</li>
+        {common.followUpPrompts?.length ? (
+          <InsightSection title="Follow-up prompts">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {common.followUpPrompts.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-          </section>
+          </InsightSection>
         ) : null}
 
-        {common.patientCounseling.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Counseling Notes</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {common.patientCounseling.map((note, idx) => (
-                <li key={idx}>{note}</li>
+        {common.patientCounseling?.length ? (
+          <InsightSection title="Patient counseling">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {common.patientCounseling.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-          </section>
+          </InsightSection>
+        ) : null}
+
+        {common.references?.length ? (
+          <InsightSection title="References" description="Source material cited by the model for this run.">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {common.references.map((ref, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <BookOpen className="mt-0.5 h-4 w-4 text-primary" />
+                  <div>
+                    <p className="font-medium text-foreground">{ref.label}</p>
+                    {ref.citation ? <p className="text-xs text-muted-foreground">{ref.citation}</p> : null}
+                    {ref.url ? (
+                      <a
+                        href={ref.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Open source
+                      </a>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
         ) : null}
 
         <Separator />
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">References</h2>
-          <ul className="space-y-1 text-sm text-muted-foreground">
-            {common.references.map((reference, idx) => (
-              <li key={idx}>
-                <span className="font-medium">{reference.label}</span>
-                {reference.citation ? <span className="ml-1">— {reference.citation}</span> : null}
-                {reference.url ? (
-                  <a className="ml-2 text-primary hover:underline" href={reference.url} target="_blank" rel="noreferrer">
-                    Source
-                  </a>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <p className="text-xs text-muted-foreground">{common.disclaimer}</p>
+        <p className="text-xs leading-relaxed text-muted-foreground">{common.disclaimer}</p>
       </CardContent>
     </Card>
   );
 }
 
-function ModeSpecific({ mode, payload }: { mode: MedicineSearchMode; payload: MedicineSearchParsed['modeSpecific'] }) {
+function ModeSpecific({ mode, payload }: { mode: MedicineSearchMode; payload: LLMMedicineModePayload }) {
   if (!payload) {
     return null;
   }
@@ -274,7 +410,7 @@ function ModeSpecific({ mode, payload }: { mode: MedicineSearchMode; payload: Me
 
 function DiseaseInsights({ payload }: { payload: LLMMedicineDiseasePayload }) {
   const {
-    pathophysiologySnapshot = 'No pathophysiology summary available.',
+    pathophysiologySnapshot,
     firstLineTherapies = [],
     secondLineOptions = [],
     combinationStrategies = [],
@@ -284,55 +420,60 @@ function DiseaseInsights({ payload }: { payload: LLMMedicineDiseasePayload }) {
   } = payload;
 
   return (
-    <Card>
+    <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Disease-focused Details</CardTitle>
+        <CardTitle className="text-2xl">Disease-focused guidance</CardTitle>
+        <CardDescription>Therapeutic framing across acute and maintenance strategies.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <section>
-          <h2 className="text-lg font-semibold">Pathophysiology Snapshot</h2>
-          <p className="text-sm text-muted-foreground">{pathophysiologySnapshot}</p>
-        </section>
+      <CardContent className="space-y-8">
+        <InsightSection title="Pathophysiology snapshot">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {pathophysiologySnapshot || 'No pathophysiology commentary was provided.'}
+          </p>
+        </InsightSection>
 
-        <TreatmentRail title="First-line Therapies" items={firstLineTherapies} />
-        <TreatmentRail title="Second-line Options" items={secondLineOptions} />
-        <TreatmentRail title="Combination Strategies" items={combinationStrategies} />
+        <TreatmentRail title="First-line therapies" items={firstLineTherapies} />
+        <TreatmentRail title="Second-line options" items={secondLineOptions} />
+        <TreatmentRail title="Combination strategies" items={combinationStrategies} />
 
         {monitoringPlan.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Monitoring Plan</h2>
+          <InsightSection title="Monitoring plan">
             <div className="grid gap-3 md:grid-cols-2">
               {monitoringPlan.map((tip, idx) => (
-                <div key={idx} className="rounded-md border p-3 text-sm">
-                  <p className="font-semibold">{tip.metric}</p>
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{tip.metric}</p>
                   <p className="text-muted-foreground">{tip.frequency}</p>
                   <p className="mt-2 text-xs text-muted-foreground">{tip.note}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
 
         {nonPharmacologicAdjuncts.length ? (
-          <section>
-            <h2 className="text-lg font-semibold">Non-pharmacologic Adjuncts</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          <InsightSection title="Non-pharmacologic adjuncts">
+            <ul className="space-y-2 text-sm text-muted-foreground">
               {nonPharmacologicAdjuncts.map((item, idx) => (
-                <li key={idx}>{item}</li>
+                <li key={idx} className="flex items-start gap-2">
+                  <FlaskConical className="mt-0.5 h-4 w-4 text-primary" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-          </section>
+          </InsightSection>
         ) : null}
 
         {redFlags.length ? (
-          <section>
-            <h2 className="text-lg font-semibold">Red Flags</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          <InsightSection title="Red flags">
+            <ul className="space-y-2 text-sm text-muted-foreground">
               {redFlags.map((item, idx) => (
-                <li key={idx}>{item}</li>
+                <li key={idx} className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-          </section>
+          </InsightSection>
         ) : null}
       </CardContent>
     </Card>
@@ -341,82 +482,126 @@ function DiseaseInsights({ payload }: { payload: LLMMedicineDiseasePayload }) {
 
 function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
   const {
-    mechanism = 'No mechanism details available.',
+    mechanism,
     primaryIndications = [],
     formulations = [],
     dosingGuidance = [],
     doseAdjustments = [],
+    contraindications = [],
+    blackBoxWarnings = [],
+    commonSideEffects = [],
+    seriousSideEffects = [],
+    monitoringParameters = [],
+    patientCounselingPoints = [],
   } = payload;
 
   return (
-    <Card>
+    <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Agent Profile</CardTitle>
+        <CardTitle className="text-2xl">Agent profile</CardTitle>
+        <CardDescription>Mechanistic and dosing insight for the specified medication.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <section>
-          <h2 className="text-lg font-semibold">Mechanism</h2>
-          <p className="text-sm text-muted-foreground">{mechanism}</p>
-        </section>
+      <CardContent className="space-y-8">
+        <InsightSection title="Mechanism">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {mechanism || 'No mechanism details were provided.'}
+          </p>
+        </InsightSection>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Primary Indications</h2>
-          <div className="grid gap-3 md:grid-cols-2">
-            {primaryIndications.map((indication, idx) => (
-              <div key={idx} className="rounded-md border p-3 text-sm">
-                <p className="font-semibold">{indication.condition}</p>
-                <p className="text-muted-foreground">{indication.note}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {primaryIndications.length ? (
+          <InsightSection title="Primary indications">
+            <div className="grid gap-3 md:grid-cols-2">
+              {primaryIndications.map((item, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{item.condition}</p>
+                  <p className="text-muted-foreground">{item.note}</p>
+                </div>
+              ))}
+            </div>
+          </InsightSection>
+        ) : null}
 
         {formulations.length ? (
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Formulations</h2>
+          <InsightSection title="Formulations">
             <div className="grid gap-3 md:grid-cols-2">
               {formulations.map((form, idx) => (
-                <div key={idx} className="rounded-md border p-3 text-sm">
-                  <p className="font-semibold">{form.form}</p>
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{form.form}</p>
                   <p className="text-muted-foreground">Strengths: {form.strengths.join(', ')}</p>
-                  {form.release ? <p className="text-xs text-muted-foreground">Release profile: {form.release}</p> : null}
+                  {form.release ? <p className="text-xs text-muted-foreground">Release: {form.release}</p> : null}
                   {form.notes ? <p className="text-xs text-muted-foreground">{form.notes}</p> : null}
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Dosing Guidance</h2>
-          <div className="space-y-3">
-            {dosingGuidance.map((dose, idx) => (
-              <div key={idx} className="rounded-md border p-3 text-sm">
-                <p className="font-semibold">{dose.population}</p>
-                <p className="text-muted-foreground">{dose.dose} · {dose.frequency}</p>
-                {dose.maxDose ? <p className="text-xs text-muted-foreground">Max: {dose.maxDose}</p> : null}
-                {dose.titration ? <p className="text-xs text-muted-foreground">Titration: {dose.titration}</p> : null}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {doseAdjustments.length ? (
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Dose Adjustments</h2>
+        {dosingGuidance.length ? (
+          <InsightSection title="Dosing guidance">
             <div className="space-y-3">
-              {doseAdjustments.map((adjustment, idx) => (
-                <div key={idx} className="rounded-md border p-3 text-sm">
-                  <p className="font-semibold">{adjustment.factor}</p>
-                  <p className="text-muted-foreground">{adjustment.recommendation}</p>
-                  {adjustment.rationale ? <p className="text-xs text-muted-foreground">{adjustment.rationale}</p> : null}
+              {dosingGuidance.map((dose, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{dose.population}</p>
+                  <p className="text-muted-foreground">{dose.dose} · {dose.frequency}</p>
+                  {dose.maxDose ? <p className="text-xs text-muted-foreground">Max: {dose.maxDose}</p> : null}
+                  {dose.titration ? <p className="text-xs text-muted-foreground">Titration: {dose.titration}</p> : null}
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
 
-        <SafetySection payload={payload} />
+        {doseAdjustments.length ? (
+          <InsightSection title="Dose adjustments">
+            <div className="space-y-3">
+              {doseAdjustments.map((item, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{item.factor}</p>
+                  <p className="text-muted-foreground">{item.recommendation}</p>
+                  {item.rationale ? <p className="text-xs text-muted-foreground">{item.rationale}</p> : null}
+                </div>
+              ))}
+            </div>
+          </InsightSection>
+        ) : null}
+
+        <InsightSection title="Safety">
+          <div className="grid gap-4 md:grid-cols-2">
+            <SafetyList title="Contraindications" items={contraindications} />
+            <SafetyList title="Black box warnings" items={blackBoxWarnings} variant="destructive" />
+            <SafetyList title="Common side effects" items={commonSideEffects} />
+            <SafetyList title="Serious side effects" items={seriousSideEffects} variant="destructive" />
+          </div>
+        </InsightSection>
+
+        {monitoringParameters.length ? (
+          <InsightSection title="Monitoring parameters">
+            <div className="grid gap-3 md:grid-cols-2">
+              {monitoringParameters.map((tip, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{tip.metric}</p>
+                  <p className="text-muted-foreground">{tip.frequency}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{tip.note}</p>
+                </div>
+              ))}
+            </div>
+          </InsightSection>
+        ) : null}
+
+        {patientCounselingPoints.length ? (
+          <InsightSection title="Patient counseling">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {patientCounselingPoints.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Badge variant="secondary" className="mt-0.5 px-2 py-0 text-[10px] uppercase">
+                    counsel
+                  </Badge>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -425,7 +610,7 @@ function NameInsights({ payload }: { payload: LLMMedicineNamePayload }) {
 function SideEffectInsights({ payload }: { payload: LLMMedicineSideEffectsPayload }) {
   const {
     likelyCulprits = [],
-    mechanisticInsights = 'Mechanistic insights were not provided.',
+    mechanisticInsights,
     managementStrategies = [],
     alternativeOptions = [],
     whenToEscalate = [],
@@ -433,71 +618,89 @@ function SideEffectInsights({ payload }: { payload: LLMMedicineSideEffectsPayloa
   } = payload;
 
   return (
-    <Card>
+    <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Adverse Effect Analysis</CardTitle>
+        <CardTitle className="text-2xl">Adverse effect analysis</CardTitle>
+        <CardDescription>Root-cause hypotheses with mitigation sequences.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Likely Culprits</h2>
-          <div className="space-y-3">
-            {likelyCulprits.map((culprit, idx) => (
-              <div key={idx} className="rounded-md border p-3 text-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold">{culprit.drugName}</p>
-                  <Badge variant="outline">{culprit.likelihood}</Badge>
+      <CardContent className="space-y-8">
+        {likelyCulprits.length ? (
+          <InsightSection title="Likely culprits">
+            <div className="space-y-3">
+              {likelyCulprits.map((culprit, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-foreground">{culprit.drugName}</p>
+                    <Badge variant={likelihoodVariant(culprit.likelihood)} className="uppercase">
+                      {culprit.likelihood}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground">{culprit.mechanism}</p>
+                  <p className="text-xs text-muted-foreground">Onset: {culprit.onsetTiming}</p>
                 </div>
-                <p className="text-muted-foreground">{culprit.mechanism}</p>
-                <p className="text-xs text-muted-foreground">Onset: {culprit.onsetTiming}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </InsightSection>
+        ) : null}
 
-        <section>
-          <h2 className="text-lg font-semibold">Mechanistic Insights</h2>
-          <p className="text-sm text-muted-foreground">{mechanisticInsights}</p>
-        </section>
+        <InsightSection title="Mechanistic insights">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {mechanisticInsights || 'No mechanistic commentary was provided.'}
+          </p>
+        </InsightSection>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Management Strategies</h2>
-          <div className="space-y-3">
-            {managementStrategies.map((strategy, idx) => (
-              <div key={idx} className="rounded-md border p-3 text-sm">
-                <p className="font-semibold">{strategy.strategy}</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                  {strategy.steps.map((step: string, stepIdx: number) => (
-                    <li key={stepIdx}>{step}</li>
-                  ))}
-                </ul>
-                {strategy.monitoring ? <p className="mt-2 text-xs text-muted-foreground">Monitoring: {strategy.monitoring}</p> : null}
-              </div>
-            ))}
-          </div>
-        </section>
+        {managementStrategies.length ? (
+          <InsightSection title="Management strategies">
+            <div className="space-y-3">
+              {managementStrategies.map((strategy, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{strategy.strategy}</p>
+                  <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                    {strategy.steps.map((step, stepIdx) => (
+                      <li key={stepIdx} className="flex items-start gap-2">
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {strategy.monitoring ? (
+                    <p className="mt-3 text-xs uppercase tracking-wide text-muted-foreground">
+                      Monitoring: {strategy.monitoring}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </InsightSection>
+        ) : null}
 
         {alternativeOptions.length ? (
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Alternative Options</h2>
+          <InsightSection title="Alternative options">
             <div className="space-y-3">
               {alternativeOptions.map((option, idx) => (
-                <div key={idx} className="rounded-md border p-3 text-sm">
-                  <p className="font-semibold">{option.name}</p>
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{option.name}</p>
                   <p className="text-muted-foreground">{option.comparison}</p>
-                  <div className="mt-2 grid gap-2 md:grid-cols-2">
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
                     <div>
                       <p className="text-xs font-semibold uppercase text-muted-foreground">Pros</p>
-                      <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                        {option.pros.map((pro: string, proIdx: number) => (
-                          <li key={proIdx}>{pro}</li>
+                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        {option.pros.map((pro, proIdx) => (
+                          <li key={proIdx} className="flex items-start gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                            <span>{pro}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase text-muted-foreground">Cons</p>
-                      <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                        {option.cons.map((con: string, conIdx: number) => (
-                        {whenToEscalate.map((item, idx) => (
+                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        {option.cons.map((con, conIdx) => (
+                          <li key={conIdx} className="flex items-start gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-destructive/70" />
+                            <span>{con}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -505,26 +708,34 @@ function SideEffectInsights({ payload }: { payload: LLMMedicineSideEffectsPayloa
                 </div>
               ))}
             </div>
-          </section>
-                        {documentationTips.map((tip, idx) => (
+          </InsightSection>
+        ) : null}
 
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Escalation Guidance</h2>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-            {payload.whenToEscalate.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </section>
+        {whenToEscalate.length ? (
+          <InsightSection title="Escalation guidance">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {whenToEscalate.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
+        ) : null}
 
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Documentation Tips</h2>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-            {payload.documentationTips.map((tip: string, idx: number) => (
-              <li key={idx}>{tip}</li>
-            ))}
-          </ul>
-        </section>
+        {documentationTips.length ? (
+          <InsightSection title="Documentation tips">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {documentationTips.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <ClipboardList className="mt-0.5 h-4 w-4 text-primary" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -542,94 +753,111 @@ function IngredientInsights({ payload }: { payload: LLMMedicineIngredientPayload
   } = payload;
 
   return (
-    <Card>
+    <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Ingredient Intelligence</CardTitle>
+        <CardTitle className="text-2xl">Ingredient intelligence</CardTitle>
+        <CardDescription>Formulary coverage, equivalence, and regulatory context.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Products</h2>
-          <div className="space-y-3">
-            {products.map((product, idx) => (
-              <div key={idx} className="rounded-md border p-3 text-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold">{product.productName}</p>
-                  <Badge variant="outline">{product.form}</Badge>
-                  <Badge variant={product.otc ? 'secondary' : 'default'}>{product.otc ? 'OTC' : 'Rx'}</Badge>
+      <CardContent className="space-y-8">
+        {products.length ? (
+          <InsightSection title="Products">
+            <div className="space-y-3">
+              {products.map((product, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-foreground">{product.productName}</p>
+                    <Badge variant="outline">{product.form}</Badge>
+                    <Badge variant={product.otc ? 'secondary' : 'default'}>{product.otc ? 'OTC' : 'RX'}</Badge>
+                  </div>
+                  <p className="text-muted-foreground">Strength: {product.strength}</p>
                 </div>
-                <p className="text-muted-foreground">Strength: {product.strength}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {brandEquivalents.length ? (
-          <section>
-            <h2 className="text-lg font-semibold">Brand Equivalents</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {brandEquivalents.map((item, idx) => (
-                <li key={idx}>{item}</li>
               ))}
-            </ul>
-          </section>
+            </div>
+          </InsightSection>
         ) : null}
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Therapeutic Classes</h2>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-            {therapeuticClasses.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </section>
+        {brandEquivalents.length ? (
+          <InsightSection title="Brand equivalents">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {brandEquivalents.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Pill className="mt-0.5 h-4 w-4 text-primary" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
+        ) : null}
+
+        {therapeuticClasses.length ? (
+          <InsightSection title="Therapeutic classes">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {therapeuticClasses.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Badge variant="secondary" className="mt-0.5 px-2 py-0 text-[10px] uppercase">
+                    class
+                  </Badge>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
+        ) : null}
 
         {formulationDetails.length ? (
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Formulation Details</h2>
+          <InsightSection title="Formulation details">
             <div className="grid gap-3 md:grid-cols-2">
               {formulationDetails.map((form, idx) => (
-                <div key={idx} className="rounded-md border p-3 text-sm">
-                  <p className="font-semibold">{form.form}</p>
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{form.form}</p>
                   <p className="text-muted-foreground">Strengths: {form.strengths.join(', ')}</p>
                   {form.release ? <p className="text-xs text-muted-foreground">Release: {form.release}</p> : null}
                   {form.notes ? <p className="text-xs text-muted-foreground">{form.notes}</p> : null}
                 </div>
               ))}
             </div>
-              {regulatoryNotes.length ? (
+          </InsightSection>
         ) : null}
 
-        {payload.regulatoryNotes.length ? (
-                    {regulatoryNotes.map((note, idx) => (
-            <h2 className="text-lg font-semibold">Regulatory Notes</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {payload.regulatoryNotes.map((note: string, idx: number) => (
-                <li key={idx}>{note}</li>
+        {regulatoryNotes.length ? (
+          <InsightSection title="Regulatory notes">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {regulatoryNotes.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <ShieldAlert className="mt-0.5 h-4 w-4 text-primary" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-              {availabilityConsiderations.length ? (
+          </InsightSection>
         ) : null}
 
-        {payload.availabilityConsiderations.length ? (
-                    {availabilityConsiderations.map((consideration, idx) => (
-            <h2 className="text-lg font-semibold">Availability Considerations</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {payload.availabilityConsiderations.map((consideration: string, idx: number) => (
-                <li key={idx}>{consideration}</li>
+        {availabilityConsiderations.length ? (
+          <InsightSection title="Availability considerations">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {availabilityConsiderations.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Wallet className="mt-0.5 h-4 w-4 text-primary" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-              {qualityFlags.length ? (
+          </InsightSection>
         ) : null}
 
-        {payload.qualityFlags.length ? (
-                    {qualityFlags.map((flag, idx) => (
-            <h2 className="text-lg font-semibold">Quality Flags</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {payload.qualityFlags.map((flag: string, idx: number) => (
-                <li key={idx}>{flag}</li>
+        {qualityFlags.length ? (
+          <InsightSection title="Quality flags">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {qualityFlags.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Badge variant="outline" className="mt-0.5 px-2 py-0 text-[10px] uppercase">
+                    quality
+                  </Badge>
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-          </section>
+          </InsightSection>
         ) : null}
       </CardContent>
     </Card>
@@ -649,150 +877,192 @@ function SimilarInsights({ payload }: { payload: LLMMedicineSimilarPayload }) {
   const headerAlternatives: ComparisonValue[] = comparisonMatrix[0]?.alternatives ?? [];
 
   return (
-    <Card>
+    <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Alternative Comparison</CardTitle>
+        <CardTitle className="text-2xl">Comparable options</CardTitle>
+        <CardDescription>Cross-agent review with switching considerations.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Alternatives</h2>
-          <div className="space-y-3">
-            {alternatives.map((option, idx) => (
-              <div key={idx} className="rounded-md border p-3 text-sm">
-                <p className="font-semibold">{option.name}</p>
-                <p className="text-muted-foreground">{option.comparison}</p>
-                <div className="mt-2 grid gap-2 md:grid-cols-2">
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-muted-foreground">Pros</p>
-                    <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                      {option.pros.map((pro: string, proIdx: number) => (
-                        <li key={proIdx}>{pro}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-muted-foreground">Cons</p>
-                    <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                      {option.cons.map((con: string, conIdx: number) => (
-                        <li key={conIdx}>{con}</li>
-                      ))}
-                    </ul>
+      <CardContent className="space-y-8">
+        {alternatives.length ? (
+          <InsightSection title="Alternative summaries">
+            <div className="space-y-3">
+              {alternatives.map((option, idx) => (
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{option.name}</p>
+                  <p className="text-muted-foreground">{option.comparison}</p>
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-semibold uppercase text-muted-foreground">Pros</p>
+                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        {option.pros.map((pro, proIdx) => (
+                          <li key={proIdx} className="flex items-start gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                            <span>{pro}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase text-muted-foreground">Cons</p>
+                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        {option.cons.map((con, conIdx) => (
+                          <li key={conIdx} className="flex items-start gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-destructive/70" />
+                            <span>{con}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </InsightSection>
+        ) : null}
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Comparison Matrix</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b">
-                <tr>
-                  <th className="px-2 py-2">Attribute</th>
-                  <th className="px-2 py-2">Baseline</th>
-                  {headerAlternatives.map((comp, idx) => (
-                    <th key={idx} className="px-2 py-2">{comp.name}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {comparisonMatrix.map((row: ComparisonRow, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="px-2 py-2 font-semibold">{row.attribute}</td>
-                    <td className="px-2 py-2 text-muted-foreground">{row.baseline}</td>
-                    {row.alternatives.map((alt: ComparisonValue, altIdx: number) => (
-                      <td key={altIdx} className="px-2 py-2 text-muted-foreground">{alt.detail}</td>
+        {comparisonMatrix.length ? (
+          <InsightSection title="Comparison matrix">
+            <div className="overflow-x-auto rounded-2xl border border-border/70">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-border/70 bg-muted/50">
+                  <tr>
+                    <th className="px-3 py-2 font-medium text-muted-foreground">Attribute</th>
+                    <th className="px-3 py-2 font-medium text-muted-foreground">Baseline</th>
+                    {headerAlternatives.map((alt, idx) => (
+                      <th key={idx} className="px-3 py-2 font-medium text-muted-foreground">
+                        {alt.name}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                </thead>
+                <tbody>
+                  {comparisonMatrix.map((row: ComparisonRow, idx) => (
+                    <tr key={idx} className="border-b border-border/60 last:border-0">
+                      <td className="px-3 py-2 font-medium text-foreground">{row.attribute}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{row.baseline}</td>
+                      {row.alternatives.map((alt: ComparisonValue, altIdx: number) => (
+                        <td key={altIdx} className="px-3 py-2 text-muted-foreground">
+                          {alt.detail}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </InsightSection>
+        ) : null}
 
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Switching Guidance</h2>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-            {switchingGuidance.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </section>
-
-        {costConsiderations.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Cost Considerations</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {costConsiderations.map((item, idx) => (
-                <li key={idx}>{item}</li>
+        {switchingGuidance.length ? (
+          <InsightSection title="Switching guidance">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {switchingGuidance.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <ArrowRight className="mt-0.5 h-4 w-4 text-primary" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-          </section>
+          </InsightSection>
+        ) : null}
+
+        {costConsiderations.length ? (
+          <InsightSection title="Cost considerations">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {costConsiderations.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Wallet className="mt-0.5 h-4 w-4 text-primary" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </InsightSection>
         ) : null}
 
         {transitionRisks.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Transition Risks</h2>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          <InsightSection title="Transition risks">
+            <ul className="space-y-2 text-sm text-muted-foreground">
               {transitionRisks.map((item, idx) => (
-                <li key={idx}>{item}</li>
+                <li key={idx} className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
-          </section>
+          </InsightSection>
         ) : null}
 
         {monitoringAfterSwitch.length ? (
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Monitoring After Switch</h2>
+          <InsightSection title="Post-switch monitoring">
             <div className="grid gap-3 md:grid-cols-2">
               {monitoringAfterSwitch.map((tip, idx) => (
-                <div key={idx} className="rounded-md border p-3 text-sm">
-                  <p className="font-semibold">{tip.metric}</p>
+                <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+                  <p className="font-semibold text-foreground">{tip.metric}</p>
                   <p className="text-muted-foreground">{tip.frequency}</p>
                   <p className="mt-2 text-xs text-muted-foreground">{tip.note}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </InsightSection>
         ) : null}
       </CardContent>
     </Card>
   );
 }
 
-function AdvancedActions({ parsed }: { parsed: MedicineSearchParsed }) {
+function SessionDetails({ search }: { search: MedicineSearchParsed }) {
+  const timestamp = formatTimestamp(search.createdAt);
+  const duration = typeof search.duration === 'number' ? `${(search.duration / 1000).toFixed(1)} seconds` : '—';
+
   return (
-    <Card className="sticky top-6">
+    <Card className="border border-border/60 bg-background/80 shadow-lg backdrop-blur-xl">
       <CardHeader>
-        <CardTitle>Session Details</CardTitle>
+        <CardTitle className="text-lg">Session details</CardTitle>
+        <CardDescription>Metadata captured for this session.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm text-muted-foreground">
+      <CardContent className="space-y-4 text-sm text-muted-foreground">
         <div>
           <p className="text-xs uppercase tracking-wide">Query</p>
-          <p className="font-medium text-foreground">{parsed.query}</p>
+          <p className="font-medium text-foreground">{search.query}</p>
         </div>
         <Separator />
-        <div>
-          <p className="text-xs uppercase tracking-wide">Search ID</p>
-          <p className="font-mono text-xs">{parsed.searchId}</p>
+        <div className="space-y-3">
+          <SessionRow label="Search ID" value={search.searchId} monospace />
+          <SessionRow label="Generated" value={timestamp} />
+          <SessionRow label="Status" value={search.status} />
+          <SessionRow label="Duration" value={duration} />
         </div>
-        {parsed.summary ? (
-          <>
-            <Separator />
-            <div>
-              <p className="text-xs uppercase tracking-wide">At-a-glance summary</p>
-              <p>{parsed.summary}</p>
-            </div>
-          </>
-        ) : null}
-        <Separator />
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Generated content is for clinical decision support and education only. Confirm all recommendations with authoritative medical references and patient-specific data.
-        </p>
       </CardContent>
     </Card>
+  );
+}
+
+function SafetyCallout() {
+  return (
+    <Card className="border border-border/60 bg-muted/40 shadow-lg backdrop-blur-xl">
+      <CardHeader className="space-y-3">
+        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <ShieldAlert className="h-4 w-4 text-primary" />
+          Safety reminder
+        </div>
+        <CardDescription className="text-sm text-muted-foreground">
+          Use these insights as decision support. Confirm recommendations with authoritative references and
+          patient-specific data before updating care plans.
+        </CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+function InsightSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+      </div>
+      {children}
+    </section>
   );
 }
 
@@ -802,109 +1072,103 @@ function TreatmentRail({ title, items }: { title: string; items: TherapyOption[]
   }
 
   return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <InsightSection title={title}>
       <div className="grid gap-3 md:grid-cols-2">
-        {items.map((therapy, idx) => (
-          <div key={idx} className="rounded-md border p-3 text-sm">
-            <p className="font-semibold">{therapy.name}</p>
-            <p className="text-muted-foreground">{therapy.rationale}</p>
-            {therapy.cautions?.length ? (
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                {therapy.cautions.map((caution: string, cautionIdx: number) => (
-                  <li key={cautionIdx}>{caution}</li>
+        {items.map((item, idx) => (
+          <div key={idx} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+            <p className="font-semibold text-foreground">{item.name}</p>
+            <p className="text-muted-foreground">{item.rationale}</p>
+            {item.cautions?.length ? (
+              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                {item.cautions.map((caution, cautionIdx) => (
+                  <li key={cautionIdx} className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-destructive/70" />
+                    <span>{caution}</span>
+                  </li>
                 ))}
               </ul>
             ) : null}
-            {therapy.evidenceLevel ? (
-              <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">Evidence {therapy.evidenceLevel}</p>
+            {item.evidenceLevel ? (
+              <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">
+                Evidence {item.evidenceLevel}
+              </p>
             ) : null}
           </div>
         ))}
       </div>
-    </section>
+    </InsightSection>
   );
 }
 
-function SafetySection({ payload }: { payload: LLMMedicineNamePayload }) {
-  const {
-    contraindications = [],
-    blackBoxWarnings = [],
-    commonSideEffects = [],
-    seriousSideEffects = [],
-    monitoringParameters = [],
-    patientCounselingPoints = [],
-  } = payload;
+function SafetyList({
+  title,
+  items,
+  variant = 'default',
+}: {
+  title: string;
+  items: string[];
+  variant?: 'default' | 'destructive';
+}) {
+  if (!items.length) {
+    return null;
+  }
+
+  const badgeVariant = variant === 'destructive' ? 'destructive' : 'secondary';
 
   return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold">Safety</h2>
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-md border p-3 text-sm">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Contraindications</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-            {contraindications.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="rounded-md border p-3 text-sm">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Black Box Warnings</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-            {blackBoxWarnings.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </div>
+    <div className="rounded-2xl border border-border/70 bg-background/60 p-4 text-sm">
+      <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+        <Badge variant={badgeVariant} className="px-2 py-0 text-[10px] uppercase">
+          {title}
+        </Badge>
       </div>
-
-      <Separator />
-
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-md border p-3 text-sm">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Common Side Effects</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-            {commonSideEffects.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="rounded-md border p-3 text-sm">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Serious Side Effects</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-            {seriousSideEffects.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <div className="rounded-md border p-3 text-sm">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Monitoring Parameters</p>
-          <div className="mt-2 grid gap-3 md:grid-cols-2">
-            {monitoringParameters.map((tip, idx) => (
-              <div key={idx} className="rounded-md border p-3 text-sm">
-                <p className="font-semibold">{tip.metric}</p>
-                <p className="text-muted-foreground">{tip.frequency}</p>
-                <p className="mt-2 text-xs text-muted-foreground">{tip.note}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-md border p-3 text-sm">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Patient Counseling</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-            {patientCounselingPoints.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </section>
+      <ul className="space-y-1 text-muted-foreground">
+        {items.map((item, idx) => (
+          <li key={idx} className="flex items-start gap-2">
+            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-muted-foreground/70" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
+}
+
+function SessionRow({ label, value, monospace }: { label: string; value: string; monospace?: boolean }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className={monospace ? 'font-mono text-xs text-foreground' : 'font-medium text-foreground'}>{value}</p>
+    </div>
+  );
+}
+
+function HeroStat({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/70 p-4 text-sm">
+      <span className="mt-0.5 text-primary">{icon}</span>
+      <div className="space-y-1">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="font-medium text-foreground">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function formatTimestamp(input: Date | string | number | undefined): string {
+  if (!input) {
+    return 'Not available';
+  }
+
+  const date = input instanceof Date ? input : new Date(input);
+  if (Number.isNaN(date.getTime())) {
+    return 'Not available';
+  }
+
+  return date.toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
 }
 
 function priorityVariant(priority: 'urgent' | 'soon' | 'routine') {
@@ -923,6 +1187,17 @@ function severityVariant(severity: 'low' | 'moderate' | 'high') {
     case 'high':
       return 'destructive';
     case 'moderate':
+      return 'default';
+    default:
+      return 'secondary';
+  }
+}
+
+function likelihoodVariant(likelihood: SideEffectCulprit['likelihood']) {
+  switch (likelihood) {
+    case 'definite':
+      return 'destructive';
+    case 'probable':
       return 'default';
     default:
       return 'secondary';

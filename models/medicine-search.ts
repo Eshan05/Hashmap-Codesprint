@@ -34,6 +34,9 @@ const MedicineSearchSchema: Schema = new Schema(
   },
   {
     timestamps: true,
+    collection: "medicine_searches",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
