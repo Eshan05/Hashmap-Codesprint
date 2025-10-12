@@ -1,12 +1,11 @@
 'use client';
 
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Thermometer, Pill, AlertTriangle, FlaskConical, Repeat } from 'lucide-react';
-import React from 'react';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { AlertTriangle, ChevronDown, FlaskConical, Pill, Repeat, Thermometer } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const items = [
   {
@@ -43,7 +42,7 @@ const items = [
   },
   {
     id: 'sideEffects',
-    title: 'Side Effects / Adverse Reactions',
+    title: 'Side Effects / Reactions',
     icon: AlertTriangle,
     description: 'Search by side effect to find medicines that commonly cause it and possible alternatives.',
     collapsibles: [
@@ -59,7 +58,7 @@ const items = [
   },
   {
     id: 'ingredient',
-    title: 'Ingredient / Active Substance',
+    title: 'Ingredients',
     icon: FlaskConical,
     description: 'Find medicines that contain a specific active ingredient and view brand equivalents.',
     collapsibles: [
@@ -75,7 +74,7 @@ const items = [
   },
   {
     id: 'similar',
-    title: 'Find Similar Medicines',
+    title: 'Similar Medicines',
     icon: Repeat,
     description: 'Get alternatives or therapeutically equivalent medicines to a given drug.',
     collapsibles: [
@@ -123,8 +122,8 @@ export function ModeDrawer() {
     <Drawer
       direction="right"
       shouldScaleBackground
-      open={isDrawerOpen}
-      onOpenChange={handleOpenChange}
+    // open={isDrawerOpen}
+    // onOpenChange={handleOpenChange}
     >
       <DrawerTrigger asChild>
         <Button size="none" type="button" variant="link">here</Button>

@@ -146,7 +146,7 @@ export default function MedSearchForm() {
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <p className='text-muted-foreground !text-sm inline-block lg:hidden py-2 px-1'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <Button size="none" type='button' variant="link">here</Button></p>
+                <p className='text-muted-foreground !text-sm inline-block lg:hidden py-2 px-1'>Select a mode (Hover over the information icon to know more), you can see examples for different modes <ModeDrawer /></p>
               </div>
               <FormMessage />
             </FormItem>
